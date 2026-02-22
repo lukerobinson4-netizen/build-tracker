@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Tracker — Data Migration</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d0d0d; color: #ccc; min-height: 100vh; padding: 40px 20px; }
+  .container { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; color: #fff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 32px; font-family: monospace; }
+  .card { background: #141414; border: 1px solid #2a2a2a; padding: 24px; margin-bottom: 20px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; margin-top: 12px; }
+  input { width: 100%; padding: 8px 12px; background: #0d0d0d; border: 1px solid #333; color: #ccc; font-size: 13px; font-family: monospace; }
+  input:focus { outline: none; border-color: #555; }
+  .btn { padding: 9px 20px; font-size: 13px; cursor: pointer; border: none; font-family: monospace; }
+  .btn-primary { background: #4caf7d; color: #000; }
+  .btn-ghost  { background: none; border: 1px solid #444; color: #888; }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  #log { background: #080808; border: 1px solid #1a1a1a; padding: 16px; font-family: monospace; font-size: 11px; line-height: 1.8; min-height: 120px; max-height: 360px; overflow-y: auto; white-space: pre-wrap; }
+  .ok   { color: #4caf7d; }
+  .err  { color: #e05252; }
+  .info { color: #6b9fe4; }
+  .warn { color: #f0a020; }
+  .stat { display: inline-block; background: #1a1a1a; border: 1px solid #2a2a2a; padding: 4px 12px; font-family: monospace; font-size: 11px; margin: 4px 4px 0 0; }
+  .stat span { color: #4caf7d; }
+  hr { border: none; border-top: 1px solid #1a1a1a; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Build Tracker — Data Migration Tool</h1>
+  <p class="subtitle">One-time tool to move your localStorage data into Supabase. Run this once, then use index.html going forward.</p>
+
+  <div class="card">
+    <h2>Step 1 — Supabase Credentials</h2>
+    <label>Project URL</label>
+    <input id="sb-url" placeholder="https://xxxxxxxxxxxx.supabase.co" type="url" />
+    <label>Anon Public Key</label>
+    <input id="sb-key" placeholder="eyJhbGci..." type="password" />
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="testConn()">Test Connection</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Step 2 — Inspect Local Data</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">Click to see what's currently in this browser's localStorage from the old app.</p>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="inspectLocal()">Inspect localStorage</button>
+      <button class="btn btn-ghost" onclick="downloadBackup()">⬇ Download JSON Backup</button>
+    </div>
+    <div id="stats" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Step 3 — Migrate to Supabase</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">Pushes all local data into your Supabase tables. Safe to run multiple times — uses upsert so it won't create duplicates.</p>
+    <div class="actions">
+      <button class="btn btn-primary" id="migrate-btn" onclick="runMigration()" disabled>Migrate Data →</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Log</h2>
+    <div id="log">Waiting...</div>
+  </div>
+
+  <div class="card">
+    <h2>Step 4 — Import from JSON Backup</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">If you're on a different browser/device, upload the JSON backup you downloaded above to migrate that data.</p>
+    <label>JSON Backup File</label>
+    <input type="file" id="json-file" accept=".json" onchange="loadJsonFile(this)" />
+    <div class="actions">
+      <button class="btn btn-ghost" id="import-btn" onclick="runImport()" disabled>Import from File →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let sb = null;
+let sbOk = false;
+let importData = null;
+
+const KEYS = {
+  docs:      'dairy_docs_v3',
+  dates:     'dairy_dates_v3',
+  tasks:     'dairy_tasks_v3',
+  trades:    'dairy_trades_v1',
+  suppliers: 'dairy_suppliers_v1',
+  contacts:  'dairy_contacts_v1',
+  taskCats:  'dairy_task_cats_v1',
+  questions: 'dairy_questions_v1',
+};
+
+function log(msg, cls='') {
+  const el = document.getElementById('log');
+  el.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+  el.scrollTop = el.scrollHeight;
+}
+function logClear() { document.getElementById('log').innerHTML = ''; }
+
+// ── Column mappers (same as index.html) ──────────────────────────────────────
+function docToRow(d) {
+  return { id:d.id, type:d.type||'quote', status:d.status||'pending',
+    supplier:d.supplier||null, trade:d.trade||null, description:d.desc||null,
+    docnum:d.docnum||null, doc_date:d.date||null, expiry:d.expiry||null,
+    amount:Number(d.amount)||0, gst:Number(d.gst)||0, notes:d.notes||null,
+    payments:d.payments||[], attachment_name:d.attachmentName||null,
+    import_method:d.importMethod||null, bank_details:d.bankDetails||null };
+}
+function dateToRow(d) {
+  return { id:d.id, title:d.title, date:d.date||null, end_date:d.endDate||null,
+    type:d.type||null, trade:d.trade||null, priority:d.priority||'med',
+    notes:d.notes||null, source:d.source||'manual', source_doc:d.sourceDoc||null,
+    done:!!d.done, actioned_date:d.actionedDate||null, deps:d.deps||[] };
+}
+function taskToRow(t) {
+  return { id:t.id, title:t.title, description:t.desc||null, cat:t.cat||null,
+    status:t.status||'open', closure_note:t.closureNote||null,
+    priority:t.priority||'med', due:t.due||null, assign:t.assign||null,
+    linked_doc:t.linkedDoc||null, linked_contact:t.linkedContact||null,
+    done:!!t.done, notes:t.notes||null, subtasks:t.subtasks||[], created:t.created||null };
+}
+function contactToRow(c) {
+  return { id:c.id, name:c.name||null, company:c.company||null,
+    supplier:c.supplier||null, role:c.role||null, trade:c.trade||null,
+    mobile:c.mobile||null, phone:c.phone||null, email:c.email||null,
+    address:c.address||null, abn:c.abn||null, licence:c.licence||null, notes:c.notes||null };
+}
+function questionToRow(q) {
+  return { id:q.id, question_text:q.text||'', for_name:q.for||null,
+    linked_contact:q.linkedContact||null, linked_doc:q.linkedDoc||null,
+    asked:q.asked||null, answer:q.answer||null,
+    answered:q.answered||null, priority:q.priority||'med' };
+}
+
+// ── Read local data ───────────────────────────────────────────────────────────
+function readLocal() {
+  const get = (k) => { try { return JSON.parse(localStorage.getItem(k))||[]; } catch { return []; } };
+  return {
+    docs:      get(KEYS.docs),
+    dates:     get(KEYS.dates),
+    tasks:     get(KEYS.tasks),
+    contacts:  get(KEYS.contacts),
+    questions: get(KEYS.questions),
+    trades:    get(KEYS.trades),
+    suppliers: get(KEYS.suppliers),
+    taskCats:  get(KEYS.taskCats),
+  };
+}
+
+function inspectLocal() {
+  logClear();
+  const d = readLocal();
+  log('📦 Local data found:', 'info');
+  log(`  docs:      ${d.docs.length}`);
+  log(`  dates:     ${d.dates.length}`);
+  log(`  tasks:     ${d.tasks.length}`);
+  log(`  contacts:  ${d.contacts.length}`);
+  log(`  questions: ${d.questions.length}`);
+  log(`  trades:    ${d.trades.length}`);
+  log(`  suppliers: ${d.suppliers.length}`);
+  log(`  taskCats:  ${d.taskCats.length}`);
+
+  const statsEl = document.getElementById('stats');
+  statsEl.innerHTML = [
+    ['Docs', d.docs.length],
+    ['Dates', d.dates.length],
+    ['Tasks', d.tasks.length],
+    ['Contacts', d.contacts.length],
+    ['Questions', d.questions.length],
+  ].map(([k,v])=>`<span class="stat">${k}: <span>${v}</span></span>`).join('');
+
+  if (d.docs.length + d.tasks.length + d.dates.length > 0) {
+    document.getElementById('migrate-btn').disabled = !sbOk;
+    log('\nClick "Migrate Data" to push this to Supabase.', 'ok');
+  } else {
+    log('\n⚠ No data found in localStorage. Make sure you\'re running this in the same browser you used the old app in.', 'warn');
+  }
+}
+
+function downloadBackup() {
+  const d = readLocal();
+  d._exported = new Date().toISOString();
+  d._version  = 'build-tracker-v7';
+  const blob = new Blob([JSON.stringify(d, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'build-tracker-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  log('✓ Backup downloaded', 'ok');
+}
+
+// ── Connection ────────────────────────────────────────────────────────────────
+async function testConn() {
+  const url = document.getElementById('sb-url').value.trim();
+  const key = document.getElementById('sb-key').value.trim();
+  logClear();
+  if (!url||!key) { log('Enter both URL and key.', 'err'); return; }
+  log('Testing connection...', 'info');
+  try {
+    sb = supabase.createClient(url, key);
+    const {data, error} = await sb.from('settings').select('key').limit(1);
+    if (error) throw error;
+    sbOk = true;
+    log('✓ Connected to Supabase!', 'ok');
+    log(`  Tables visible. Settings rows: ${data.length}`, 'ok');
+    document.getElementById('migrate-btn').disabled = false;
+    // Save creds for index.html too
+    localStorage.setItem('_sb_url', url);
+    localStorage.setItem('_sb_key', key);
+    log('  Credentials saved — index.html will connect automatically.', 'ok');
+  } catch(e) {
+    sbOk = false;
+    log('✕ Connection failed: '+e.message, 'err');
+    log('  Check your URL and key, and make sure the schema.sql was run.', 'warn');
+  }
+}
+
+// ── Migration ─────────────────────────────────────────────────────────────────
+async function pushTable(table, rows, label) {
+  if (!rows.length) { log(`  ${label}: skipped (empty)`, 'warn'); return 0; }
+  const CHUNK = 100;
+  let pushed = 0;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+    const {error} = await sb.from(table).upsert(chunk, {onConflict:'id'});
+    if (error) { log(`  ✕ ${label}: ${error.message}`, 'err'); return pushed; }
+    pushed += chunk.length;
+  }
+  log(`  ✓ ${label}: ${pushed} rows`, 'ok');
+  return pushed;
+}
+
+async function runMigration() {
+  if (!sbOk) { log('Connect to Supabase first.', 'err'); return; }
+  logClear();
+  log('Starting migration...', 'info');
+  const d = readLocal();
+
+  let total = 0;
+  total += await pushTable('docs',      d.docs.map(docToRow),          'Docs');
+  total += await pushTable('dates',     d.dates.map(dateToRow),         'Dates');
+  total += await pushTable('tasks',     d.tasks.map(taskToRow),         'Tasks');
+  total += await pushTable('contacts',  d.contacts.map(contactToRow),   'Contacts');
+  total += await pushTable('questions', d.questions.map(questionToRow), 'Questions');
+
+  // Settings as JSON arrays
+  const {error: se} = await sb.from('settings').upsert([
+    {key:'trades',    value: d.trades},
+    {key:'suppliers', value: d.suppliers},
+    {key:'task_cats', value: d.taskCats},
+  ], {onConflict:'key'});
+  if (se) log('  ✕ Settings: '+se.message, 'err');
+  else    log('  ✓ Settings: trades, suppliers, task_cats', 'ok');
+
+  log(`\n✅ Migration complete — ${total} rows pushed to Supabase.`, 'ok');
+  log('\nNext steps:', 'info');
+  log('  1. Open index.html — it will connect and load from Supabase automatically.');
+  log('  2. Verify your data looks correct.');
+  log('  3. Keep this backup file somewhere safe.');
+  log('  4. You can close this migrate.html tab now.');
+}
+
+// ── Import from JSON file ─────────────────────────────────────────────────────
+function loadJsonFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      importData = JSON.parse(e.target.result);
+      log(`✓ Loaded backup: ${file.name}`, 'ok');
+      log(`  docs:${importData.docs?.length||0} dates:${importData.dates?.length||0} tasks:${importData.tasks?.length||0} contacts:${importData.contacts?.length||0}`, 'info');
+      document.getElementById('import-btn').disabled = !sbOk;
+    } catch(err) {
+      log('✕ Invalid JSON file: '+err.message, 'err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function runImport() {
+  if (!sbOk || !importData) { log('Connect and load a file first.', 'err'); return; }
+  logClear();
+  log('Importing from backup file...', 'info');
+  const d = importData;
+  let total = 0;
+  total += await pushTable('docs',      (d.docs||[]).map(docToRow),          'Docs');
+  total += await pushTable('dates',     (d.dates||[]).map(dateToRow),         'Dates');
+  total += await pushTable('tasks',     (d.tasks||[]).map(taskToRow),         'Tasks');
+  total += await pushTable('contacts',  (d.contacts||[]).map(contactToRow),   'Contacts');
+  total += await pushTable('questions', (d.questions||[]).map(questionToRow), 'Questions');
+  const {error} = await sb.from('settings').upsert([
+    {key:'trades',    value: d.trades||[]},
+    {key:'suppliers', value: d.suppliers||[]},
+    {key:'task_cats', value: d.taskCats||[]},
+  ], {onConflict:'key'});
+  if (error) log('  ✕ Settings: '+error.message, 'err');
+  else       log('  ✓ Settings', 'ok');
+  log(`\n✅ Import complete — ${total} rows pushed.`, 'ok');
+}
+</script>
+</body>
+</html>
