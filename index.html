@@ -293,6 +293,33 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 /* GANTT CONTROLS */
 .gantt-controls { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .gantt-zoom { font-family: var(--mono); font-size: 10px; }
+
+/* ── Fixtures & Fittings ─────────────────────────────────── */
+.fx-status-needed     { background:rgba(120,120,120,0.15); color:#888;    border:1px solid #555; }
+.fx-status-researching{ background:rgba(107,159,228,0.15); color:var(--blue);   border:1px solid var(--blue); }
+.fx-status-selected   { background:rgba(240,160,32,0.15);  color:var(--yellow); border:1px solid var(--yellow); }
+.fx-status-ordered    { background:rgba(76,175,125,0.2);   color:var(--green);  border:1px solid var(--green); }
+.fx-status-delivered  { background:rgba(76,175,125,0.35);  color:#2d8a5a;       border:1px solid #2d8a5a; }
+.fx-status-badge { font-family:var(--mono); font-size:9px; padding:2px 7px; text-transform:uppercase; letter-spacing:0.5px; }
+.fx-dwell-btn.active { border-color:var(--accent); color:var(--accent); }
+.fx-group-header { padding:10px 16px; background:var(--bg); border:1px solid var(--border);
+  border-bottom:none; font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--text-muted); display:flex; align-items:center; justify-content:space-between; }
+.fx-cat-header { padding:6px 16px 6px 28px; background:var(--surface); border:1px solid var(--border);
+  border-top:none; border-bottom:none; font-size:11px; color:var(--text-dim);
+  display:flex; align-items:center; justify-content:space-between; font-family:var(--mono); }
+.fx-item { border:1px solid var(--border); border-top:none; background:var(--surface);
+  padding:12px 16px 12px 28px; display:grid; grid-template-columns:1fr auto;
+  gap:8px; align-items:start; cursor:pointer; transition:background 0.1s; }
+.fx-item:hover { background:rgba(255,255,255,0.025); }
+.fx-item-name { font-size:13px; font-weight:500; color:var(--text); }
+.fx-item-meta { font-family:var(--mono); font-size:10px; color:var(--text-muted); margin-top:3px; }
+.fx-item-price { font-family:var(--mono); font-size:13px; color:var(--accent); text-align:right; }
+.fx-item-sub { font-family:var(--mono); font-size:10px; color:var(--text-muted); text-align:right; }
+.fx-url-link { font-family:var(--mono); font-size:10px; color:var(--blue); text-decoration:none; }
+.fx-url-link:hover { text-decoration:underline; }
+.fx-summary-card { background:var(--surface); border:1px solid var(--border); padding:12px 14px; }
+
 </style>
 </head>
 <body>
@@ -351,6 +378,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   <div class="tab" onclick="showTab('categories',this)">By Trade</div>
   <div class="tab" onclick="showTab('contacts',this)">Contacts</div>
   <div class="tab" onclick="showTab('questions',this)">Questions</div>
+  <div class="tab" onclick="showTab('fixtures',this)">Fixtures & Fittings</div>
 </div>
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -1248,6 +1276,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 // ═══ DATA STORES ═══════════════════════════════════════════════════════════════
 
 const DOCS_KEY      = 'dairy_docs_v3';
+const FIXTURES_KEY  = 'dairy_fixtures_v1';
 const DATES_KEY     = 'dairy_dates_v3';
 const TASKS_KEY     = 'dairy_tasks_v3';
 const TASK_CATS_KEY = 'dairy_task_cats_v1';
@@ -1255,6 +1284,23 @@ const TRADES_KEY    = 'dairy_trades_v1';
 const SUPPLIERS_KEY = 'dairy_suppliers_v1';
 const CONTACTS_KEY  = 'dairy_contacts_v1';
 const QUESTIONS_KEY = 'dairy_questions_v1';
+
+const DEFAULT_FX_ROOMS = [
+  'Kitchen','Bathroom 1','Bathroom 2','Ensuite','Laundry',
+  'Living / Dining','Bedroom 1','Bedroom 2','Bedroom 3',
+  'Outdoor / Alfresco','Garage / Utility','General'
+];
+const DEFAULT_FX_CATS = [
+  'Tapware','Sanitaryware','Showers & Baths','Cabinetry & Storage',
+  'Lighting','Electrical','Flooring','Wall Finishes',
+  'Doors & Hardware','Heating & Cooling','Appliances','General Fixtures'
+];
+
+const FX_STATUS_LABELS = {
+  needed:'Needed', researching:'Researching', selected:'Selected',
+  ordered:'Ordered', delivered:'Delivered'
+};
+const FX_STATUS_ORDER = ['needed','researching','selected','ordered','delivered'];
 
 const DEFAULT_TRADES = [
   'Roofing & Cladding','Electrical','Plumbing','Solar & Battery',
@@ -1272,7 +1318,8 @@ let suppliers = [];
 let contacts  = [];
 let questions = [];
 
-let docs  = [];
+let docs     = [];
+let fixtures = [];
 let dates = [];  // gantt/timeline items
 let tasks = [];
 
@@ -1346,6 +1393,21 @@ function contactToRow(c) {
     email:c.email, address:c.address, abn:c.abn, licence:c.licence, notes:c.notes };
 }
 function rowToContact(r) { return { ...r }; }
+function fixtureToRow(f) {
+  return { id:f.id, name:f.name, room:f.room||null, category:f.category||null,
+    dwelling:f.dwelling||'Both', status:f.status||'needed',
+    brand:f.brand||null, model:f.model||null, product_code:f.code||null,
+    finish:f.finish||null, qty:Number(f.qty)||1, unit_price:Number(f.price)||0,
+    supplier:f.supplier||null, product_url:f.url||null, notes:f.notes||null };
+}
+function rowToFixture(r) {
+  return { id:r.id, name:r.name, room:r.room, category:r.category,
+    dwelling:r.dwelling||'Both', status:r.status||'needed',
+    brand:r.brand, model:r.model, code:r.product_code,
+    finish:r.finish, qty:Number(r.qty)||1, price:Number(r.unit_price)||0,
+    supplier:r.supplier, url:r.product_url, notes:r.notes };
+}
+
 function questionToRow(q) {
   return { id:q.id, question_text:q.text, for_name:q.for,
     linked_contact:q.linkedContact||null, linked_doc:q.linkedDoc||null,
@@ -1536,6 +1598,7 @@ async function loadFromSupabase() {
       sb.from('contacts').select('*'),
       sb.from('questions').select('*'),
       sb.from('settings').select('*'),
+      sb.from('fixtures').select('*'),
     ]);
     if (docsR.error||datesR.error||tasksR.error) throw docsR.error||datesR.error||tasksR.error;
 
@@ -1544,6 +1607,7 @@ async function loadFromSupabase() {
     tasks     = (tasksR.data     ||[]).map(rowToTask);
     contacts  = (contactsR.data  ||[]).map(rowToContact);
     questions = (questionsR.data ||[]).map(rowToQuestion);
+    fixtures  = (fixturesR.data  ||[]).map(rowToFixture);
 
     const sv = (settingsR.data||[]);
     const getSetting = (k,def) => { const r=sv.find(x=>x.key===k); return r?r.value:def; };
@@ -1562,10 +1626,12 @@ async function loadFromSupabase() {
 
     // Sync cache
     cacheWriteAll('docs',      docs.map(docToRow));
+  localStorage.setItem('_cache_fixtures', JSON.stringify(fixtures));
     cacheWriteAll('dates',     dates.map(dateToRow));
     cacheWriteAll('tasks',     tasks.map(taskToRow));
     cacheWriteAll('contacts',  contacts.map(contactToRow));
     cacheWriteAll('questions', questions.map(questionToRow));
+    localStorage.setItem('_cache_fixtures', JSON.stringify(fixtures.map(fixtureToRow)));
 
     docs.forEach(d=>{ if(d.supplier&&!suppliers.includes(d.supplier)) suppliers.push(d.supplier); });
     setConnStatus('ok','●  Connected to Supabase');
@@ -1628,6 +1694,7 @@ function loadAll() {
 function saveAll() {
   // 1) Always write to old localStorage keys so offline works perfectly
   localStorage.setItem(DOCS_KEY,      JSON.stringify(docs));
+  localStorage.setItem(FIXTURES_KEY,  JSON.stringify(fixtures));
   localStorage.setItem(DATES_KEY,     JSON.stringify(dates));
   localStorage.setItem(TASKS_KEY,     JSON.stringify(tasks));
   localStorage.setItem(TRADES_KEY,    JSON.stringify(trades));
@@ -1637,6 +1704,7 @@ function saveAll() {
   localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
   // 2) Also write to new cache format
   cacheWriteAll('docs',      docs.map(docToRow));
+  localStorage.setItem('_cache_fixtures', JSON.stringify(fixtures));
   cacheWriteAll('dates',     dates.map(dateToRow));
   cacheWriteAll('tasks',     tasks.map(taskToRow));
   cacheWriteAll('contacts',  contacts.map(contactToRow));
@@ -1659,6 +1727,7 @@ function syncToSupabase() {
         sb.from('tasks').upsert(tasks.map(taskToRow), {onConflict:'id'}),
         sb.from('contacts').upsert(contacts.map(contactToRow), {onConflict:'id'}),
         sb.from('questions').upsert(questions.map(questionToRow), {onConflict:'id'}),
+        sb.from('fixtures').upsert(fixtures.map(fixtureToRow), {onConflict:'id'}),
         sb.from('settings').upsert([
           {key:'trades',    value:trades},
           {key:'suppliers', value:suppliers},
@@ -1682,6 +1751,7 @@ async function pruneDeleted() {
     {table:'tasks',     ids:tasks.map(x=>x.id)},
     {table:'contacts',  ids:contacts.map(x=>x.id)},
     {table:'questions', ids:questions.map(x=>x.id)},
+    {table:'fixtures',  ids:fixtures.map(x=>x.id)},
   ];
   for (const {table,ids} of checks) {
     const {data} = await sb.from(table).select('id');
@@ -1957,6 +2027,7 @@ function showTab(name, el) {
   if(name==='categories') renderCategories();
   if(name==='contacts')  renderContacts();
   if(name==='questions') renderQuestions();
+  if(name==='fixtures')  renderFixtures();
 }
 
 // ═══ DASHBOARD ════════════════════════════════════════════════════════════════
@@ -2038,6 +2109,8 @@ function renderTaskStrip() {
 function renderStats() {
   const accepted = docs.filter(d=>d.status==='accepted');
   const totalCommitted = accepted.reduce((s,d)=>s+Number(d.amount),0);
+  const fixturesTotal = fixtures.reduce((s,f)=>s+f.qty*f.price,0);
+  const fixturesOrdered = fixtures.filter(f=>['ordered','delivered'].includes(f.status)).reduce((s,f)=>s+f.qty*f.price,0);
   const totalPaid = docs.reduce((s,d)=>s+paidTotal(d),0);
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
   const openTasks = tasks.filter(t=>!t.done).length;
@@ -2048,6 +2121,7 @@ function renderStats() {
     <div class="stat-card orange"><div class="stat-label">Payments Pending</div><div class="stat-value orange">${fmt(totalPending)}</div><div class="stat-sub">scheduled not paid</div></div>
     <div class="stat-card purple"><div class="stat-label">Open Tasks</div><div class="stat-value purple">${openTasks}</div><div class="stat-sub">${overdueTasks} overdue</div></div>
     <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes · ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
+    ${fixturesTotal>0?`<div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} items · ${fmt(fixturesOrdered)} ordered</div></div>`:''}
   `;
 }
 
@@ -4116,6 +4190,310 @@ function markPaid(docId, payId) {
 }
 
 // ═══ INIT ════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FIXTURES & FITTINGS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+let fxDwellingFilter = 'all';
+let fxEditId = null;
+
+// ── Rooms & Categories (user-editable via settings, defaulting to built-in) ──
+function getFxRooms()    { try { return JSON.parse(localStorage.getItem('_fx_rooms'))||DEFAULT_FX_ROOMS; } catch { return DEFAULT_FX_ROOMS; } }
+function getFxCats()     { try { return JSON.parse(localStorage.getItem('_fx_cats'))||DEFAULT_FX_CATS;  } catch { return DEFAULT_FX_CATS; }  }
+
+function setFxDwelling(v, btn) {
+  fxDwellingFilter = v;
+  document.querySelectorAll('.fx-dwell-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFixtures();
+}
+
+// ── Modal open/close ──────────────────────────────────────────────────────────
+function openFixtureModal(id) {
+  fxEditId = id || null;
+  const modal = document.getElementById('fixture-modal');
+  const titleEl = document.getElementById('fixture-modal-title');
+  const deleteBtn = document.getElementById('fx-delete-btn');
+
+  // Populate room and category selects
+  const roomSel = document.getElementById('fx-room');
+  const catSel  = document.getElementById('fx-cat');
+  roomSel.innerHTML = getFxRooms().map(r=>`<option value="${r}">${r}</option>`).join('');
+  catSel.innerHTML  = getFxCats().map(c=>`<option value="${c}">${c}</option>`).join('');
+
+  if (id) {
+    const f = fixtures.find(x=>x.id===id);
+    if (!f) return;
+    titleEl.textContent = 'Edit Item';
+    deleteBtn.style.display = 'block';
+    document.getElementById('fx-name').value     = f.name||'';
+    document.getElementById('fx-room').value     = f.room||getFxRooms()[0];
+    document.getElementById('fx-cat').value      = f.category||getFxCats()[0];
+    document.getElementById('fx-dwelling').value = f.dwelling||'Both';
+    document.getElementById('fx-status').value   = f.status||'needed';
+    document.getElementById('fx-brand').value    = f.brand||'';
+    document.getElementById('fx-model').value    = f.model||'';
+    document.getElementById('fx-code').value     = f.code||'';
+    document.getElementById('fx-finish').value   = f.finish||'';
+    document.getElementById('fx-qty').value      = f.qty||1;
+    document.getElementById('fx-price').value    = f.price||'';
+    document.getElementById('fx-supplier').value = f.supplier||'';
+    document.getElementById('fx-url').value      = f.url||'';
+    document.getElementById('fx-notes').value    = f.notes||'';
+    fxUpdateTotal();
+  } else {
+    titleEl.textContent = 'Add Fixture / Fitting';
+    deleteBtn.style.display = 'none';
+    ['fx-name','fx-brand','fx-model','fx-code','fx-finish','fx-supplier','fx-url','fx-notes'].forEach(id=>{ document.getElementById(id).value=''; });
+    document.getElementById('fx-qty').value    = 1;
+    document.getElementById('fx-price').value  = '';
+    document.getElementById('fx-status').value = 'needed';
+    document.getElementById('fx-dwelling').value = 'Both';
+    document.getElementById('fx-total-preview').textContent = '—';
+  }
+  openModal('fixture-modal');
+}
+
+function fxUpdateTotal() {
+  const qty   = parseFloat(document.getElementById('fx-qty').value)||0;
+  const price = parseFloat(document.getElementById('fx-price').value)||0;
+  const total = qty * price;
+  document.getElementById('fx-total-preview').textContent = total > 0 ? fmt(total) : '—';
+}
+
+function saveFixture() {
+  const name = document.getElementById('fx-name').value.trim();
+  if (!name) { alert('Item name is required.'); document.getElementById('fx-name').focus(); return; }
+
+  const f = {
+    id:       fxEditId || uid(),
+    name,
+    room:     document.getElementById('fx-room').value,
+    category: document.getElementById('fx-cat').value,
+    dwelling: document.getElementById('fx-dwelling').value,
+    status:   document.getElementById('fx-status').value,
+    brand:    document.getElementById('fx-brand').value.trim(),
+    model:    document.getElementById('fx-model').value.trim(),
+    code:     document.getElementById('fx-code').value.trim(),
+    finish:   document.getElementById('fx-finish').value.trim(),
+    qty:      parseFloat(document.getElementById('fx-qty').value)||1,
+    price:    parseFloat(document.getElementById('fx-price').value)||0,
+    supplier: document.getElementById('fx-supplier').value.trim(),
+    url:      document.getElementById('fx-url').value.trim(),
+    notes:    document.getElementById('fx-notes').value.trim(),
+  };
+
+  if (fxEditId) {
+    const idx = fixtures.findIndex(x=>x.id===fxEditId);
+    if (idx>=0) fixtures[idx]=f; else fixtures.push(f);
+  } else {
+    fixtures.push(f);
+  }
+
+  saveAll();
+  closeModal('fixture-modal');
+  renderFixtures();
+  renderDashboard();
+}
+
+function deleteFixture() {
+  if (!fxEditId) return;
+  if (!confirm('Delete this item?')) return;
+  fixtures = fixtures.filter(x=>x.id!==fxEditId);
+  saveAll();
+  closeModal('fixture-modal');
+  renderFixtures();
+  renderDashboard();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderFixtures() {
+  const search     = (document.getElementById('fx-search')||{}).value||'';
+  const statusFilt = (document.getElementById('fx-status-filter')||{}).value||'all';
+
+  let items = [...fixtures];
+
+  // Apply filters
+  if (fxDwellingFilter !== 'all') {
+    items = items.filter(f => f.dwelling === fxDwellingFilter || f.dwelling === 'Both');
+  }
+  if (statusFilt !== 'all') {
+    items = items.filter(f => f.status === statusFilt);
+  }
+  if (search) {
+    const s = search.toLowerCase();
+    items = items.filter(f =>
+      [f.name,f.brand,f.model,f.code,f.supplier,f.room,f.category,f.notes].join(' ').toLowerCase().includes(s)
+    );
+  }
+
+  // Summary bar
+  renderFxSummary(items);
+
+  const el = document.getElementById('fixtures-list');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state">' + (fixtures.length ? 'No items match your filters.' : 'No items yet — click "+ Add Item" to start building your list.') + '</div>';
+    return;
+  }
+
+  // Group by room → category
+  const byRoom = {};
+  items.forEach(f => {
+    const room = f.room || 'General';
+    const cat  = f.category || 'General Fixtures';
+    if (!byRoom[room]) byRoom[room] = {};
+    if (!byRoom[room][cat]) byRoom[room][cat] = [];
+    byRoom[room][cat].push(f);
+  });
+
+  el.innerHTML = Object.entries(byRoom).sort(([a],[b])=>a.localeCompare(b)).map(([room, cats]) => {
+    const roomTotal = Object.values(cats).flat().reduce((s,f)=>s+f.qty*f.price,0);
+    const roomCount = Object.values(cats).flat().length;
+    return `<div style="margin-bottom:20px;">
+      <div class="fx-group-header">
+        <span>📍 ${room}</span>
+        <span>${roomCount} item${roomCount!==1?'s':''} ${roomTotal>0?'· '+fmt(roomTotal):''}</span>
+      </div>
+      ${Object.entries(cats).sort(([a],[b])=>a.localeCompare(b)).map(([cat, catItems]) => {
+        const catTotal = catItems.reduce((s,f)=>s+f.qty*f.price,0);
+        return `<div class="fx-cat-header">
+            <span>${cat}</span>
+            <span>${catItems.length} item${catItems.length!==1?'s':''} ${catTotal>0?'· '+fmt(catTotal):''}</span>
+          </div>
+          ${catItems.map(f => renderFixtureItem(f)).join('')}`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderFixtureItem(f) {
+  const total = f.qty * f.price;
+  const statusCls = 'fx-status-' + (f.status||'needed');
+  const statusLabel = FX_STATUS_LABELS[f.status||'needed'];
+  const hasMeta = f.brand || f.model || f.code || f.finish;
+  const metaParts = [f.brand, f.model, f.code?`#${f.code}`:'', f.finish].filter(Boolean);
+  const dwellTag = f.dwelling !== 'Both' ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);border:1px solid var(--border);padding:1px 5px;">${f.dwelling}</span>` : '';
+
+  return `<div class="fx-item" onclick="openFixtureModal('${f.id}')">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span class="fx-item-name">${f.name}</span>
+        <span class="fx-status-badge ${statusCls}">${statusLabel}</span>
+        ${dwellTag}
+      </div>
+      ${hasMeta ? `<div class="fx-item-meta">${metaParts.join(' · ')}</div>` : ''}
+      <div class="fx-item-meta" style="margin-top:4px;">
+        ${f.supplier ? `<span>📦 ${f.supplier}</span>` : ''}
+        ${f.url ? `&nbsp;·&nbsp;<a class="fx-url-link" href="${f.url}" target="_blank" onclick="event.stopPropagation()">View product ↗</a>` : ''}
+        ${f.notes ? `<span style="display:block;margin-top:2px;color:var(--text-dim);">${f.notes}</span>` : ''}
+      </div>
+    </div>
+    <div>
+      ${total > 0 ? `<div class="fx-item-price">${fmt(total)}</div>
+        <div class="fx-item-sub">qty ${f.qty} × ${fmt(f.price)}</div>` :
+        `<div class="fx-item-sub" style="color:var(--text-dim);">No price yet</div>`}
+    </div>
+  </div>`;
+}
+
+function renderFxSummary(items) {
+  const el = document.getElementById('fx-summary-bar');
+  if (!el) return;
+  const total      = items.reduce((s,f)=>s+f.qty*f.price,0);
+  const totalAll   = fixtures.reduce((s,f)=>s+f.qty*f.price,0);
+  const byStatus   = {};
+  FX_STATUS_ORDER.forEach(s=>byStatus[s]=0);
+  fixtures.forEach(f=>{ byStatus[f.status||'needed']=(byStatus[f.status||'needed']||0)+1; });
+
+  el.innerHTML = `
+    <div class="fx-summary-card">
+      <div class="stat-label">Total Items</div>
+      <div style="font-family:var(--mono);font-size:18px;color:var(--text);">${fixtures.length}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${items.length} shown</div>
+    </div>
+    <div class="fx-summary-card">
+      <div class="stat-label">Estimated Cost</div>
+      <div style="font-family:var(--mono);font-size:18px;color:var(--accent);">${totalAll>0?fmt(totalAll):'—'}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">excl GST</div>
+    </div>
+    ${FX_STATUS_ORDER.map(s=>`
+    <div class="fx-summary-card">
+      <div class="stat-label">${FX_STATUS_LABELS[s]}</div>
+      <div style="font-family:var(--mono);font-size:18px;color:var(--text);">${byStatus[s]||0}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">items</div>
+    </div>`).join('')}
+  `;
+}
+
+// ── Print report ──────────────────────────────────────────────────────────────
+function printFixturesReport() {
+  const byRoom = {};
+  fixtures.forEach(f => {
+    const room = f.room||'General';
+    if (!byRoom[room]) byRoom[room]=[];
+    byRoom[room].push(f);
+  });
+
+  const totalCost = fixtures.reduce((s,f)=>s+f.qty*f.price,0);
+  const priceCount = fixtures.filter(f=>f.price>0).length;
+
+  const w = window.open('','_blank','width=900,height=700');
+  w.document.write(`<!DOCTYPE html><html><head><title>Fixtures & Fittings — 128 Dairy Creek Road</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; color: #222; padding: 30px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .sub { color: #888; font-size: 11px; margin-bottom: 24px; }
+    h2 { font-size: 13px; background: #f5f5f5; padding: 6px 10px; margin: 16px 0 0; border-left: 3px solid #333; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+    th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; border-bottom: 1px solid #ddd; color: #888; }
+    td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    .status { font-size: 9px; padding: 1px 5px; border-radius: 2px; font-weight: 600; text-transform: uppercase; }
+    .status-needed     { background:#eee; color:#666; }
+    .status-researching{ background:#e8f0fc; color:#1a56b0; }
+    .status-selected   { background:#fef3cd; color:#856404; }
+    .status-ordered    { background:#d4edda; color:#155724; }
+    .status-delivered  { background:#c3e6cb; color:#0a3d1a; }
+    .total-row { font-weight:600; background:#f9f9f9; }
+    .summary { margin-bottom: 24px; display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+    .sum-card { border: 1px solid #ddd; padding: 10px 14px; }
+    .sum-label { font-size: 10px; color: #888; text-transform: uppercase; }
+    .sum-val { font-size: 18px; font-weight: 600; }
+    @media print { body { padding: 10px; } }
+  </style></head><body>
+  <h1>Fixtures & Fittings List</h1>
+  <div class="sub">128 Dairy Creek Road, Gundaroo NSW 2620 — DA250507 — Generated ${new Date().toLocaleDateString('en-AU')}</div>
+  <div class="summary">
+    <div class="sum-card"><div class="sum-label">Total Items</div><div class="sum-val">${fixtures.length}</div></div>
+    <div class="sum-card"><div class="sum-label">Priced Items</div><div class="sum-val">${priceCount}</div></div>
+    <div class="sum-card"><div class="sum-label">Estimated Cost</div><div class="sum-val">${totalCost>0?'$'+totalCost.toLocaleString('en-AU',{minimumFractionDigits:0}):'—'}</div></div>
+    <div class="sum-card"><div class="sum-label">Unpriced Items</div><div class="sum-val">${fixtures.length-priceCount}</div></div>
+  </div>
+  ${Object.entries(byRoom).sort(([a],[b])=>a.localeCompare(b)).map(([room,items])=>{
+    const roomTotal = items.reduce((s,f)=>s+f.qty*f.price,0);
+    return `<h2>${room} ${roomTotal>0?'— $'+roomTotal.toLocaleString('en-AU',{minimumFractionDigits:0}):''}</h2>
+    <table><thead><tr>
+      <th>Item</th><th>Brand / Model</th><th>Code</th><th>Dwelling</th><th>Supplier</th><th>Qty</th><th>Unit $</th><th>Total</th><th>Status</th>
+    </tr></thead><tbody>
+    ${items.map(f=>`<tr>
+      <td>${f.name}${f.finish?'<br><small style="color:#888;">'+f.finish+'</small>':''}</td>
+      <td>${[f.brand,f.model].filter(Boolean).join(' ')}</td>
+      <td style="font-family:monospace;font-size:10px;">${f.code||'—'}</td>
+      <td>${f.dwelling||'Both'}</td>
+      <td>${f.supplier||'—'}</td>
+      <td style="text-align:center;">${f.qty||1}</td>
+      <td style="text-align:right;">${f.price>0?'$'+Number(f.price).toLocaleString('en-AU',{minimumFractionDigits:2}):'—'}</td>
+      <td style="text-align:right;font-weight:600;">${f.qty*f.price>0?'$'+(f.qty*f.price).toLocaleString('en-AU',{minimumFractionDigits:0}):'—'}</td>
+      <td><span class="status status-${f.status||'needed'}">${FX_STATUS_LABELS[f.status||'needed']}</span></td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  }).join('')}
+  <p style="margin-top:24px;font-size:10px;color:#aaa;">All prices exclude GST. Status: Needed → Researching → Selected → Ordered → Delivered</p>
+  </body></html>`);
+  w.document.close();
+  w.print();
+}
+
 // ── App startup ──────────────────────────────────────────────────────────────
 loadQueue();
 loadAll(); // instant load from cache
@@ -4164,5 +4542,141 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
     </div>
   </div>
 </div>
+
+<!-- ═══ FIXTURES & FITTINGS TAB ═══ -->
+<div id="tab-fixtures" class="main" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+    <div>
+      <div style="font-size:18px;font-weight:600;color:var(--text);">Fixtures & Fittings</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:3px;">Track items from placeholder to delivered</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <!-- Dwelling filter -->
+      <div style="display:flex;gap:4px;">
+        <button class="btn btn-ghost btn-sm fx-dwell-btn active" onclick="setFxDwelling('all',this)">All</button>
+        <button class="btn btn-ghost btn-sm fx-dwell-btn" onclick="setFxDwelling('D1',this)">Dwelling 1</button>
+        <button class="btn btn-ghost btn-sm fx-dwell-btn" onclick="setFxDwelling('D2',this)">Dwelling 2</button>
+        <button class="btn btn-ghost btn-sm fx-dwell-btn" onclick="setFxDwelling('Both',this)">Both</button>
+      </div>
+      <!-- Status filter -->
+      <select class="form-control" id="fx-status-filter" onchange="renderFixtures()" style="width:140px;font-size:11px;height:30px;padding:4px 8px;">
+        <option value="all">All statuses</option>
+        <option value="needed">Needed</option>
+        <option value="researching">Researching</option>
+        <option value="selected">Selected</option>
+        <option value="ordered">Ordered</option>
+        <option value="delivered">Delivered</option>
+      </select>
+      <input class="filter-search" id="fx-search" placeholder="Search items..." oninput="renderFixtures()" style="width:180px;">
+      <button class="btn btn-primary btn-sm" onclick="openFixtureModal()">+ Add Item</button>
+      <button class="btn btn-ghost btn-sm" onclick="printFixturesReport()">⎙ Print Report</button>
+    </div>
+  </div>
+
+  <!-- Summary bar -->
+  <div id="fx-summary-bar" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px;"></div>
+
+  <!-- Items list -->
+  <div id="fixtures-list"></div>
+</div>
+
+<!-- ═══ FIXTURE ITEM MODAL ═══ -->
+<div class="modal-overlay" id="fixture-modal">
+  <div class="modal" style="width:680px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <div class="modal-title" id="fixture-modal-title">Add Fixture / Fitting</div>
+      <button class="modal-close" onclick="closeModal('fixture-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;">
+
+        <div class="form-group full" style="grid-column:1/-1;">
+          <label class="form-label">Item Name *</label>
+          <input class="form-control" id="fx-name" placeholder="e.g. Basin tap, Shower head, Toilet suite"/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Room</label>
+          <select class="form-control" id="fx-room"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" id="fx-cat"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dwelling</label>
+          <select class="form-control" id="fx-dwelling">
+            <option value="Both">Both Dwellings</option>
+            <option value="D1">Dwelling 1 only</option>
+            <option value="D2">Dwelling 2 only</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="fx-status">
+            <option value="needed">Needed — placeholder</option>
+            <option value="researching">Researching</option>
+            <option value="selected">Selected</option>
+            <option value="ordered">Ordered</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1;border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+          <label class="form-label" style="color:var(--text-muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;">Product Details (fill in once found)</label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Brand / Make</label>
+          <input class="form-control" id="fx-brand" placeholder="e.g. Caroma, Grohe, Clipsal"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Model / Product Name</label>
+          <input class="form-control" id="fx-model" placeholder="e.g. Urbane II, Liano II"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Product Code / SKU</label>
+          <input class="form-control" id="fx-code" placeholder="e.g. 848105W"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Finish / Colour</label>
+          <input class="form-control" id="fx-finish" placeholder="e.g. Matte black, Chrome"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Qty</label>
+          <input class="form-control" type="number" id="fx-qty" value="1" min="1" oninput="fxUpdateTotal()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit Price (excl GST)</label>
+          <input class="form-control" type="number" id="fx-price" step="0.01" placeholder="0.00" oninput="fxUpdateTotal()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <input class="form-control" id="fx-supplier" placeholder="e.g. Reece, Bunnings, Harvey Norman" list="supplier-list"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total (excl GST)</label>
+          <div id="fx-total-preview" style="font-family:var(--mono);font-size:16px;color:var(--accent);padding:8px 0;">—</div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Product URL</label>
+          <input class="form-control" id="fx-url" placeholder="https://..." type="url"/>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-control" id="fx-notes" rows="2" placeholder="Dimensions, compatibility notes, alternatives considered..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="btn btn-danger btn-sm" id="fx-delete-btn" onclick="deleteFixture()" style="display:none;">Delete Item</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeModal('fixture-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveFixture()">Save Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
