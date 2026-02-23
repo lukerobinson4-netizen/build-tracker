@@ -8,8 +8,3 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.anthropic.com;"
-[[redirects]]
-  from = "/price-search.js"
-  to = "/price-search.js"
-  status = 200
-```
