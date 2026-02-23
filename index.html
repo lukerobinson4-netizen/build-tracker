@@ -1483,6 +1483,7 @@ function initSupabase() {
   }
   try {
     sb = supabase.createClient(url, key);
+window.sbClient = sb;
     return true;
   } catch(e) {
     setConnStatus('error', 'âœ•  Supabase init failed: '+e.message);
@@ -1534,6 +1535,7 @@ async function saveDbConfig() {
   localStorage.setItem('_sb_url', url);
   localStorage.setItem('_sb_key', key);
   sb = supabase.createClient(url, key);
+window.sbClient = sb;
   closeModal('db-config-modal');
   setConnStatus('syncing', 'â—Œ  Connecting...');
   const ok = await checkConnection();

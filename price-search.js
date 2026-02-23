@@ -29,17 +29,17 @@
   }
 
   async function loadFixtureData() {
-    if (!window.supabase) return;
+    if (!window.sbClient) return;
     try {
-      const { data } = await window.supabase.from('fixtures').select('*');
+      const { data } = await window.sbClient.from('fixtures').select('*');
       (data || []).forEach(f => fixtureDataCache.set(f.id, f));
     } catch(e) { console.warn('Price search: could not load fixture data', e); }
   }
 
   async function loadCachedPriceResults() {
-    if (!window.supabase) return;
+    if (!window.sbClient) return;
     try {
-      const { data } = await window.supabase
+      const { data } = await window.sbClient
         .from('fixtures')
         .select('id, price_data, price_verdict, price_flagged')
         .not('price_data', 'is', null);
@@ -50,9 +50,9 @@
   }
 
   async function savePriceDataToSupabase(id, priceData) {
-    if (!window.supabase) return;
+    if (!window.sbClient) return;
     try {
-      await window.supabase.from('fixtures').update({
+      await window.sbClient.from('fixtures').update({
         price_data: priceData,
         price_searched_at: priceData.searchedAt || new Date().toISOString(),
         price_verdict: priceData.verdict,
@@ -63,9 +63,9 @@
   }
 
   async function saveFlagToSupabase(id, flagged) {
-    if (!window.supabase) return;
+    if (!window.sbClient) return;
     try {
-      await window.supabase.from('fixtures').update({ price_flagged: flagged }).eq('id', id);
+      await window.sbClient.from('fixtures').update({ price_flagged: flagged }).eq('id', id);
     } catch(e) { console.warn('Could not save flag:', e); }
   }
 
@@ -248,11 +248,11 @@
 
   async function updatePrice(id, bestPrice, bestSupplier) {
     if (!confirm('Update unit price to ' + fmtFull(bestPrice) + (bestSupplier ? ' from ' + bestSupplier : '') + '?')) return;
-    if (!window.supabase) return;
+    if (!window.sbClient) return;
     try {
       const update = { unit_price: bestPrice };
       if (bestSupplier) update.supplier = bestSupplier;
-      await window.supabase.from('fixtures').update(update).eq('id', id);
+      await window.sbClient.from('fixtures').update(update).eq('id', id);
       showToast('Price updated to ' + fmtFull(bestPrice), 'success');
       if (typeof renderFixtures === 'function') renderFixtures();
     } catch(e) { showToast('Could not update price: ' + e.message, 'error'); }
@@ -362,7 +362,7 @@
 
   async function init() {
     var attempts = 0;
-    while (!window.supabase && attempts < 20) {
+    while (!window.sbClient && attempts < 20) {
       await new Promise(function(r) { setTimeout(r, 500); });
       attempts++;
     }
