@@ -1591,7 +1591,7 @@ async function loadFromSupabase() {
   if (!sbConnected) return false;
   setConnStatus('syncing','◌  Loading data...');
   try {
-    const [docsR, datesR, tasksR, contactsR, questionsR, settingsR] = await Promise.all([
+    const [docsR, datesR, tasksR, contactsR, questionsR, settingsR, fixturesR] = await Promise.all([
       sb.from('docs').select('*'),
       sb.from('dates').select('*'),
       sb.from('tasks').select('*'),
