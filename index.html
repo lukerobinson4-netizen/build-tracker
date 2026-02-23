@@ -259,9 +259,9 @@ textarea.form-control { resize: vertical; min-height: 72px; }
 .upcoming-dot.ok { background: var(--accent); }
 
 /* CAT ROW */
-.cat-row { padding: 10px 16px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 100px 100px 60px; gap: 8px; align-items: center; }
+.cat-row { padding: 10px 16px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 100px 100px 80px; gap: 8px; align-items: center; }
 .cat-row:last-child { border-bottom: none; }
-.cat-mini-bar { height: 4px; background: var(--border); }
+.cat-mini-bar  { height: 4px; background: var(--border); width: 80px; min-width: 80px; max-width: 80px; overflow: hidden; }
 .cat-mini-fill { height: 100%; background: var(--accent); }
 
 /* UTILS */
@@ -649,8 +649,8 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div id="upcoming-list"></div>
       </div>
       <div class="section">
-        <div class="section-header"><div class="section-title">By Trade</div></div>
-        <div id="cat-summary"></div>
+        <div class="section-header"><div class="section-title">Open Tasks</div><a onclick="showTab('tasks')" style="font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer;text-transform:uppercase;letter-spacing:1px;">View All</a></div>
+        <div id="dashboard-open-tasks"></div>
       </div>
     </div>
   </div>
@@ -2296,7 +2296,7 @@ function renderDashboard() {
   renderStats();
   renderRecent();
   renderUpcoming();
-  renderCatSummary();
+  renderDashboardOpenTasks();
 }
 
 function markDateDone(id, event) {
@@ -2516,6 +2516,34 @@ function renderCatSummary() {
   el.innerHTML = Object.entries(cats).sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>{
     const pct=v.total>0?Math.min(100,Math.round(v.paid/v.total*100)):0;
     return `<div class="cat-row"><div>${name}</div><div style="font-family:var(--mono);font-size:11px;text-align:right;color:var(--text-muted)">${fmt(v.total)}</div><div style="font-family:var(--mono);font-size:11px;text-align:right;color:var(--green)">${fmt(v.paid)}</div><div><div class="cat-mini-bar"><div class="cat-mini-fill" style="width:${pct}%"></div></div></div></div>`;
+  }).join('');
+}
+
+function renderDashboardOpenTasks() {
+  const el = document.getElementById('dashboard-open-tasks');
+  if (!el) return;
+  const isClosed = t => t.done || t.status === 'closed';
+  const open = tasks.filter(t => !isClosed(t)).sort((a, b) => {
+    const pri = {high:0, med:1, low:2};
+    if (pri[a.priority] !== pri[b.priority]) return pri[a.priority] - pri[b.priority];
+    return (a.due||'9999').localeCompare(b.due||'9999');
+  }).slice(0, 8);
+  if (!open.length) {
+    el.innerHTML = '<div style="padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--text-dim);">No open tasks</div>';
+    return;
+  }
+  el.innerHTML = open.map(t => {
+    const days = daysUntil(t.due);
+    const priCol = t.priority==='high'?'var(--red)':t.priority==='med'?'var(--orange)':'var(--text-dim)';
+    const dueCol = !t.due?'var(--text-dim)':days<0?'var(--red)':days<3?'var(--orange)':'var(--text-muted)';
+    const dueStr = t.due ? (days<0?`${Math.abs(days)}d overdue`:days===0?'today':days<7?`${days}d`:fmtD(t.due)) : '';
+    return `<div style="padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:${priCol};flex-shrink:0;"></span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
+        ${dueStr?`<div style="font-family:var(--mono);font-size:10px;color:${dueCol};">${dueStr}</div>`:''}
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -3357,7 +3385,7 @@ function renderCategories() {
     const pct=paidWidth;
     return `<div class="section">
       <div class="section-header"><div class="section-title">${name}</div><div style="font-family:var(--mono);font-size:12px;color:var(--accent)">${fmt(v.total)}</div></div>
-      <div style="padding:8px 16px 4px;display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;max-width:160px"><div style="width:${barWidth}%;height:100%;background:var(--border2,#2a2c2e);position:relative;"><div style="width:${paidWidth}%;height:100%;background:var(--green);"></div></div></div><span class="pay-pct">${fmt(v.paid)} paid</span></div>
+      <div style="padding:8px 16px 4px;display:flex;align-items:center;gap:8px"><div style="flex:1;max-width:120px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="width:${pct}%;max-width:100%;height:100%;background:var(--green);border-radius:2px;"></div></div><span class="pay-pct">${fmt(v.paid)} paid</span></div>
       ${v.docs.map(d=>{
       const pending = Number(d.amount) - paidTotal(d);
       return `<div style="padding:10px 16px;border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;">
