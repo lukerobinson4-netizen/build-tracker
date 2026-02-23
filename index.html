@@ -3350,11 +3350,14 @@ function renderCategories() {
     if(!cats[d.trade]) cats[d.trade]={docs:[],total:0,paid:0};
     cats[d.trade].docs.push(d); cats[d.trade].total+=Number(d.amount); cats[d.trade].paid+=paidTotal(d);
   });
-  document.getElementById('categories-grid').innerHTML=Object.entries(cats).sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>{
-    const pct=v.total>0?Math.min(100,Math.round(v.paid/v.total*100)):0;
+  document.getElementById('categories-grid').innerHTML=Object.entries(cats).sort((a,b)=>b[1].total-a[1].total).map(([name,v],i,arr)=>{
+    const maxTotal=Math.max(...arr.map(([,x])=>x.total));
+    const barWidth=maxTotal>0?Math.round(v.total/maxTotal*100):0;
+    const paidWidth=v.total>0?Math.min(100,Math.round(v.paid/v.total*100)):0;
+    const pct=paidWidth;
     return `<div class="section">
       <div class="section-header"><div class="section-title">${name}</div><div style="font-family:var(--mono);font-size:12px;color:var(--accent)">${fmt(v.total)}</div></div>
-      <div style="padding:8px 16px 4px;display:flex;align-items:center;gap:8px"><div class="pay-bar" style="flex:1;height:4px"><div class="pay-bar-fill" style="width:${pct}%"></div></div><span class="pay-pct">${fmt(v.paid)} paid</span></div>
+      <div style="padding:8px 16px 4px;display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;max-width:160px"><div style="width:${barWidth}%;height:100%;background:var(--border2,#2a2c2e);position:relative;"><div style="width:${paidWidth}%;height:100%;background:var(--green);"></div></div></div><span class="pay-pct">${fmt(v.paid)} paid</span></div>
       ${v.docs.map(d=>{
       const pending = Number(d.amount) - paidTotal(d);
       return `<div style="padding:10px 16px;border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;">
