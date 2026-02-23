@@ -1858,7 +1858,7 @@ function today() { return new Date().toISOString().split('T')[0]; }
 function daysUntil(d) { if (!d) return null; return Math.round((new Date(d)-new Date(today()))/86400000); }
 function uid() { return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 // A payment is considered paid if it has a paid date OR status==='paid'/'partial'
-function isPaymentPaid(p) { return !!(p.paid || p.status==='paid' || p.status==='partial'); }
+function isPaymentPaid(p) { return !!(p.status==='paid' || p.status==='partial' || (p.paid && p.paid !== p.due)); }
 function paidTotal(doc) {
   return (doc.payments||[]).filter(isPaymentPaid).reduce((s,p)=>{
     return s + (p.paidAmount ? Number(p.paidAmount) : Number(p.amount));
@@ -2174,6 +2174,7 @@ function pendingPaymentRows(doc) {
   const hasPaymentRows = (doc.payments || []).length > 0;
 
   // Skip pure unaccepted quotes with no payment schedule
+  // Note: invoices are ALWAYS eligible regardless of status field
   if (!isInvoice && !isAccepted) return [];
   // Skip quotes with no payment rows (nothing has been scheduled/committed yet)
   if (!isInvoice && !hasPaymentRows) return [];
@@ -3295,7 +3296,10 @@ function saveDocument() {
   // Collect any file entries
   const files = docFileEntries.slice();
   docFileEntries = [];
-  const doc={id:uid(),type,status,supplier,trade,desc,docnum,date,expiry:type==='quote'?expiry:'',amount,gst:Math.round(amount*0.1*100)/100,notes,payments,attachmentName,linkedQuote:type==='invoice'?linkedQuote:'',importMethod:currentImportTab,bankDetails,files};
+  // GST for new doc: only auto-calc if no GST field exists on the add form
+  // (add form doesn't have a GST field — always auto-calc at 10%)
+  const newGst = Math.round(amount * 0.1 * 100) / 100;
+  const doc={id:uid(),type,status,supplier,trade,desc,docnum,date,expiry:type==='quote'?expiry:'',amount,gst:newGst,notes,payments,attachmentName,linkedQuote:type==='invoice'?linkedQuote:'',importMethod:currentImportTab,bankDetails,files};
   docs.unshift(doc);
   autoSaveSupplier(supplier);
   // Sync contact
@@ -3431,8 +3435,16 @@ function saveEdit() {
   if (!d) return;
   const supplier = document.getElementById('e-supplier').value.trim();
   const date = document.getElementById('e-date').value;
-  const amount = parseFloat(document.getElementById('e-amount').value) || 0;
+  const rawAmount = parseFloat(document.getElementById('e-amount').value) || 0;
+  const inclGST   = document.getElementById('e-gst-incl') && document.getElementById('e-gst-incl').checked;
+  // If checkbox ticked: entered amount includes GST — strip it out for storage
+  const amount = inclGST ? Math.round(rawAmount / 1.1 * 100) / 100 : rawAmount;
   if (!supplier || !date || !amount) { alert('Supplier, Date and Amount required.'); return; }
+  // GST: use field value if entered (even 0), only auto-calc if field is completely empty
+  const gstFieldVal = document.getElementById('e-gst').value;
+  const gst = inclGST
+    ? Math.round((rawAmount - amount) * 100) / 100
+    : (gstFieldVal === '' ? Math.round(amount * 0.1 * 100) / 100 : (parseFloat(gstFieldVal) || 0));
 
   // Update core doc fields
   d.supplier = supplier;
@@ -3444,7 +3456,7 @@ function saveEdit() {
   d.docnum = document.getElementById('e-docnum').value.trim();
   d.date = date;
   d.amount = amount;
-  d.gst = parseFloat(document.getElementById('e-gst').value) || Math.round(amount*0.1*100)/100;
+  d.gst = gst;
   d.expiry = d.type==='quote' ? document.getElementById('e-expiry').value : '';
   d.notes = document.getElementById('e-notes').value.trim();
   d.attachmentName = document.getElementById('e-attachment').value.trim();
@@ -3518,8 +3530,11 @@ function saveEditPayment() {
   if (!desc || !amount) { alert('Description and amount required.'); return; }
   p.desc = desc;
   p.amount = amount;
-  p.due = document.getElementById('ep-due').value;
-  p.paid = document.getElementById('ep-paid').value;
+  p.due  = document.getElementById('ep-due').value;
+  const editedPaid = document.getElementById('ep-paid').value;
+  p.paid = editedPaid || '';
+  // If paid date was cleared, also clear status to unpaid
+  if (!editedPaid && p.status === 'paid') p.status = 'scheduled';
   p.ref = document.getElementById('ep-ref').value.trim();
   p.notes = document.getElementById('ep-notes').value.trim();
   p.txn = document.getElementById('ep-txn').value.trim();
