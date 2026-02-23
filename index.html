@@ -4529,7 +4529,310 @@ function printFixturesReport() {
     .sum-label { font-size: 10px; color: #888; text-transform: uppercase; }
     .sum-val { font-size: 18px; font-weight: 600; }
     @media print { body { padding: 10px; } }
-  </style></head><body>
+ /* ═══════════════════════════════════════════════════════════════════
+   FIXTURES PRICE SEARCH — CSS
+   Add inside the existing <style> tag in index.html
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Price search button on fixture rows */
+.btn-price-search {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-price-search:hover:not(:disabled) {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(91, 143, 204, 0.08);
+}
+.btn-price-search:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.btn-price-search.searching {
+  border-color: var(--blue);
+  color: var(--blue);
+  opacity: 0.7;
+}
+.btn-price-search.has-results {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(76, 175, 125, 0.08);
+}
+.btn-price-search.has-savings {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(224, 127, 58, 0.08);
+  font-weight: 600;
+}
+
+/* Spin animation for loading */
+@keyframes price-spin { to { transform: rotate(360deg); } }
+.price-search-spinner {
+  width: 10px; height: 10px;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: price-spin 0.7s linear infinite;
+}
+
+/* Price results panel — slides in below fixture row */
+.price-results-panel {
+  background: var(--surface2, #1e2021);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--blue);
+  padding: 14px 16px;
+  margin-top: -1px;
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.price-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.price-results-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+.price-results-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 4px;
+}
+.price-results-close:hover { color: var(--text); }
+
+/* Verdict banner */
+.price-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.price-verdict.competitive  { background: rgba(76,175,125,0.12); border: 1px solid rgba(76,175,125,0.3); }
+.price-verdict.savings      { background: rgba(224,127,58,0.12); border: 1px solid rgba(224,127,58,0.3); }
+.price-verdict.overpriced   { background: rgba(224,85,85,0.12);  border: 1px solid rgba(224,85,85,0.3); }
+.price-verdict.no-data      { background: rgba(122,120,117,0.1); border: 1px solid var(--border); }
+
+.price-verdict-icon { font-size: 16px; flex-shrink: 0; }
+.price-verdict-text { flex: 1; font-size: 12px; font-weight: 500; }
+.price-verdict.competitive .price-verdict-text  { color: var(--green, #4caf7d); }
+.price-verdict.savings .price-verdict-text      { color: var(--orange, #e07f3a); }
+.price-verdict.overpriced .price-verdict-text   { color: var(--red, #e05555); }
+.price-verdict.no-data .price-verdict-text      { color: var(--text-muted); }
+
+.price-verdict-saving {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--orange, #e07f3a);
+  white-space: nowrap;
+}
+
+/* Price comparison table */
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.price-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-dim, #4a4845);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.price-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.price-table tr.your-quote td { background: rgba(255,255,255,0.03); }
+.price-table tr.best-price td { background: rgba(76,175,125,0.07); }
+.price-table tr:last-child td { border-bottom: none; }
+
+.price-tag { font-family: var(--mono); font-weight: 500; }
+.price-tag.best  { color: var(--green, #4caf7d); }
+.price-tag.high  { color: var(--red, #e05555); }
+.price-tag.yours { color: var(--accent, #c8a96e); }
+.price-tag.mid   { color: var(--text); }
+
+.price-link {
+  color: var(--blue, #5b8fcc);
+  text-decoration: none;
+  font-size: 10px;
+  font-family: var(--mono);
+}
+.price-link:hover { text-decoration: underline; }
+.price-note { font-size: 10px; color: var(--text-muted); }
+.price-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-left: 4px;
+}
+.price-badge.best-badge { background: rgba(76,175,125,0.2); color: var(--green, #4caf7d); }
+.price-badge.yours-badge { background: rgba(200,169,110,0.15); color: var(--accent, #c8a96e); }
+
+/* Panel action buttons */
+.price-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn-flag-renegotiate {
+  background: rgba(224,127,58,0.15);
+  border: 1px solid rgba(224,127,58,0.4);
+  color: var(--orange, #e07f3a);
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-flag-renegotiate:hover {
+  background: var(--orange, #e07f3a);
+  color: var(--bg, #0e0f0f);
+}
+.btn-flag-renegotiate.flagged {
+  background: var(--orange, #e07f3a);
+  color: var(--bg, #0e0f0f);
+}
+.btn-use-best-price {
+  background: rgba(76,175,125,0.15);
+  border: 1px solid rgba(76,175,125,0.4);
+  color: var(--green, #4caf7d);
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-use-best-price:hover {
+  background: var(--green, #4caf7d);
+  color: var(--bg, #0e0f0f);
+}
+.price-searched-at {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim, #4a4845);
+  margin-left: auto;
+}
+
+/* Search All button in fixtures header */
+.btn-search-all-prices {
+  background: rgba(91,143,204,0.12);
+  border: 1px solid rgba(91,143,204,0.35);
+  color: var(--blue, #5b8fcc);
+  padding: 5px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-search-all-prices:hover { background: rgba(91,143,204,0.22); }
+.btn-search-all-prices:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Savings summary strip */
+.price-savings-summary {
+  background: rgba(224,127,58,0.08);
+  border: 1px solid rgba(224,127,58,0.25);
+  border-radius: 3px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.price-savings-summary .sum-label { color: var(--text-muted); font-size: 11px; }
+.price-savings-summary .sum-value { font-family: var(--mono); font-weight: 600; color: var(--orange, #e07f3a); font-size: 14px; }
+.price-savings-summary .sum-item { display: flex; flex-direction: column; gap: 2px; }
+
+/* Flagged indicator in fixture row */
+.fixture-flagged-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(224,127,58,0.15);
+  border: 1px solid rgba(224,127,58,0.3);
+  color: var(--orange, #e07f3a);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-left: 6px;
+}
+
+/* Progress counter during batch search */
+.search-progress-bar {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.search-progress-fill {
+  height: 100%;
+  background: var(--blue, #5b8fcc);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+ </style></head><body>
   <h1>Fixtures & Fittings List</h1>
   <div class="sub">128 Dairy Creek Road, Gundaroo NSW 2620 — DA250507 — Generated ${new Date().toLocaleDateString('en-AU')}</div>
   <div class="summary">
@@ -4974,5 +5277,177 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   </div>
 </div>
 
+
+// Searches Australian retail prices for a fixture/fitting using Claude + web search
+
+exports.handler = async (event) => {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Content-Type': 'application/json',
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers, body: '' };
+  }
+
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
+  }
+
+  const { brand, model, sku, category, unitPrice, qty } = body;
+
+  if (!brand && !model) {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Brand or model required' }) };
+  }
+
+  const searchTerm = [brand, model, sku].filter(Boolean).join(' ');
+  const userQuoteTotal = unitPrice && qty ? (parseFloat(unitPrice) * parseInt(qty)) : null;
+
+  const prompt = `You are a price research assistant for an Australian construction project. 
+Search for the current Australian retail price for this product:
+
+**Product:** ${searchTerm}
+**Category:** ${category || 'building fixture/fitting'}
+${unitPrice ? `**Current quoted price (excl GST):** $${unitPrice} AUD per unit` : ''}
+${qty ? `**Quantity needed:** ${qty}` : ''}
+
+Search Australian retail and trade suppliers for this exact product or close equivalent. 
+Focus on: Reece Plumbing, Tradelink, Bunnings, Beaumont Tiles, Harvey Norman, Winning Appliances, 
+Beacon Lighting, Plumbing Plus, Reece, Tradelink, Mitre 10, Meir, ABI Interiors, 
+and any specialist Australian suppliers.
+
+Return a JSON object with this EXACT structure (no markdown, just raw JSON):
+{
+  "searchTerm": "${searchTerm}",
+  "results": [
+    {
+      "supplier": "Supplier Name",
+      "price": 299.00,
+      "priceType": "RRP" or "Trade" or "Sale",
+      "url": "https://...",
+      "note": "Brief note e.g. 'In stock', 'Trade account required', 'Discontinued'"
+    }
+  ],
+  "bestPrice": 249.00,
+  "bestSupplier": "Supplier Name",
+  "priceRange": { "min": 199, "max": 399 },
+  "verdict": "competitive" or "savings_available" or "overpriced" or "no_data",
+  "savingPerUnit": 50.00,
+  "savingTotal": ${userQuoteTotal ? `${userQuoteTotal}` : 'null'},
+  "summary": "One sentence summary of findings",
+  "searchedAt": "${new Date().toISOString()}",
+  "australianAvailability": "Widely available" or "Limited" or "Import only" or "Unknown"
+}
+
+If the exact model isn't found, search for the closest equivalent and note it.
+If no Australian pricing is found at all, set verdict to "no_data" and explain in summary.
+Return ONLY the JSON object, no other text.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'interleaved-thinking-2025-05-14',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        tools: [
+          {
+            type: 'web_search_20250305',
+            name: 'web_search',
+          },
+        ],
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Anthropic API error:', response.status, errText);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: `API error ${response.status}`, detail: errText }),
+      };
+    }
+
+    const data = await response.json();
+
+    // Extract text from response (may be after tool_use blocks)
+    let resultText = '';
+    for (const block of data.content || []) {
+      if (block.type === 'text') {
+        resultText += block.text;
+      }
+    }
+
+    // Parse JSON from response
+    let priceData;
+    try {
+      // Strip any markdown code fences if present
+      const cleaned = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      // Find the JSON object
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        priceData = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error('No JSON found in response');
+      }
+    } catch (parseErr) {
+      console.error('Parse error:', parseErr, 'Raw text:', resultText);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          error: 'Could not parse price data',
+          verdict: 'no_data',
+          summary: 'Search completed but results could not be parsed. Try again.',
+          searchTerm,
+          results: [],
+        }),
+      };
+    }
+
+    // Add comparison data if we have a quoted price
+    if (unitPrice && priceData.bestPrice) {
+      const quoted = parseFloat(unitPrice);
+      const best = parseFloat(priceData.bestPrice);
+      const diff = quoted - best;
+      const pct = Math.round((diff / quoted) * 100);
+      priceData.quotedPrice = quoted;
+      priceData.priceDiffPct = pct;
+      priceData.priceDiffAbs = diff;
+      if (qty) {
+        priceData.potentialSaving = diff * parseInt(qty);
+      }
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(priceData),
+    };
+  } catch (err) {
+    console.error('Function error:', err);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: err.message }),
+    };
+  }
+};
+<script src="price-search.js"></script>
 </body>
 </html>
