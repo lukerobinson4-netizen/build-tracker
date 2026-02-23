@@ -13,9 +13,3 @@
   to = "/price-search.js"
   status = 200
 ```
-
-Save, then:
-```
-git add netlify.toml
-git commit -m "fix: explicitly serve price-search.js"
-git push
