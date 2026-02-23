@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
   'use strict';
 
   const PRICE_SEARCH_API = '/.netlify/functions/price-search';
@@ -8,38 +8,38 @@
   let batchSearchActive = false;
 
   function fmt(n) {
-    if (n == null || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return 'â€”';
     return '$' + Number(n).toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
   function fmtFull(n) {
-    if (n == null || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return 'â€”';
     return '$' + Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function getVerdictClass(v) {
     return { competitive:'competitive', savings_available:'savings', overpriced:'overpriced', no_data:'no-data' }[v] || 'no-data';
   }
   function getVerdictIcon(v) {
-    return { competitive:'✓', savings_available:'⚠', overpriced:'↑', no_data:'?' }[v] || '?';
+    return { competitive:'âœ“', savings_available:'âš ', overpriced:'â†‘', no_data:'?' }[v] || '?';
   }
   function getVerdictLabel(v, pct, saving) {
-    if (v === 'competitive')       return 'Competitively priced — at or below market rate';
-    if (v === 'savings_available') return 'Better price found — ' + pct + '% cheaper available' + (saving ? ' (save ' + fmt(saving) + ')' : '');
-    if (v === 'overpriced')        return 'Significantly overpriced — ' + pct + '% above best found';
+    if (v === 'competitive')       return 'Competitively priced â€” at or below market rate';
+    if (v === 'savings_available') return 'Better price found â€” ' + pct + '% cheaper available' + (saving ? ' (save ' + fmt(saving) + ')' : '');
+    if (v === 'overpriced')        return 'Significantly overpriced â€” ' + pct + '% above best found';
     return 'No pricing data found for this product';
   }
 
   async function loadFixtureData() {
-    if (!window.sb) return;
+    if (!window.supabase) return;
     try {
-      const { data } = await window.sb.from('fixtures').select('*');
+      const { data } = await window.supabase.from('fixtures').select('*');
       (data || []).forEach(f => fixtureDataCache.set(f.id, f));
     } catch(e) { console.warn('Price search: could not load fixture data', e); }
   }
 
   async function loadCachedPriceResults() {
-    if (!window.sb) return;
+    if (!window.supabase) return;
     try {
-      const { data } = await window.sb
+      const { data } = await window.supabase
         .from('fixtures')
         .select('id, price_data, price_verdict, price_flagged')
         .not('price_data', 'is', null);
@@ -50,9 +50,9 @@
   }
 
   async function savePriceDataToSupabase(id, priceData) {
-    if (!window.sb) return;
+    if (!window.supabase) return;
     try {
-      await window.sb.from('fixtures').update({
+      await window.supabase.from('fixtures').update({
         price_data: priceData,
         price_searched_at: priceData.searchedAt || new Date().toISOString(),
         price_verdict: priceData.verdict,
@@ -63,9 +63,9 @@
   }
 
   async function saveFlagToSupabase(id, flagged) {
-    if (!window.sb) return;
+    if (!window.supabase) return;
     try {
-      await window.sb.from('fixtures').update({ price_flagged: flagged }).eq('id', id);
+      await window.supabase.from('fixtures').update({ price_flagged: flagged }).eq('id', id);
     } catch(e) { console.warn('Could not save flag:', e); }
   }
 
@@ -248,11 +248,11 @@
 
   async function updatePrice(id, bestPrice, bestSupplier) {
     if (!confirm('Update unit price to ' + fmtFull(bestPrice) + (bestSupplier ? ' from ' + bestSupplier : '') + '?')) return;
-    if (!window.sb) return;
+    if (!window.supabase) return;
     try {
       const update = { unit_price: bestPrice };
       if (bestSupplier) update.supplier = bestSupplier;
-      await window.sb.from('fixtures').update(update).eq('id', id);
+      await window.supabase.from('fixtures').update(update).eq('id', id);
       showToast('Price updated to ' + fmtFull(bestPrice), 'success');
       if (typeof renderFixtures === 'function') renderFixtures();
     } catch(e) { showToast('Could not update price: ' + e.message, 'error'); }
@@ -362,7 +362,7 @@
 
   async function init() {
     var attempts = 0;
-    while (!window.sb && attempts < 20) {
+    while (!window.supabase && attempts < 20) {
       await new Promise(function(r) { setTimeout(r, 500); });
       attempts++;
     }
