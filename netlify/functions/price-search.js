@@ -1,6 +1,7 @@
 // netlify/functions/price-search.js
 // Searches Australian retail prices for a fixture/fitting using Claude + web search
 
+exports.config = { timeout: 30 };
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
