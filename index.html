@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<title>128 Dairy Creek Rd — Build Tracker</title>
+<title>128 Dairy Creek Rd â€” Build Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -294,7 +294,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 .gantt-controls { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .gantt-zoom { font-family: var(--mono); font-size: 10px; }
 
-/* ── Fixtures & Fittings ─────────────────────────────────── */
+/* â”€â”€ Fixtures & Fittings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fx-status-needed     { background:rgba(120,120,120,0.15); color:#888;    border:1px solid #555; }
 .fx-status-researching{ background:rgba(107,159,228,0.15); color:var(--blue);   border:1px solid var(--blue); }
 .fx-status-selected   { background:rgba(240,160,32,0.15);  color:var(--yellow); border:1px solid var(--yellow); }
@@ -324,9 +324,9 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 </head>
 <body>
 <div id="conn-bar" style="position:fixed;top:0;left:0;right:0;z-index:9999;padding:5px 16px;font-family:monospace;font-size:11px;display:flex;align-items:center;justify-content:space-between;transition:background 0.3s;background:#1a1a2e;color:#888;border-bottom:1px solid #333;">
-  <span id="conn-msg">○ &nbsp;Offline — using local cache</span>
+  <span id="conn-msg">â—‹ &nbsp;Offline â€” using local cache</span>
   <span id="conn-queue" style="color:#f90;"></span>
-  <button onclick="openModal('db-config-modal')" style="background:none;border:1px solid #555;color:#888;padding:2px 10px;cursor:pointer;font-size:10px;font-family:monospace;">⚙ Database</button>
+  <button onclick="openModal('db-config-modal')" style="background:none;border:1px solid #555;color:#888;padding:2px 10px;cursor:pointer;font-size:10px;font-family:monospace;">âš™ Database</button>
 </div>
 <div style="height:29px;"></div><!-- spacer for fixed bar -->
 
@@ -334,10 +334,10 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   <div class="modal" style="width:540px;">
     <div class="modal-header">
       <div class="modal-title">Supabase Connection</div>
-      <button class="modal-close" onclick="closeModal('db-config-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('db-config-modal')">Ã—</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Enter your Supabase credentials once — saved locally in your browser.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Enter your Supabase credentials once â€” saved locally in your browser.</p>
       <div class="form-group full" style="margin-bottom:12px;">
         <label class="form-label">Project URL</label>
         <input class="form-control" id="db-url" placeholder="https://xxxxxxxxxxxx.supabase.co" type="url"/>
@@ -345,7 +345,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="form-group full">
         <label class="form-label">Anon Public Key</label>
         <input class="form-control" id="db-key" placeholder="eyJhbGci..." type="password"/>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Supabase project → Settings → API → Project URL + anon public key</div>
+        <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Supabase project â†’ Settings â†’ API â†’ Project URL + anon public key</div>
       </div>
       <div id="db-test-msg" style="margin-top:12px;font-size:11px;font-family:monospace;min-height:18px;"></div>
     </div>
@@ -359,10 +359,10 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 <div class="header">
   <div class="header-left">
     <div class="header-title">BUILD TRACKER</div>
-    <div class="header-sub">128 Dairy Creek Rd, Gundaroo · DA250507</div>
+    <div class="header-sub">128 Dairy Creek Rd, Gundaroo Â· DA250507</div>
   </div>
   <div class="header-right">
-    <button class="btn btn-ghost btn-sm" onclick="openModal('settings-modal')" title="Manage trades & suppliers">⚙ Settings</button>
+    <button class="btn btn-ghost btn-sm" onclick="openModal('settings-modal')" title="Manage trades & suppliers">âš™ Settings</button>
     <button class="btn btn-purple btn-sm" onclick="openModal('task-modal')">+ Task</button>
     <button class="btn btn-blue btn-sm" onclick="openDateModal()">+ Date/Milestone</button>
     <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Document</button>
@@ -381,7 +381,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   <div class="tab" onclick="showTab('fixtures',this)">Fixtures & Fittings</div>
 </div>
 
-<!-- ═══ DASHBOARD ═══ -->
+<!-- â•â•â• DASHBOARD â•â•â• -->
 <div id="tab-dashboard" class="main">
   <!-- TIMELINE STRIP -->
   <div class="timeline-strip">
@@ -390,8 +390,8 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost btn-sm" id="toggle-done-dates-btn" onclick="toggleDoneDates(this)">Show Actioned</button>
         <button class="btn btn-ghost btn-sm" onclick="openDateModal()">+ Add Date</button>
-        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">↓ Extract from Docs</button>
-        <button class="btn btn-ghost btn-sm" onclick="showTab('gantt',document.querySelectorAll('.tab')[2])">View Gantt →</button>
+        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">â†“ Extract from Docs</button>
+        <button class="btn btn-ghost btn-sm" onclick="showTab('gantt',document.querySelectorAll('.tab')[2])">View Gantt â†’</button>
       </div>
     </div>
     <div class="timeline-strip-scroll" id="timeline-strip"></div>
@@ -403,7 +403,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="timeline-strip-title" style="color:var(--purple);">Open Tasks</div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost btn-sm" onclick="openModal('task-modal')">+ Add Task</button>
-        <button class="btn btn-ghost btn-sm" onclick="showTab('tasks',document.querySelectorAll('.tab')[1])">View All →</button>
+        <button class="btn btn-ghost btn-sm" onclick="showTab('tasks',document.querySelectorAll('.tab')[1])">View All â†’</button>
       </div>
     </div>
     <div class="timeline-strip-scroll" id="task-strip"></div>
@@ -434,7 +434,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ TASKS ═══ -->
+<!-- â•â•â• TASKS â•â•â• -->
 <div id="tab-tasks" class="main" style="display:none;">
   <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;">
     <div>
@@ -473,13 +473,13 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ GANTT ═══ -->
+<!-- â•â•â• GANTT â•â•â• -->
 <div id="tab-gantt" class="main" style="display:none;">
   <div class="section">
     <div class="section-header">
       <div class="section-title">Gantt / Timeline</div>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">↓ Extract from Docs</button>
+        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">â†“ Extract from Docs</button>
         <button class="btn btn-ghost btn-sm" onclick="openDateModal()">+ Add Manually</button>
       </div>
     </div>
@@ -495,7 +495,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="task-filter" onclick="setGanttFilter('milestone',this)" style="font-size:9px;padding:3px 8px;">Milestones</div>
       <div class="task-filter" onclick="setGanttFilter('quote',this)" style="font-size:9px;padding:3px 8px;">Quote Dates</div>
       <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-        <button class="btn btn-ghost btn-sm" onclick="ganttScrollToToday()" title="Scroll to today">⊙ Today</button>
+        <button class="btn btn-ghost btn-sm" onclick="ganttScrollToToday()" title="Scroll to today">âŠ™ Today</button>
         <select id="gantt-jump-select" class="form-control" style="width:180px;font-size:11px;padding:4px 8px;height:28px;" onchange="ganttJumpToSelected()" title="Jump to item">
           <option value="">Jump to item...</option>
         </select>
@@ -511,21 +511,21 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ DOCUMENTS ═══ -->
+<!-- â•â•â• DOCUMENTS â•â•â• -->
 <div id="tab-quotes" class="main" style="display:none;">
   <div class="section">
     <div class="section-header">
       <div style="display:flex;align-items:center;gap:12px;">
         <div class="section-title">All Documents</div>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-ghost btn-sm" id="view-list-btn" onclick="setQuoteView('list',this)" style="border-color:var(--accent);color:var(--accent);">≡ List</button>
-          <button class="btn btn-ghost btn-sm" id="view-system-btn" onclick="setQuoteView('system',this)">⬡ By System</button>
+          <button class="btn btn-ghost btn-sm" id="view-list-btn" onclick="setQuoteView('list',this)" style="border-color:var(--accent);color:var(--accent);">â‰¡ List</button>
+          <button class="btn btn-ghost btn-sm" id="view-system-btn" onclick="setQuoteView('system',this)">â¬¡ By System</button>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="section-count" id="doc-count">0 items</span>
-        <button class="btn btn-ghost btn-sm" onclick="openModal('systems-modal');renderSystemsEdit()">⚙ Systems</button>
-        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">↓ Extract Dates</button>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('systems-modal');renderSystemsEdit()">âš™ Systems</button>
+        <button class="btn btn-blue btn-sm" onclick="openExtractModal()">â†“ Extract Dates</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add</button>
       </div>
     </div>
@@ -543,7 +543,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ PAYMENTS ═══ -->
+<!-- â•â•â• PAYMENTS â•â•â• -->
 <div id="tab-payments" class="main" style="display:none;">
   <div class="two-col">
     <div class="section">
@@ -557,31 +557,31 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ CATEGORIES ═══ -->
+<!-- â•â•â• CATEGORIES â•â•â• -->
 <div id="tab-categories" class="main" style="display:none;">
   <div id="categories-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px;align-items:start;"></div>
 </div>
 
-<!-- ═══ CONTACTS ═══ -->
+<!-- â•â•â• CONTACTS â•â•â• -->
 <div id="tab-contacts" class="main" style="display:none;">
   <div class="section">
     <div class="section-header">
       <div class="section-title">Contacts</div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="section-count" id="contacts-count">0 contacts</span>
-        <button class="btn btn-ghost btn-sm" onclick="reseedContacts()" title="Reload the built-in contacts from project documents (won't delete manually added ones)">↺ Reseed from Docs</button>
+        <button class="btn btn-ghost btn-sm" onclick="reseedContacts()" title="Reload the built-in contacts from project documents (won't delete manually added ones)">â†º Reseed from Docs</button>
         <button class="btn btn-primary btn-sm" onclick="openContactModal()">+ Add Contact</button>
       </div>
     </div>
     <div class="filter-row">
       <input class="filter-search" placeholder="Search name, company, supplier..." oninput="renderContacts()" id="contacts-search" style="width:260px;">
-      <button class="btn btn-ghost btn-sm" onclick="findDuplicateContacts()" title="Scan for contacts with the same name or supplier">🔍 Find Duplicates</button>
+      <button class="btn btn-ghost btn-sm" onclick="findDuplicateContacts()" title="Scan for contacts with the same name or supplier">ðŸ” Find Duplicates</button>
     </div>
     <div id="contacts-list"></div>
   </div>
 </div>
 
-<!-- ═══ QUESTIONS ═══ -->
+<!-- â•â•â• QUESTIONS â•â•â• -->
 <div id="tab-questions" class="main" style="display:none;">
   <div class="section">
     <div class="section-header">
@@ -602,12 +602,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 </div>
 
 
-<!-- ═══ ADD DOCUMENT MODAL ═══ -->
+<!-- â•â•â• ADD DOCUMENT MODAL â•â•â• -->
 <div class="modal-overlay" id="add-modal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Add Document</div>
-      <button class="modal-close" onclick="closeModal('add-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('add-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="import-tabs">
@@ -663,11 +663,11 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           </div>
           <div class="form-group">
             <label class="form-label">System Group</label>
-            <select class="form-control" id="f-system-group"><option value="">— None —</option></select>
+            <select class="form-control" id="f-system-group"><option value="">â€” None â€”</option></select>
           </div>
           <div class="form-group full" id="linked-quote-group" style="display:none;">
             <label class="form-label">Linked Quote</label>
-            <select class="form-control" id="f-linked-quote"><option value="">— Not linked —</option></select>
+            <select class="form-control" id="f-linked-quote"><option value="">â€” Not linked â€”</option></select>
           </div>
           <div class="form-group full">
             <label class="form-label">Notes</label>
@@ -684,7 +684,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div style="font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px;">Supplier Payment Details (for your reference)</div>
         <div class="form-grid">
           <div class="form-group"><label class="form-label">Bank</label><input class="form-control" id="f-bank" placeholder="e.g. Bendigo Bank, CommBank"/></div>
-          <div class="form-group"><label class="form-label">Account Name</label><input class="form-control" id="f-acc-name" placeholder="e.g. Foster Heating – Canberra"/></div>
+          <div class="form-group"><label class="form-label">Account Name</label><input class="form-control" id="f-acc-name" placeholder="e.g. Foster Heating â€“ Canberra"/></div>
           <div class="form-group"><label class="form-label">BSB</label><input class="form-control" id="f-bsb" placeholder="e.g. 633 000"/></div>
           <div class="form-group"><label class="form-label">Account Number</label><input class="form-control" id="f-acc-num" placeholder="e.g. 1708 61512"/></div>
         </div>
@@ -700,7 +700,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="import-panel" id="import-upload">
         <div class="drop-zone" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
           <input type="file" accept=".pdf,.jpg,.png,.doc,.docx" onchange="handleFileSelect(event)" id="file-input">
-          <div class="drop-icon">📄</div>
+          <div class="drop-icon">ðŸ“„</div>
           <div class="drop-text">Drop PDF or click to select</div>
           <div class="drop-hint">PDF, JPG, PNG, DOC supported</div>
         </div>
@@ -715,7 +715,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <div class="form-group"><label class="form-label">Date *</label><input class="form-control" type="date" id="u-date"/></div>
           <div class="form-group full"><label class="form-label">Description</label><input class="form-control" id="u-desc"/></div>
           <div class="form-group" id="u-expiry-group"><label class="form-label">Valid Until</label><input class="form-control" type="date" id="u-expiry"/></div>
-          <div class="form-group full" id="u-linked-group" style="display:none;"><label class="form-label">Linked Quote</label><select class="form-control" id="u-linked-quote"><option value="">— Not linked —</option></select></div>
+          <div class="form-group full" id="u-linked-group" style="display:none;"><label class="form-label">Linked Quote</label><select class="form-control" id="u-linked-quote"><option value="">â€” Not linked â€”</option></select></div>
           <div class="form-group full"><label class="form-label">Status</label><select class="form-control" id="u-status"><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="expired">Expired</option></select></div>
         </div>
       </div>
@@ -725,7 +725,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <textarea class="form-control" id="paste-content" rows="6" placeholder="Paste quote email, PDF text..."></textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
-          <button class="btn btn-ghost btn-sm" onclick="parsePaste()">Extract Details →</button>
+          <button class="btn btn-ghost btn-sm" onclick="parsePaste()">Extract Details â†’</button>
         </div>
         <div class="divider"></div>
         <div class="form-grid">
@@ -737,7 +737,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <div class="form-group"><label class="form-label">Date *</label><input class="form-control" type="date" id="p-date"/></div>
           <div class="form-group full"><label class="form-label">Description</label><input class="form-control" id="p-desc"/></div>
           <div class="form-group" id="p-expiry-group"><label class="form-label">Valid Until</label><input class="form-control" type="date" id="p-expiry"/></div>
-          <div class="form-group full" id="p-linked-group" style="display:none;"><label class="form-label">Linked Quote</label><select class="form-control" id="p-linked-quote"><option value="">— Not linked —</option></select></div>
+          <div class="form-group full" id="p-linked-group" style="display:none;"><label class="form-label">Linked Quote</label><select class="form-control" id="p-linked-quote"><option value="">â€” Not linked â€”</option></select></div>
           <div class="form-group full"><label class="form-label">Status</label><select class="form-control" id="p-status"><option value="pending">Pending</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="expired">Expired</option></select></div>
         </div>
       </div>
@@ -749,12 +749,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ ADD DATE / MILESTONE MODAL ═══ -->
+<!-- â•â•â• ADD DATE / MILESTONE MODAL â•â•â• -->
 <div class="modal-overlay" id="date-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
       <div class="modal-title">Add Date / Milestone</div>
-      <button class="modal-close" onclick="closeModal('date-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('date-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -786,7 +786,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="form-group">
           <label class="form-label">Trade / Category</label>
           <select class="form-control" id="dm-trade">
-            <option value="">— General —</option>
+            <option value="">â€” General â€”</option>
             <option>Roofing & Cladding</option><option>Electrical</option><option>Plumbing</option>
             <option>Solar & Battery</option><option>Hydronic Heating</option><option>Concrete & Floors</option>
             <option>Pool</option><option>Earthworks</option><option>Structural</option>
@@ -827,12 +827,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ ADD TASK MODAL ═══ -->
+<!-- â•â•â• ADD TASK MODAL â•â•â• -->
 <div class="modal-overlay" id="task-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
       <div class="modal-title">Add Task</div>
-      <button class="modal-close" onclick="closeModal('task-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('task-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -866,7 +866,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         </div>
         <div class="form-group full closure-note-row" id="t-closure-row">
           <label class="form-label">Closure Note <span style="color:var(--red);">*</span></label>
-          <textarea class="form-control" id="t-closure-note" rows="2" placeholder="Describe what was done to close this task — required to mark as Closed..."></textarea>
+          <textarea class="form-control" id="t-closure-note" rows="2" placeholder="Describe what was done to close this task â€” required to mark as Closed..."></textarea>
         </div>
         <div class="form-group">
           <label class="form-label">Due Date</label>
@@ -883,11 +883,11 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         </div>
         <div class="form-group">
           <label class="form-label">Linked Document / Supplier</label>
-          <select class="form-control" id="t-linked-doc"><option value="">— None —</option></select>
+          <select class="form-control" id="t-linked-doc"><option value="">â€” None â€”</option></select>
         </div>
         <div class="form-group">
           <label class="form-label">Linked Contact</label>
-          <select class="form-control" id="t-linked-contact"><option value="">— None —</option></select>
+          <select class="form-control" id="t-linked-contact"><option value="">â€” None â€”</option></select>
         </div>
       </div>
     </div>
@@ -898,12 +898,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ EXTRACT DATES MODAL ═══ -->
+<!-- â•â•â• EXTRACT DATES MODAL â•â•â• -->
 <div class="modal-overlay" id="extract-modal">
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title">Extract Dates from Documents</div>
-      <button class="modal-close" onclick="closeModal('extract-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('extract-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">The following dates were found in your documents. Select which ones to add to the Gantt / timeline.</p>
@@ -916,12 +916,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ PAYMENT MODAL ═══ -->
+<!-- â•â•â• PAYMENT MODAL â•â•â• -->
 <div class="modal-overlay" id="payment-modal">
   <div class="modal modal-sm" style="width:580px;">
     <div class="modal-header">
       <div class="modal-title" id="pm-modal-title">Add Payment</div>
-      <button class="modal-close" onclick="closeModal('payment-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('payment-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">Payment Details</div>
@@ -943,7 +943,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="form-grid">
           <div class="form-group"><label class="form-label">Paid Date *</label><input class="form-control" type="date" id="pm-paid-date"/></div>
           <div class="form-group"><label class="form-label">Amount Paid (if partial)</label><input class="form-control" type="number" id="pm-paid-amount" step="0.01" placeholder="Leave blank = full amount"/></div>
-          <div class="form-group full"><label class="form-label">Bank Confirmation / Receipt # <span style="color:var(--red);">*</span></label><input class="form-control" id="pm-ref" placeholder="e.g. BSB 633 000 · Acc 1708 61512 · Ref: DAIRYCREEK1"/></div>
+          <div class="form-group full"><label class="form-label">Bank Confirmation / Receipt # <span style="color:var(--red);">*</span></label><input class="form-control" id="pm-ref" placeholder="e.g. BSB 633 000 Â· Acc 1708 61512 Â· Ref: DAIRYCREEK1"/></div>
           <div class="form-group"><label class="form-label">Payment Method</label>
             <select class="form-control" id="pm-method">
               <option value="direct">Direct Deposit / EFT</option>
@@ -974,7 +974,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ EDIT DOCUMENT MODAL ═══ -->
+<!-- â•â•â• EDIT DOCUMENT MODAL â•â•â• -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal" style="width:760px;">
     <div class="modal-header">
@@ -982,7 +982,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="modal-title" id="edit-modal-title">Edit Document</div>
         <span id="edit-type-badge" class="badge badge-quote">Quote</span>
       </div>
-      <button class="modal-close" onclick="closeModal('edit-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('edit-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <!-- CORE FIELDS -->
@@ -1045,11 +1045,11 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="form-group" id="e-expiry-placeholder" style="display:none;"></div>
         <div class="form-group">
           <label class="form-label">System Group</label>
-          <select class="form-control" id="e-system-group"><option value="">— None —</option></select>
+          <select class="form-control" id="e-system-group"><option value="">â€” None â€”</option></select>
         </div>
         <div class="form-group">
           <label class="form-label">Balance Due Date</label>
-          <input class="form-control" type="date" id="e-balance-due" title="When the remaining balance is due — used in upcoming payments"/>
+          <input class="form-control" type="date" id="e-balance-due" title="When the remaining balance is due â€” used in upcoming payments"/>
           <span style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-top:3px;display:block;">Final payment / balance due date</span>
         </div>
         <div class="form-group full">
@@ -1080,12 +1080,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ EDIT PAYMENT MODAL ═══ -->
+<!-- â•â•â• EDIT PAYMENT MODAL â•â•â• -->
 <div class="modal-overlay" id="edit-payment-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
       <div class="modal-title">Edit Payment</div>
-      <button class="modal-close" onclick="closeModal('edit-payment-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('edit-payment-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -1108,10 +1108,10 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ DELETE CONFIRM ═══ -->
+<!-- â•â•â• DELETE CONFIRM â•â•â• -->
 <div class="modal-overlay" id="delete-modal">
   <div class="modal modal-sm" style="width:380px;">
-    <div class="modal-header"><div class="modal-title">Confirm Delete</div><button class="modal-close" onclick="closeModal('delete-modal')">×</button></div>
+    <div class="modal-header"><div class="modal-title">Confirm Delete</div><button class="modal-close" onclick="closeModal('delete-modal')">Ã—</button></div>
     <div class="modal-body"><p style="color:var(--text-muted);">Delete this item? This cannot be undone.</p></div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
@@ -1120,12 +1120,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ CONTACT MODAL ═══ -->
+<!-- â•â•â• CONTACT MODAL â•â•â• -->
 <div class="modal-overlay" id="contact-modal">
   <div class="modal modal-sm" style="width:600px;">
     <div class="modal-header">
       <div class="modal-title" id="contact-modal-title">Add Contact</div>
-      <button class="modal-close" onclick="closeModal('contact-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('contact-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -1134,7 +1134,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="form-group"><label class="form-label">Company</label><input class="form-control" id="ct-company" placeholder="e.g. Rezicast Systems Pty Ltd"/></div>
         <div class="form-group"><label class="form-label">Linked Company / Supplier</label>
           <select class="form-control" id="ct-supplier">
-            <option value="">— Not linked —</option>
+            <option value="">â€” Not linked â€”</option>
           </select>
           <div style="font-size:10px;color:var(--text-dim);margin-top:3px;">Links this person to a company/supplier in your documents</div>
         </div>
@@ -1156,19 +1156,19 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ QUESTION MODAL ═══ -->
+<!-- â•â•â• QUESTION MODAL â•â•â• -->
 <div class="modal-overlay" id="question-modal">
   <div class="modal modal-sm" style="width:560px;">
     <div class="modal-header">
       <div class="modal-title" id="question-modal-title">Add Question</div>
-      <button class="modal-close" onclick="closeModal('question-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('question-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group"><label class="form-label">Question For *</label><input class="form-control" id="q-for" list="contact-name-list" autocomplete="off" placeholder="e.g. Mick Johnson, Council, Andy Edge"/><datalist id="contact-name-list"></datalist></div>
-        <div class="form-group"><label class="form-label">Linked Contact</label><select class="form-control" id="q-linked-contact"><option value="">— None —</option></select></div>
+        <div class="form-group"><label class="form-label">Linked Contact</label><select class="form-control" id="q-linked-contact"><option value="">â€” None â€”</option></select></div>
         <div class="form-group full"><label class="form-label">Question *</label><textarea class="form-control" id="q-text" rows="3" placeholder="What is the question?"></textarea></div>
-        <div class="form-group"><label class="form-label">Trade / Category</label><select class="form-control" id="q-trade"><option value="">— General —</option></select></div>
+        <div class="form-group"><label class="form-label">Trade / Category</label><select class="form-control" id="q-trade"><option value="">â€” General â€”</option></select></div>
         <div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="q-priority"><option value="med">Medium</option><option value="high">High</option><option value="low">Low</option></select></div>
         <div class="form-group"><label class="form-label">Date Asked</label><input class="form-control" type="date" id="q-asked"/></div>
         <div class="form-group"><label class="form-label">Date Answered</label><input class="form-control" type="date" id="q-answered"/></div>
@@ -1183,12 +1183,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ EDIT TASK MODAL ═══ -->
+<!-- â•â•â• EDIT TASK MODAL â•â•â• -->
 <div class="modal-overlay" id="edit-task-modal">
   <div class="modal" style="width:680px;">
     <div class="modal-header">
       <div class="modal-title" id="edit-task-title">Edit Task</div>
-      <button class="modal-close" onclick="closeModal('edit-task-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('edit-task-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -1216,11 +1216,11 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           </select>
         </div>
         <div class="form-group"><label class="form-label">Due Date</label><input class="form-control" type="date" id="et-due"/></div>
-        <div class="form-group"><label class="form-label">Linked Document</label><select class="form-control" id="et-linked-doc"><option value="">— None —</option></select></div>
-        <div class="form-group"><label class="form-label">Linked Contact</label><select class="form-control" id="et-linked-contact"><option value="">— None —</option></select></div>
+        <div class="form-group"><label class="form-label">Linked Document</label><select class="form-control" id="et-linked-doc"><option value="">â€” None â€”</option></select></div>
+        <div class="form-group"><label class="form-label">Linked Contact</label><select class="form-control" id="et-linked-contact"><option value="">â€” None â€”</option></select></div>
         <div class="form-group full closure-note-row" id="et-closure-row">
           <label class="form-label">Closure Note <span style="color:var(--red);">*</span></label>
-          <textarea class="form-control" id="et-closure-note" rows="2" placeholder="Describe what was done to close this task — required to mark as Closed..."></textarea>
+          <textarea class="form-control" id="et-closure-note" rows="2" placeholder="Describe what was done to close this task â€” required to mark as Closed..."></textarea>
         </div>
         <div class="form-group full"><label class="form-label">Notes</label><textarea class="form-control" id="et-notes" rows="2" placeholder="Additional notes..."></textarea></div>
       </div>
@@ -1238,12 +1238,12 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ SETTINGS MODAL ═══ -->
+<!-- â•â•â• SETTINGS MODAL â•â•â• -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal" style="width:700px;">
     <div class="modal-header">
       <div class="modal-title">Settings</div>
-      <button class="modal-close" onclick="closeModal('settings-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('settings-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
@@ -1294,7 +1294,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 <datalist id="supplier-list"></datalist>
 
 <script>
-// ═══ DATA STORES ═══════════════════════════════════════════════════════════════
+// â•â•â• DATA STORES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const DOCS_KEY      = 'dairy_docs_v3';
 const FIXTURES_KEY  = 'dairy_fixtures_v1';
@@ -1363,19 +1363,19 @@ let deleteTarget   = null;
 let deleteType     = 'doc';
 let paymentRowCount = 0;
 
-// ─── LOAD ─────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ LOAD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SUPABASE DATA LAYER
 // localStorage = offline cache + instant UI updates
 // Supabase     = persistent cloud storage, synced after every write
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 let sb = null;          // Supabase client instance
 let sbConnected = false;
 let syncQueue   = [];   // pending writes when offline
 
-// ── Column name mapping: app JS names → Supabase column names ─────────────────
+// â”€â”€ Column name mapping: app JS names â†’ Supabase column names â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function docToRow(d)  {
   return { id:d.id, type:d.type, status:d.status, supplier:d.supplier,
     trade:d.trade, description:d.desc, docnum:d.docnum, doc_date:d.date,
@@ -1451,7 +1451,7 @@ function rowToQuestion(r) {
     asked:r.asked, answer:r.answer, answered:r.answered, priority:r.priority };
 }
 
-// ── Connection status UI ───────────────────────────────────────────────────────
+// â”€â”€ Connection status UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setConnStatus(state, msg) {
   const bar  = document.getElementById('conn-bar');
   const msgEl= document.getElementById('conn-msg');
@@ -1473,19 +1473,19 @@ function setQueueBadge(n) {
   if (el) el.textContent = n > 0 ? n+' pending sync' : '';
 }
 
-// ── Init Supabase from stored credentials ─────────────────────────────────────
+// â”€â”€ Init Supabase from stored credentials â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function initSupabase() {
   const url = localStorage.getItem('_sb_url');
   const key = localStorage.getItem('_sb_key');
   if (!url || !key) {
-    setConnStatus('offline', '○  No database configured — data saves locally only');
+    setConnStatus('offline', 'â—‹  No database configured â€” data saves locally only');
     return false;
   }
   try {
     sb = supabase.createClient(url, key);
     return true;
   } catch(e) {
-    setConnStatus('error', '✕  Supabase init failed: '+e.message);
+    setConnStatus('error', 'âœ•  Supabase init failed: '+e.message);
     return false;
   }
 }
@@ -1496,16 +1496,16 @@ async function checkConnection() {
     const { error } = await sb.from('settings').select('key').limit(1);
     if (error) throw error;
     sbConnected = true;
-    setConnStatus('ok', '●  Connected to Supabase');
+    setConnStatus('ok', 'â—  Connected to Supabase');
     return true;
   } catch(e) {
     sbConnected = false;
-    setConnStatus('error', '✕  Database error: '+e.message);
+    setConnStatus('error', 'âœ•  Database error: '+e.message);
     return false;
   }
 }
 
-// ── DB Config modal ───────────────────────────────────────────────────────────
+// â”€â”€ DB Config modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openDbConfig() {
   document.getElementById('db-url').value = localStorage.getItem('_sb_url')||'';
   document.getElementById('db-key').value = localStorage.getItem('_sb_key')||'';
@@ -1522,9 +1522,9 @@ async function testDbConnection() {
     const client = supabase.createClient(url, key);
     const { error } = await client.from('settings').select('key').limit(1);
     if (error) throw error;
-    msg.style.color='#4caf7d'; msg.textContent='✓ Connected successfully!';
+    msg.style.color='#4caf7d'; msg.textContent='âœ“ Connected successfully!';
   } catch(e) {
-    msg.style.color='#e05252'; msg.textContent='✕ '+e.message;
+    msg.style.color='#e05252'; msg.textContent='âœ• '+e.message;
   }
 }
 async function saveDbConfig() {
@@ -1535,7 +1535,7 @@ async function saveDbConfig() {
   localStorage.setItem('_sb_key', key);
   sb = supabase.createClient(url, key);
   closeModal('db-config-modal');
-  setConnStatus('syncing', '◌  Connecting...');
+  setConnStatus('syncing', 'â—Œ  Connecting...');
   const ok = await checkConnection();
   if (ok) {
     await loadFromSupabase();
@@ -1544,7 +1544,7 @@ async function saveDbConfig() {
   }
 }
 
-// ── Offline queue ─────────────────────────────────────────────────────────────
+// â”€â”€ Offline queue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadQueue() {
   try { syncQueue = JSON.parse(localStorage.getItem('_sb_queue'))||[]; } catch { syncQueue=[]; }
 }
@@ -1559,7 +1559,7 @@ function enqueue(op) {
 }
 async function flushQueue() {
   if (!sbConnected || syncQueue.length===0) return;
-  setConnStatus('syncing','◌  Syncing '+syncQueue.length+' change'+( syncQueue.length!==1?'s':'')+'...');
+  setConnStatus('syncing','â—Œ  Syncing '+syncQueue.length+' change'+( syncQueue.length!==1?'s':'')+'...');
   const failed = [];
   for (const op of syncQueue) {
     try {
@@ -1577,11 +1577,11 @@ async function flushQueue() {
   syncQueue = failed;
   persistQueue();
   setQueueBadge(syncQueue.length);
-  if (failed.length===0) setConnStatus('ok','●  Synced — '+new Date().toLocaleTimeString());
-  else setConnStatus('error','✕  '+failed.length+' changes failed to sync');
+  if (failed.length===0) setConnStatus('ok','â—  Synced â€” '+new Date().toLocaleTimeString());
+  else setConnStatus('error','âœ•  '+failed.length+' changes failed to sync');
 }
 
-// ── Upsert helpers ────────────────────────────────────────────────────────────
+// â”€â”€ Upsert helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function sbUpsert(table, row) {
   // Always write to localStorage cache immediately
   cacheWrite(table, row);
@@ -1595,7 +1595,7 @@ async function sbDelete(table, id) {
   if (sbConnected) await flushQueue();
 }
 
-// ── localStorage cache helpers ────────────────────────────────────────────────
+// â”€â”€ localStorage cache helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CACHE = {
   docs:'_cache_docs', dates:'_cache_dates', tasks:'_cache_tasks',
   contacts:'_cache_contacts', questions:'_cache_questions', settings:'_cache_settings'
@@ -1617,10 +1617,10 @@ function cacheWriteAll(table, rows) {
   localStorage.setItem(CACHE[table], JSON.stringify(rows));
 }
 
-// ── Load all data (Supabase first, fall back to cache) ────────────────────────
+// â”€â”€ Load all data (Supabase first, fall back to cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadFromSupabase() {
   if (!sbConnected) return false;
-  setConnStatus('syncing','◌  Loading data...');
+  setConnStatus('syncing','â—Œ  Loading data...');
   try {
     const [docsR, datesR, tasksR, contactsR, questionsR, settingsR, fixturesR] = await Promise.all([
       sb.from('docs').select('*'),
@@ -1667,10 +1667,10 @@ async function loadFromSupabase() {
     localStorage.setItem('_cache_fixtures', JSON.stringify(fixtures.map(fixtureToRow)));
 
     docs.forEach(d=>{ if(d.supplier&&!suppliers.includes(d.supplier)) suppliers.push(d.supplier); });
-    setConnStatus('ok','●  Connected to Supabase');
+    setConnStatus('ok','â—  Connected to Supabase');
     return true;
   } catch(e) {
-    setConnStatus('error','✕  Load failed: '+e.message+' — using local cache');
+    setConnStatus('error','âœ•  Load failed: '+e.message+' â€” using local cache');
     return false;
   }
 }
@@ -1689,7 +1689,7 @@ async function sbSaveSetting(key, value) {
   localStorage.setItem('_cache_setting_'+key, JSON.stringify(value));
 }
 
-// ── loadAll: load from cache immediately, then refresh from Supabase ──────────
+// â”€â”€ loadAll: load from cache immediately, then refresh from Supabase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function loadAll() {
   // Load from localStorage cache for instant startup
   const cachedDocs = cacheReadAll('docs');
@@ -1725,7 +1725,7 @@ function loadAll() {
   docs.forEach(d=>{ if(d.supplier&&!suppliers.includes(d.supplier)) suppliers.push(d.supplier); });
 }
 
-// ── saveAll: write to cache + enqueue Supabase sync ──────────────────────────
+// â”€â”€ saveAll: write to cache + enqueue Supabase sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function saveAll() {
   // 1) Always write to old localStorage keys so offline works perfectly
   localStorage.setItem(DOCS_KEY,      JSON.stringify(docs));
@@ -1749,13 +1749,13 @@ function saveAll() {
   syncToSupabase();
 }
 
-// Debounced full sync — avoids hammering Supabase on rapid saves
+// Debounced full sync â€” avoids hammering Supabase on rapid saves
 let _syncTimer = null;
 function syncToSupabase() {
   clearTimeout(_syncTimer);
   _syncTimer = setTimeout(async () => {
     if (!sbConnected) return;
-    setConnStatus('syncing','◌  Saving...');
+    setConnStatus('syncing','â—Œ  Saving...');
     try {
       await Promise.all([
         sb.from('docs').upsert(docs.map(docToRow), {onConflict:'id'}),
@@ -1771,11 +1771,11 @@ function syncToSupabase() {
         {key:'systems',   value:systems},
         ], {onConflict:'key'}),
       ]);
-      // Prune deleted rows — delete any Supabase rows not in current arrays
+      // Prune deleted rows â€” delete any Supabase rows not in current arrays
       await pruneDeleted();
-      setConnStatus('ok','●  Saved — '+new Date().toLocaleTimeString());
+      setConnStatus('ok','â—  Saved â€” '+new Date().toLocaleTimeString());
     } catch(e) {
-      setConnStatus('error','✕  Save error: '+e.message);
+      setConnStatus('error','âœ•  Save error: '+e.message);
     }
   }, 800); // 800ms debounce
 }
@@ -1813,12 +1813,12 @@ function renderAll() {
   }
 }
 
-// seedContactsFromDocs removed — contacts now use explicit supplier field
+// seedContactsFromDocs removed â€” contacts now use explicit supplier field
 
 function seedContacts() {
   contacts = [
     // YOUR TEAM
-    { id:'ct-luke', name:'Luke Robinson', company:'', supplier:'', role:'Owner Builder', trade:'', mobile:'0400 008 097', phone:'', email:'luke.robinson4@gmail.com', address:'128 Dairy Creek Road, Gundaroo NSW 2620', abn:'', licence:'', notes:'Owner builder — primary contact for project. Completing OB course.' },
+    { id:'ct-luke', name:'Luke Robinson', company:'', supplier:'', role:'Owner Builder', trade:'', mobile:'0400 008 097', phone:'', email:'luke.robinson4@gmail.com', address:'128 Dairy Creek Road, Gundaroo NSW 2620', abn:'', licence:'', notes:'Owner builder â€” primary contact for project. Completing OB course.' },
     { id:'ct-sarah', name:'Sarah Isdale', company:'', supplier:'', role:'Owner / Co-applicant', trade:'', mobile:'', phone:'', email:'sarahisdale@hotmail.com', address:'128 Dairy Creek Road, Gundaroo NSW 2620', abn:'', licence:'', notes:'Co-owner and co-applicant on DA. CC\'d on all build correspondence.' },
     { id:'ct-hugh', name:'Hugh Gordon', company:'Hugh Gordon Architects', supplier:'Hugh Gordon Architects', role:'Architect / Project Manager', trade:'Design / Architecture', mobile:'0410 625 701', phone:'', email:'design.hughgordon@gmail.com', address:'', abn:'', licence:'', notes:'Prepared architectural plans for DA. Named Project Manager in wastewater report. NatHERS plans Rev 1, July 2025.' },
 
@@ -1838,17 +1838,17 @@ function seedContacts() {
     { id:'ct-kate', name:'Kate Harris', company:'Harris Environmental Consulting', supplier:'Harris Environmental', role:'Environmental Consultant / Bushfire Assessor', trade:'Other', mobile:'0403 237 072', phone:'(02) 4236 0954', email:'kate@hec.eco', address:'6/1 Memorial Drive, Shellharbour CBD NSW 2529', abn:'54 12 87 40 549', licence:'BPAD L3 26947', notes:'Ref 7445BF bushfire assessment (BAL 19 / BAL 12.5 construction, DA approved) and Ref 7445WW wastewater report (DA approved). Team: Letara Judd BPAD-L2-46804, Sean Harris, Britt Bryant. www.harrisenvironmental.com.au | Info@hec.eco' },
 
     // CERTIFIER
-    { id:'ct-stephen', name:'Stephen Monkhouse', company:'Capital Certifiers Pty Ltd', supplier:'Capital Certifiers', role:'Registered Building Certifier', trade:'Admin / Certification', mobile:'', phone:'(02) 6280 7142', email:'info@capitalcertifiers.com.au', address:'3/66 Maryborough Street, Fyshwick ACT 2609 (PO Box 954)', abn:'', licence:'BDC 2252 / Reg BPB2252', notes:'Signed certification agreement for project. Also on team: Bonnie Monkhouse BDC05099, Brad Monkhouse BDC05189, Phillip Robinson BDC3018, Glen Terry BDC05062, Rohan Kesby BDC05378. Book inspections at www.capitalcertifiers.com.au/inspection-request — 24hr notice required.' },
+    { id:'ct-stephen', name:'Stephen Monkhouse', company:'Capital Certifiers Pty Ltd', supplier:'Capital Certifiers', role:'Registered Building Certifier', trade:'Admin / Certification', mobile:'', phone:'(02) 6280 7142', email:'info@capitalcertifiers.com.au', address:'3/66 Maryborough Street, Fyshwick ACT 2609 (PO Box 954)', abn:'', licence:'BDC 2252 / Reg BPB2252', notes:'Signed certification agreement for project. Also on team: Bonnie Monkhouse BDC05099, Brad Monkhouse BDC05189, Phillip Robinson BDC3018, Glen Terry BDC05062, Rohan Kesby BDC05378. Book inspections at www.capitalcertifiers.com.au/inspection-request â€” 24hr notice required.' },
 
     // NATHERS ASSESSOR
-    { id:'ct-jamie', name:'Jamie Bonnefin', company:'Certified Energy', supplier:'Certified Energy', role:'NatHERS Accredited Assessor', trade:'Design / Architecture', mobile:'', phone:'+61 1300 443', email:'jobs@certifiedenergy.com.au', address:'', abn:'', licence:'Acc 10056 (HERA)', notes:'NatHERS Certificate #HR-CEJ207-02 — Main dwelling 7.0 Stars, 249.7m² conditioned area. Climate Zone 24 Canberra Airport. Generated 07 Jul 2025, Hero 4.1.' },
+    { id:'ct-jamie', name:'Jamie Bonnefin', company:'Certified Energy', supplier:'Certified Energy', role:'NatHERS Accredited Assessor', trade:'Design / Architecture', mobile:'', phone:'+61 1300 443', email:'jobs@certifiedenergy.com.au', address:'', abn:'', licence:'Acc 10056 (HERA)', notes:'NatHERS Certificate #HR-CEJ207-02 â€” Main dwelling 7.0 Stars, 249.7mÂ² conditioned area. Climate Zone 24 Canberra Airport. Generated 07 Jul 2025, Hero 4.1.' },
 
     // COUNCIL
     { id:'ct-council', name:'Ming Chen', company:'Yass Valley Council', supplier:'Yass Valley Council', role:'Council Contact (DA)', trade:'Admin / Certification', mobile:'', phone:'', email:'', address:'Yass Valley Council', abn:'', licence:'', notes:'DA250507 / PAN557463 approved. Lot 1 DP 601915, 128 Dairy Creek Road Gundaroo NSW 2620.' },
   ];
 }
 
-// ─── SEED DATA ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ SEED DATA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function seedDocs() {
   docs = [
     { id:'q1', type:'quote', status:'accepted', supplier:'Rezicast / Pre Cast Homes', trade:'Precast', desc:'Precast licence fee + supply panels both dwellings', docnum:'Q-2025-001', date:'2025-01-15', expiry:'', amount:28121.50, gst:2812.15, notes:'Licence fee paid.', payments:[{id:'p1a',desc:'Licence Fee',amount:28121.50,due:'2025-01-30',paid:'2025-01-28',ref:'INV-001',notes:''}], attachmentName:'', importMethod:'form' },
@@ -1869,7 +1869,7 @@ function seedDates() {
     { id:'d6', title:'Structural Engineering Brief', date:'2026-04-01', endDate:'', type:'design', trade:'Structural', priority:'high', notes:'After geotech results received', source:'manual', sourceDoc:'', done:false, deps:['d1'] },
     { id:'d7', title:'Construction Certificate Application', date:'2026-05-01', endDate:'', type:'permit', trade:'Admin', priority:'med', notes:'After structural engineering complete', source:'manual', sourceDoc:'', done:false, deps:['d5','d6'] },
     { id:'d8', title:'Site Establishment & Earthworks Start', date:'2026-06-01', endDate:'2026-06-30', type:'milestone', trade:'Earthworks', priority:'med', notes:'', source:'manual', sourceDoc:'', done:false, deps:['d7'] },
-    { id:'d9', title:'Precast Panel Delivery — Dwelling 1', date:'2026-08-01', endDate:'', type:'delivery', trade:'Precast', priority:'med', notes:'Rezicast panel delivery schedule TBC', source:'manual', sourceDoc:'', done:false, deps:['d8'] },
+    { id:'d9', title:'Precast Panel Delivery â€” Dwelling 1', date:'2026-08-01', endDate:'', type:'delivery', trade:'Precast', priority:'med', notes:'Rezicast panel delivery schedule TBC', source:'manual', sourceDoc:'', done:false, deps:['d8'] },
     { id:'d10', title:'Frame Inspection', date:'2026-09-15', endDate:'', type:'inspection', trade:'Structural', priority:'med', notes:'Council/private certifier frame inspection', source:'manual', sourceDoc:'', done:false, deps:['d9'] },
   ];
 }
@@ -1888,9 +1888,9 @@ function seedTasks() {
   ];
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
-function fmt(n) { if (n==null) return '—'; return '$'+Number(n).toLocaleString('en-AU',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtD(d) { if (!d) return '—'; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+// â”€â”€â”€ UTILS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function fmt(n) { if (n==null) return 'â€”'; return '$'+Number(n).toLocaleString('en-AU',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtD(d) { if (!d) return 'â€”'; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function today() { return new Date().toISOString().split('T')[0]; }
 function daysUntil(d) { if (!d) return null; return Math.round((new Date(d)-new Date(today()))/86400000); }
 function uid() { return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
@@ -1905,7 +1905,7 @@ function pendingTotal(doc) {
   return (doc.payments||[]).filter(p=>!isPaymentPaid(p)).reduce((s,p)=>s+Number(p.amount),0);
 }
 
-// ─── TRADES & SUPPLIERS ───────────────────────────────────────────────────────
+// â”€â”€â”€ TRADES & SUPPLIERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function tradeOptions(selected) {
   return trades.map(t=>`<option${t===selected?' selected':''}>${t}</option>`).join('');
 }
@@ -1939,7 +1939,7 @@ function autoSaveSupplier(name) {
   }
 }
 
-// ─── SETTINGS ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ SETTINGS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderSettingsLists() {
   renderSettingsTaskCats();
   const usedTrades = new Set(docs.map(d=>d.trade));
@@ -1953,7 +1953,7 @@ function renderSettingsLists() {
         <span style="font-size:13px;">${t}</span>
         <div style="display:flex;align-items:center;gap:8px;">
           ${used ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">in use</span>` : ''}
-          <button class="btn btn-danger btn-sm" ${used?'disabled style="opacity:0.3;cursor:not-allowed;"':''} onclick="removeTrade('${t.replace(/'/g,"\\'")}')">×</button>
+          <button class="btn btn-danger btn-sm" ${used?'disabled style="opacity:0.3;cursor:not-allowed;"':''} onclick="removeTrade('${t.replace(/'/g,"\\'")}')">Ã—</button>
         </div>
       </div>`;
     }).join('') || '<div style="color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:8px 0;">No trades defined</div>';
@@ -1969,7 +1969,7 @@ function renderSettingsLists() {
         <span style="font-size:13px;">${s}</span>
         <div style="display:flex;align-items:center;gap:8px;">
           ${used ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">in use</span>` : ''}
-          <button class="btn btn-danger btn-sm" onclick="removeSupplier('${s.replace(/'/g,"\\'")}')">×</button>
+          <button class="btn btn-danger btn-sm" onclick="removeSupplier('${s.replace(/'/g,"\\'")}')">Ã—</button>
         </div>
       </div>`;
     }).join('') || '<div style="color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:8px 0;">No suppliers yet</div>';
@@ -2044,13 +2044,13 @@ function getCatColor(catId) {
 }
 function getCatLabel(catId) {
   const c = taskCats.find(x=>x.id===catId);
-  return c ? c.label : catId||'—';
+  return c ? c.label : catId||'â€”';
 }
-// Legacy CAT_COLORS — kept for backwards compat, driven from taskCats at runtime
+// Legacy CAT_COLORS â€” kept for backwards compat, driven from taskCats at runtime
 const CAT_COLORS = { payment:'#4caf7d', inspection:'#5b8fcc', admin:'#e07f3a', construction:'#c8a96e', quote:'#9b7fd4', design:'#d4b84a', other:'#7a7875' };
 const PRI_LABELS = { high:'High', med:'Medium', low:'Low' };
 
-// ═══ TABS ═════════════════════════════════════════════════════════════════════
+// â•â•â• TABS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function showTab(name, el) {
   document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
   document.getElementById('tab-'+name).style.display='block';
@@ -2067,7 +2067,7 @@ function showTab(name, el) {
   if(name==='fixtures')  renderFixtures();
 }
 
-// ═══ DASHBOARD ════════════════════════════════════════════════════════════════
+// â•â•â• DASHBOARD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderDashboard() {
   renderTimelineStrip();
   renderTaskStrip();
@@ -2102,18 +2102,18 @@ function renderTimelineStrip() {
   const el = document.getElementById('timeline-strip');
   if (!visible.length) {
     el.innerHTML = '<div style="padding:16px;font-family:var(--mono);font-size:11px;color:var(--text-dim);">' +
-      (all.length ? 'All dates actioned — click "Show Actioned" to view' : 'No upcoming dates — add milestones or extract from documents') + '</div>';
+      (all.length ? 'All dates actioned â€” click "Show Actioned" to view' : 'No upcoming dates â€” add milestones or extract from documents') + '</div>';
     return;
   }
   el.innerHTML = visible.slice(0,20).map(d=>{
     const days = daysUntil(d.date);
     const cls = d.done ? 'future done-item' : days<0?'overdue':days===0?'today':days<14?'soon':'future';
     const col = TYPE_COLORS[d.type]||'#7a7875';
-    const dueText = d.done ? '| ✓ Actioned' : (days==null?'':'| '+(days<0?`${Math.abs(days)}d overdue`:days===0?'Today':`${days}d`));
+    const dueText = d.done ? '| âœ“ Actioned' : (days==null?'':'| '+(days<0?`${Math.abs(days)}d overdue`:days===0?'Today':`${days}d`));
     const dateCol = d.done?'var(--green)':cls==='overdue'?'var(--red)':cls==='today'?'var(--orange)':cls==='soon'?'var(--yellow)':'var(--text-muted)';
     const navAction = d.sourceDoc ? `navigateToDoc('${d.sourceDoc}')` : `navigateToDate('${d.id}')`;
     return `<div class="tl-item ${cls}" onclick="${navAction}" style="cursor:pointer;" title="${(d.notes||d.title).replace(/'/g,'&#39;')}">
-      <button class="tl-done-btn ${d.done?'done':''}" onclick="markDateDone('${d.id}',event)" title="${d.done?'Unmark':'Mark as actioned'}">${d.done?'✓ Done':'Mark Done'}</button>
+      <button class="tl-done-btn ${d.done?'done':''}" onclick="markDateDone('${d.id}',event)" title="${d.done?'Unmark':'Mark as actioned'}">${d.done?'âœ“ Done':'Mark Done'}</button>
       <div class="tl-date" style="color:${dateCol}">${fmtD(d.date)} ${dueText}</div>
       <div class="tl-title">${d.title}</div>
       <div class="tl-source">${d.source==='doc'&&d.sourceDoc?(docs.find(x=>x.id===d.sourceDoc)||{}).supplier||d.trade:d.trade||''}</div>
@@ -2134,7 +2134,7 @@ function renderTaskStrip() {
     const priCol = t.priority==='high'?'var(--red)':t.priority==='med'?'var(--orange)':'var(--blue)';
     const dueStr = t.due?(days<0?`${Math.abs(days)}d overdue`:days===0?'Due today':`${days}d`):'';
     const dueCol = days<0?'var(--red)':days<3?'var(--orange)':'var(--text-dim)';
-    return `<div class="tl-item future" onclick="showTab('tasks',Array.from(document.querySelectorAll('.tab')).find(x=>x.getAttribute('onclick')&&x.getAttribute('onclick').includes("'tasks'")))" style="cursor:pointer;" title="${t.desc||t.title} — click to view tasks">
+    return `<div class="tl-item future" onclick="showTab('tasks',Array.from(document.querySelectorAll('.tab')).find(x=>x.getAttribute('onclick')&&x.getAttribute('onclick').includes("'tasks'")))" style="cursor:pointer;" title="${t.desc||t.title} â€” click to view tasks">
       <div class="tl-date" style="color:${dueCol}">${t.due?fmtD(t.due):''} ${dueStr?'| '+dueStr:''}</div>
       <div class="tl-title" style="display:flex;align-items:center;gap:4px;"><span class="pri-dot pri-${t.priority}"></span>${t.title}</div>
       <div class="tl-source">${t.assign||''}</div>
@@ -2157,8 +2157,8 @@ function renderStats() {
     <div class="stat-card green"><div class="stat-label">Total Paid</div><div class="stat-value green">${fmt(totalPaid)}</div><div class="stat-sub">all documents</div></div>
     <div class="stat-card orange"><div class="stat-label">Payments Pending</div><div class="stat-value orange">${fmt(totalPending)}</div><div class="stat-sub">scheduled not paid</div></div>
     <div class="stat-card purple"><div class="stat-label">Open Tasks</div><div class="stat-value purple">${openTasks}</div><div class="stat-sub">${overdueTasks} overdue</div></div>
-    <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes · ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
-    ${fixturesTotal>0?`<div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} items · ${fmt(fixturesOrdered)} ordered</div></div>`:''}
+    <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes Â· ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
+    ${fixturesTotal>0?`<div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} items Â· ${fmt(fixturesOrdered)} ordered</div></div>`:''}
   `;
 }
 
@@ -2168,7 +2168,7 @@ function renderRecent() {
   if (!recent.length) { el.innerHTML='<div class="empty-state">No documents yet</div>'; return; }
   el.innerHTML = recent.map(d=>`
     <div onclick="navigateToDoc('${d.id}')" style="padding:12px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 110px 120px 100px 80px;gap:12px;align-items:center;cursor:pointer;" onmouseenter="this.style.background='rgba(255,255,255,0.025)'" onmouseleave="this.style.background=''">
-      <div><div class="quote-supplier">${d.supplier} <span style="font-family:var(--mono);font-size:9px;color:var(--accent);opacity:0.7;">↗</span></div><div class="quote-trade">${d.trade} · ${fmtD(d.date)}</div></div>
+      <div><div class="quote-supplier">${d.supplier} <span style="font-family:var(--mono);font-size:9px;color:var(--accent);opacity:0.7;">â†—</span></div><div class="quote-trade">${d.trade} Â· ${fmtD(d.date)}</div></div>
       <div>${typeBadge(d)}</div><div>${statusBadge(d)}</div>
       <div class="quote-amount">${fmt(d.amount)}</div>
       <div class="text-mono" style="font-size:11px;color:${paidTotal(d)>=d.amount?'var(--green)':paidTotal(d)>0?'var(--yellow)':'var(--text-muted)'}">${fmt(paidTotal(d))}</div>
@@ -2216,7 +2216,7 @@ function pendingPaymentRows(doc) {
   // Skip quotes with no payment rows (nothing has been scheduled/committed yet)
   if (!isInvoice && !hasPaymentRows) return [];
 
-  // If total paid >= doc amount, nothing is owed — skip entirely
+  // If total paid >= doc amount, nothing is owed â€” skip entirely
   if (docPaid >= docAmount - 0.005) return [];
   // Skip docs explicitly marked paid at the doc level
   if (doc.status === 'paid' && docPaid >= docAmount - 0.005) return [];
@@ -2225,7 +2225,7 @@ function pendingPaymentRows(doc) {
   const payments = doc.payments || [];
 
   if (payments.length === 0) {
-    // Invoice with no payment rows — show full outstanding balance
+    // Invoice with no payment rows â€” show full outstanding balance
     rows.push({
       id: 'syn-' + doc.id,
       desc: 'Invoice balance outstanding',
@@ -2276,8 +2276,8 @@ function renderUpcoming() {
     return `<div class="upcoming-item" ${navFn?`onclick="${navFn}" style="cursor:pointer;" title="Click to open in Documents"`:''}>
       <div class="upcoming-dot ${cls}"></div>
       <div>
-        <div style="font-size:13px;font-weight:500;">${p.supplier}${partialTag}${synTag}${p.docId?` <span style="font-family:var(--mono);font-size:9px;color:var(--accent);">↗</span>`:''}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${p.desc} · ${p.trade}</div>
+        <div style="font-size:13px;font-weight:500;">${p.supplier}${partialTag}${synTag}${p.docId?` <span style="font-family:var(--mono);font-size:9px;color:var(--accent);">â†—</span>`:''}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${p.desc} Â· ${p.trade}</div>
       </div>
       <div style="text-align:right;"><div style="font-family:var(--mono);font-size:13px;">${fmt(p.amount)}</div><span style="font-family:var(--mono);font-size:10px;" class="text-${cls==='overdue'?'red':cls==='soon'?'orange':'muted'}">${dueText}</span></div>
     </div>`;
@@ -2297,7 +2297,7 @@ function renderCatSummary() {
   }).join('');
 }
 
-// ═══ TASKS ════════════════════════════════════════════════════════════════════
+// â•â•â• TASKS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let currentTaskFilter2 = 'all';
 
 function setTaskFilter(f,el) {
@@ -2329,7 +2329,7 @@ function renderTasks() {
 
   const el = document.getElementById('tasks-list');
   let html = '';
-  if (overdue.length) html += taskGroup('⚠ Overdue', overdue, 'var(--red)');
+  if (overdue.length) html += taskGroup('âš  Overdue', overdue, 'var(--red)');
   if (highOpen.length) html += taskGroup('High Priority', highOpen, 'var(--orange)');
   if (medOpen.length) html += taskGroup('Medium Priority', medOpen, 'var(--blue)');
   if (lowOpen.length) html += taskGroup('Low Priority', lowOpen, 'var(--text-dim)');
@@ -2351,7 +2351,7 @@ function taskGroup(label, items, color) {
       const catCol = getCatColor(t.cat);
       const catLabel = getCatLabel(t.cat);
       return `<div class="task-item">
-        <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'✓':''}</div>
+        <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'âœ“':''}</div>
         <div>
           <div class="flex gap8 items-center" style="flex-wrap:wrap;margin-bottom:3px;">
             <span class="task-title ${t.done?'done-text':''}">${t.title}</span>
@@ -2359,22 +2359,22 @@ function taskGroup(label, items, color) {
           <div class="task-meta">
             <span class="task-category-badge" style="border-color:${catCol};color:${catCol}">${catLabel}</span>
             <span class="task-status-${t.status||'open'}">${(t.status||'open').toUpperCase()}</span>
-            ${(()=>{ const lc=contacts.find(x=>x.id===t.linkedContact); return lc?`<span style="font-family:var(--mono);font-size:9px;color:var(--purple);border:1px solid var(--purple);padding:1px 5px;">👤 ${lc.name}</span>`:''; })()}
-            ${t.assign?`<span style="color:var(--text-muted)">@${t.assign}</span> ·`:''} 
+            ${(()=>{ const lc=contacts.find(x=>x.id===t.linkedContact); return lc?`<span style="font-family:var(--mono);font-size:9px;color:var(--purple);border:1px solid var(--purple);padding:1px 5px;">ðŸ‘¤ ${lc.name}</span>`:''; })()}
+            ${t.assign?`<span style="color:var(--text-muted)">@${t.assign}</span> Â·`:''} 
             ${t.due?`<span style="color:${dueCol}">${dueStr}</span>`:'<span>No due date</span>'}
-            ${linked?` · <span style="color:var(--text-dim)">${linked.supplier}</span>`:''}
+            ${linked?` Â· <span style="color:var(--text-dim)">${linked.supplier}</span>`:''}
           </div>
           ${t.desc?`<div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${t.desc}</div>`:''}
-          ${t.closureNote&&t.status==='closed'?`<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;border-left:2px solid var(--green);background:rgba(76,175,125,0.07);">✓ ${t.closureNote}</div>`:''}
+          ${t.closureNote&&t.status==='closed'?`<div style="font-size:11px;color:var(--green);margin-top:4px;padding:4px 8px;border-left:2px solid var(--green);background:rgba(76,175,125,0.07);">âœ“ ${t.closureNote}</div>`:''}
         </div>
         <div class="task-actions">
-          <button class="btn btn-ghost btn-sm" onclick="openEditTaskModal('${t.id}')">✎</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteItem('${t.id}','task')">×</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditTaskModal('${t.id}')">âœŽ</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem('${t.id}','task')">Ã—</button>
         </div>
       </div>
       ${(t.subtasks||[]).length?`<div style="margin-left:36px;margin-top:6px;">
         ${t.subtasks.map(s=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:var(--text-muted);">
-          <span onclick="toggleSubtask('${t.id}','${s.id}')" style="cursor:pointer;width:14px;height:14px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:10px;background:${s.done?'var(--green)':'transparent'};color:${s.done?'var(--bg)':'inherit'};flex-shrink:0;">${s.done?'✓':''}</span>
+          <span onclick="toggleSubtask('${t.id}','${s.id}')" style="cursor:pointer;width:14px;height:14px;border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:10px;background:${s.done?'var(--green)':'transparent'};color:${s.done?'var(--bg)':'inherit'};flex-shrink:0;">${s.done?'âœ“':''}</span>
           <span style="${s.done?'text-decoration:line-through;opacity:0.5;':''}">${s.title}</span>
           ${s.due?`<span style="font-family:var(--mono);font-size:10px;color:${daysUntil(s.due)<0?'var(--red)':'var(--text-dim)'};">${fmtD(s.due)}</span>`:''}
         </div>`).join('')}
@@ -2387,7 +2387,7 @@ function toggleTask(id) {
   const t = tasks.find(x=>x.id===id);
   if (!t) return;
   if (!t.done) {
-    // Ticking done via checkbox — prompt for closure note if not already set
+    // Ticking done via checkbox â€” prompt for closure note if not already set
     const note = t.closureNote || prompt('Closure note (what was done?):');
     if (note === null) return; // user cancelled
     t.closureNote = note||'';
@@ -2433,14 +2433,14 @@ function renderTaskUrgent() {
     return `<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;">
       <div>
         <div style="display:flex;align-items:center;gap:6px;"><span class="pri-dot pri-${t.priority}"></span><span style="font-size:12px;font-weight:500;">${t.title}</span></div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-top:2px;">${t.assign||''} · ${t.cat}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-top:2px;">${t.assign||''} Â· ${t.cat}</div>
       </div>
       <div style="font-family:var(--mono);font-size:10px;color:${col};white-space:nowrap;">${dueStr}</div>
     </div>`;
   }).join('');
 }
 
-// ═══ GANTT ════════════════════════════════════════════════════════════════════
+// â•â•â• GANTT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setGanttRange(n) { ganttMonths=n; renderGantt(); }
 function setGanttFilter(f,el) {
   ganttFilter=f;
@@ -2477,7 +2477,7 @@ function renderGantt() {
       (d.payments||[]).filter(p=>!p.paid&&p.due).forEach(p=>{
         // Only add if not already in dates
         if (!dates.find(dt=>dt.sourceDoc===d.id && dt.type==='payment' && dt.date===p.due && dt.title.includes(p.desc))) {
-          items.push({ id:'pay_'+p.id, title:`${d.supplier} — ${p.desc}`, date:p.due, endDate:'', type:'payment', trade:d.trade, priority:'med', notes:fmt(p.amount)+' due', source:'doc', sourceDoc:d.id, done:false, deps:[] });
+          items.push({ id:'pay_'+p.id, title:`${d.supplier} â€” ${p.desc}`, date:p.due, endDate:'', type:'payment', trade:d.trade, priority:'med', notes:fmt(p.amount)+' due', source:'doc', sourceDoc:d.id, done:false, deps:[] });
         }
       });
     });
@@ -2498,13 +2498,13 @@ function renderGantt() {
 
   const todayIdx = days.findIndex(d=>d.toISOString().split('T')[0]===todayStr);
 
-  // Map item id → row index for dependency arrows
+  // Map item id â†’ row index for dependency arrows
   const rowIndex = {};
   allItems.forEach((item,i) => { rowIndex[item.id] = i; });
 
   let html = `<div style="width:${totalW}px;position:relative;">`;
 
-  // ── MONTH HEADER ──
+  // â”€â”€ MONTH HEADER â”€â”€
   html += `<div style="display:flex;position:sticky;top:0;z-index:20;background:var(--surface);">
     <div style="min-width:${LABEL_W}px;padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--text-dim);border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:25;background:var(--surface);">ITEM</div>
     <div style="display:flex;flex:1;">
@@ -2512,7 +2512,7 @@ function renderGantt() {
     </div>
   </div>`;
 
-  // ── DAY NUMBERS ──
+  // â”€â”€ DAY NUMBERS â”€â”€
   html += `<div style="display:flex;position:sticky;top:28px;z-index:20;background:var(--surface);border-bottom:2px solid var(--border);">
     <div style="min-width:${LABEL_W}px;border-right:1px solid var(--border);position:sticky;left:0;z-index:25;background:var(--surface);"></div>
     ${days.map((d,i)=>{
@@ -2521,12 +2521,12 @@ function renderGantt() {
     }).join('')}
   </div>`;
 
-  // ── ROWS ──
+  // â”€â”€ ROWS â”€â”€
   if (!allItems.length) {
     html += `<div style="padding:40px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text-dim);">No items in this date range. Add milestones or extract dates from documents.</div>`;
   } else {
     // Collect bar positions for SVG arrow rendering
-    const barPositions = {}; // id → {x, y, w, isMilestone}
+    const barPositions = {}; // id â†’ {x, y, w, isMilestone}
     const HEADER_H = 28 + 28; // month + day rows
 
     allItems.forEach((item, rowIdx) => {
@@ -2552,13 +2552,13 @@ function renderGantt() {
       html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(32,34,36,0.98)'" onmouseleave="this.style.background='transparent';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
         <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
           <div style="display:flex;align-items:center;gap:5px;">
-            ${item.done?`<span style="color:var(--green);font-size:10px;">✓</span>`:''}
-            ${depCount>0?`<span title="${depCount} dependenc${depCount===1?'y':'ies'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;">⬡${depCount}</span>`:''}
+            ${item.done?`<span style="color:var(--green);font-size:10px;">âœ“</span>`:''}
+            ${depCount>0?`<span title="${depCount} dependenc${depCount===1?'y':'ies'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;">â¬¡${depCount}</span>`:''}
             <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${item.title}</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
             <span style="font-family:var(--mono);font-size:9px;color:${col};">${item.type}</span>
-            ${item.trade?`<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.trade}</span>`:''}
+            ${item.trade?`<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">Â· ${item.trade}</span>`:''}
           </div>
         </div>
         <div style="flex:1;position:relative;">
@@ -2576,7 +2576,7 @@ function renderGantt() {
       </div>`;
     });
 
-    // ── SVG DEPENDENCY ARROWS ──
+    // â”€â”€ SVG DEPENDENCY ARROWS â”€â”€
     if (showDeps) {
       const svgH = allItems.length * ROW_H + HEADER_H + 20;
       let svgLines = '';
@@ -2586,7 +2586,7 @@ function renderGantt() {
           const from = barPositions[depId];
           const to   = barPositions[item.id];
           if (!from || !to) return;
-          // Arrow: from right edge of dependency → left edge of dependent
+          // Arrow: from right edge of dependency â†’ left edge of dependent
           const x1 = LABEL_W + from.rightX;
           const y1 = from.y;
           const x2 = LABEL_W + to.x - (to.isMilestone ? 8 : 4);
@@ -2633,14 +2633,14 @@ function openGanttItemMenu(itemId) {
   const item = dates.find(d=>d.id===itemId);
   if (!item) return;
   // Toggle done state on click for quick marking
-  // Could open a modal — for now just toggle done and re-render
+  // Could open a modal â€” for now just toggle done and re-render
   item.done = !item.done;
   saveAll();
   renderGantt();
   renderDashboard();
 }
 
-// ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
+// â•â•â• DOCUMENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderQuotes() {
   const filtered = docs.filter(d=>{
     const mf = currentFilter==='all'||d.status===currentFilter||d.type===currentFilter;
@@ -2655,11 +2655,11 @@ function renderQuotes() {
     const expClass=d.expiry&&daysUntil(d.expiry)<14?'text-orange':'text-muted';
     return `<div class="quote-item" id="qi-${d.id}">
       <div class="quote-row" onclick="toggleExpand('${d.id}')">
-        <div class="quote-expand-btn">▶</div>
+        <div class="quote-expand-btn">â–¶</div>
         <div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <span class="quote-supplier">${d.supplier}</span>${typeBadge(d)} ${statusBadge(d)}
-            ${d.attachmentName?`<span class="badge" style="border-color:var(--text-dim);color:var(--text-dim)">📎</span>`:''}
+            ${d.attachmentName?`<span class="badge" style="border-color:var(--text-dim);color:var(--text-dim)">ðŸ“Ž</span>`:''}
           </div>
           <div style="display:flex;gap:12px;margin-top:3px;flex-wrap:wrap;">
             <span class="quote-trade">${d.trade}</span>
@@ -2675,14 +2675,14 @@ function renderQuotes() {
         </div>
         <div style="text-align:right;">
           <div style="font-family:var(--mono);font-size:11px;${pct>=100?'color:var(--green);font-weight:600;':pct>0?'color:var(--yellow);':'color:var(--text-muted);'}">
-            ${pct>=100?'✓ ':pct>0?'◑ ':''}${fmt(paid)}
+            ${pct>=100?'âœ“ ':pct>0?'â—‘ ':''}${fmt(paid)}
           </div>
           <div class="pay-bar-wrap mt8"><div class="pay-bar"><div class="pay-bar-fill" style="width:${pct}%;${pct>=100?'background:var(--green);':pct>0?'background:var(--yellow);':''}"></div></div>
           <span class="pay-pct" style="${pct>=100?'color:var(--green);':pct>0?'color:var(--yellow);':''}">${pct}%</span></div>
         </div>
         <div style="display:flex;gap:4px;justify-content:flex-end;" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">✎ Edit</button>
-          <button class="btn btn-blue btn-sm" onclick="openExtractSingle('${d.id}')">📅</button>
+          <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">âœŽ Edit</button>
+          <button class="btn btn-blue btn-sm" onclick="openExtractSingle('${d.id}')">ðŸ“…</button>
           <button class="btn btn-danger btn-sm" onclick="deleteItem('${d.id}','doc')">Del</button>
         </div>
       </div>
@@ -2701,21 +2701,21 @@ function renderPaymentsPanel(d) {
         const isFullPaid = p.paid && (!p.paidAmount || Number(p.paidAmount)>=Number(p.amount));
         const isPartial  = p.paid && p.paidAmount && Number(p.paidAmount)<Number(p.amount);
         const statusEl   = isFullPaid
-          ? `<span class="badge badge-paid" style="background:rgba(76,175,125,0.15);border-color:var(--green);color:var(--green);">✓ Paid ${fmtD(p.paid)}</span>`
+          ? `<span class="badge badge-paid" style="background:rgba(76,175,125,0.15);border-color:var(--green);color:var(--green);">âœ“ Paid ${fmtD(p.paid)}</span>`
           : isPartial
-          ? `<span class="badge" style="background:rgba(212,184,74,0.15);border-color:var(--yellow);color:var(--yellow);">◑ Partial ${fmtD(p.paid)}</span>`
+          ? `<span class="badge" style="background:rgba(212,184,74,0.15);border-color:var(--yellow);color:var(--yellow);">â—‘ Partial ${fmtD(p.paid)}</span>`
           : `<span class="badge badge-quote">Pending</span>`;
-        const confText = [p.ref, p.bank?'🏦 '+p.bank:'', p.bsb?'BSB '+p.bsb:'', p.acc?'Acc '+p.acc:''].filter(Boolean).join(' · ');
+        const confText = [p.ref, p.bank?'ðŸ¦ '+p.bank:'', p.bsb?'BSB '+p.bsb:'', p.acc?'Acc '+p.acc:''].filter(Boolean).join(' Â· ');
         return `<div class="payment-row">
           <div>${p.desc}${p.notes?`<small style="display:block;font-family:var(--mono);font-size:10px;color:var(--text-muted)">${p.notes}</small>`:''}</div>
           <div style="font-family:var(--mono)">${fmt(p.amount)}${isPartial?`<small style="display:block;color:var(--yellow)">Paid: ${fmt(p.paidAmount)}</small>`:''}${p.gst?`<small style="display:block;color:var(--text-dim)">+GST ${fmt(p.gst)}</small>`:''}</div>
           <div style="font-family:var(--mono);font-size:11px;">${fmtD(p.due)}</div>
           <div>${statusEl}</div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">
-            ${confText ? `<span title="${confText}">${confText.slice(0,50)}${confText.length>50?'…':''}</span>` : '<span style="color:var(--text-dim)">—</span>'}
-            ${p.txn?`<span style="display:block;font-size:9px;color:var(--text-dim);margin-top:2px;" title="${p.txn}">📝 ${p.txn.slice(0,40)}${p.txn.length>40?'…':''}</span>`:''}
+            ${confText ? `<span title="${confText}">${confText.slice(0,50)}${confText.length>50?'â€¦':''}</span>` : '<span style="color:var(--text-dim)">â€”</span>'}
+            ${p.txn?`<span style="display:block;font-size:9px;color:var(--text-dim);margin-top:2px;" title="${p.txn}">ðŸ“ ${p.txn.slice(0,40)}${p.txn.length>40?'â€¦':''}</span>`:''}
           </div>
-          <div style="display:flex;gap:4px;">${!p.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${d.id}','${p.id}')">✓ Paid</button>`:''}<button class="btn btn-ghost btn-sm" onclick="openEditPayment('${d.id}','${p.id}')">✎</button><button class="btn btn-danger btn-sm" onclick="delPayment('${d.id}','${p.id}')">×</button></div>
+          <div style="display:flex;gap:4px;">${!p.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${d.id}','${p.id}')">âœ“ Paid</button>`:''}<button class="btn btn-ghost btn-sm" onclick="openEditPayment('${d.id}','${p.id}')">âœŽ</button><button class="btn btn-danger btn-sm" onclick="delPayment('${d.id}','${p.id}')">Ã—</button></div>
         </div>`;
       }).join('');
   } else { rows='<div style="padding:12px 0;font-family:var(--mono);font-size:11px;color:var(--text-dim)">No payments recorded</div>'; }
@@ -2731,16 +2731,16 @@ function renderPaymentsPanel(d) {
     </div>
     <div class="payments-actions">
       <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${d.id}')">+ Add Payment</button>
-      <button class="btn btn-ghost btn-sm" onclick="addFileToDoc('${d.id}')">📎 Add File</button>
-      <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">✎ Edit Document</button>
-      <button class="btn btn-blue btn-sm" onclick="openExtractSingle('${d.id}')">📅 Extract Dates</button>
-      ${d.status==='pending'&&d.type==='quote'?`<button class="btn btn-green btn-sm" onclick="acceptDoc('${d.id}')">✓ Accept</button><button class="btn btn-danger btn-sm" onclick="rejectDoc('${d.id}')">✗ Reject</button>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="addFileToDoc('${d.id}')">ðŸ“Ž Add File</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">âœŽ Edit Document</button>
+      <button class="btn btn-blue btn-sm" onclick="openExtractSingle('${d.id}')">ðŸ“… Extract Dates</button>
+      ${d.status==='pending'&&d.type==='quote'?`<button class="btn btn-green btn-sm" onclick="acceptDoc('${d.id}')">âœ“ Accept</button><button class="btn btn-danger btn-sm" onclick="rejectDoc('${d.id}')">âœ— Reject</button>`:''}
     </div>
     ${d.bankDetails&&(d.bankDetails.bank||d.bankDetails.bsb)?`
     <div style="margin-top:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-muted);display:flex;gap:16px;flex-wrap:wrap;align-items:center;">
       <span style="color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:1px;">Payment Details</span>
       ${d.bankDetails.accName?`<span>${d.bankDetails.accName}</span>`:''}
-      ${d.bankDetails.bank?`<span>🏦 ${d.bankDetails.bank}</span>`:''}
+      ${d.bankDetails.bank?`<span>ðŸ¦ ${d.bankDetails.bank}</span>`:''}
       ${d.bankDetails.bsb?`<span>BSB: ${d.bankDetails.bsb}</span>`:''}
       ${d.bankDetails.acc?`<span>Acc: ${d.bankDetails.acc}</span>`:''}
     </div>`:''}
@@ -2748,10 +2748,10 @@ function renderPaymentsPanel(d) {
     <div style="margin-top:10px;">
       <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:6px;">Attached Files / Correspondence</div>
       ${(d.files||[]).map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg);border:1px solid var(--border);margin-bottom:3px;font-size:12px;">
-        <span style="font-family:var(--mono);">📎 ${f.name}</span>
+        <span style="font-family:var(--mono);">ðŸ“Ž ${f.name}</span>
         ${f.desc?`<span style="color:var(--text-muted)">${f.desc}</span>`:''}
         <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-dim)">${fmtD(f.added)}</span>
-        <button class="btn btn-danger btn-sm" onclick="removeFileFromDoc('${d.id}','${f.id}')">×</button>
+        <button class="btn btn-danger btn-sm" onclick="removeFileFromDoc('${d.id}','${f.id}')">Ã—</button>
       </div>`).join('')}
     </div>`:''}`;
 
@@ -2779,7 +2779,7 @@ function refreshPanel(docId) {
     const paidEl = rowEl.children[4];
     if (paidEl) {
       const paidColor = pct>=100?'var(--green)':pct>0?'var(--yellow)':'var(--text-muted)';
-      const paidIcon  = pct>=100?'✓ ':pct>0?'◑ ':'';
+      const paidIcon  = pct>=100?'âœ“ ':pct>0?'â—‘ ':'';
       const barColor  = pct>=100?'background:var(--green);':pct>0?'background:var(--yellow);':'';
       paidEl.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:${paidColor};">${paidIcon}${fmt(paid)}</div><div class="pay-bar-wrap mt8"><div class="pay-bar"><div class="pay-bar-fill" style="width:${pct}%;${barColor}"></div></div><span class="pay-pct" style="color:${paidColor}">${pct}%</span></div>`;
     }
@@ -2797,21 +2797,21 @@ function delPayment(docId,payId) {
   if(d){ d.payments=(d.payments||[]).filter(x=>x.id!==payId); saveAll(); refreshPanel(docId); }
 }
 
-// ═══ EXTRACT DATES ════════════════════════════════════════════════════════════
+// â•â•â• EXTRACT DATES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function extractDatesFromDoc(doc) {
   const items = [];
   // Quote expiry
   if (doc.expiry) {
-    items.push({ title:`${doc.supplier} — Quote Expires`, date:doc.expiry, type:'milestone', trade:doc.trade, priority:'high', notes:`Quote ${doc.docnum||''} expiry date`, sourceDoc:doc.id });
+    items.push({ title:`${doc.supplier} â€” Quote Expires`, date:doc.expiry, type:'milestone', trade:doc.trade, priority:'high', notes:`Quote ${doc.docnum||''} expiry date`, sourceDoc:doc.id });
   }
   // Pending payments
   (doc.payments||[]).filter(p=>!p.paid&&p.due).forEach(p=>{
-    items.push({ title:`${doc.supplier} — ${p.desc}`, date:p.due, type:'payment', trade:doc.trade, priority:'med', notes:fmt(p.amount)+(p.ref?' Ref: '+p.ref:''), sourceDoc:doc.id });
+    items.push({ title:`${doc.supplier} â€” ${p.desc}`, date:p.due, type:'payment', trade:doc.trade, priority:'med', notes:fmt(p.amount)+(p.ref?' Ref: '+p.ref:''), sourceDoc:doc.id });
   });
   // Document date
   if (doc.date) {
-    items.push({ title:`${doc.supplier} — ${doc.type==='invoice'?'Invoice issued':'Quote issued'}`, date:doc.date, type:'milestone', trade:doc.trade, priority:'low', notes:doc.desc||'', sourceDoc:doc.id });
+    items.push({ title:`${doc.supplier} â€” ${doc.type==='invoice'?'Invoice issued':'Quote issued'}`, date:doc.date, type:'milestone', trade:doc.trade, priority:'low', notes:doc.desc||'', sourceDoc:doc.id });
   }
   return items;
 }
@@ -2842,7 +2842,7 @@ function openExtractModal() {
             ${item.alreadyAdded?`<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">already added</span>`:''}
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${fmtD(item.date)} ${dueStr?'· '+dueStr:''}</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${fmtD(item.date)} ${dueStr?'Â· '+dueStr:''}</span>
             <span class="tl-badge" style="border-color:${col};color:${col}">${item.type}</span>
             ${item.trade?`<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">${item.trade}</span>`:''}
           </div>
@@ -2899,7 +2899,7 @@ function importExtracted() {
   renderGantt();
 }
 
-// ═══ SAVE DATE/MILESTONE ══════════════════════════════════════════════════════
+// â•â•â• SAVE DATE/MILESTONE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function openDateModal() {
   document.getElementById('dm-date').value = today();
   document.getElementById('dm-end-date').value = '';
@@ -2941,11 +2941,11 @@ function saveDateItem() {
   renderTasks();
 }
 
-// ═══ SAVE TASK ════════════════════════════════════════════════════════════════
+// â•â•â• SAVE TASK â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function openModal(id) {
   if (id==='task-modal') {
-    const opts = docs.map(d=>`<option value="${d.id}">${d.supplier} — ${d.trade}</option>`).join('');
-    document.getElementById('t-linked-doc').innerHTML = '<option value="">— None —</option>'+opts;
+    const opts = docs.map(d=>`<option value="${d.id}">${d.supplier} â€” ${d.trade}</option>`).join('');
+    document.getElementById('t-linked-doc').innerHTML = '<option value="">â€” None â€”</option>'+opts;
     document.getElementById('t-due').value = '';
     document.getElementById('t-title').value = '';
     document.getElementById('t-desc').value = '';
@@ -2968,7 +2968,7 @@ function openModal(id) {
 }
 
 
-// ═══ TASK CATEGORIES ══════════════════════════════════════════════════════════
+// â•â•â• TASK CATEGORIES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function refreshTaskCatSelects(selectedCat) {
   const opts = taskCats.map(c =>
@@ -2993,8 +2993,8 @@ function renderSettingsTaskCats() {
       <span style="flex:1;font-size:12px;color:${c.color};font-weight:500;">${c.label}</span>
       ${used ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">in use</span>` : ''}
       <button class="btn btn-danger btn-sm" style="padding:1px 6px;"
-        ${used?'disabled title="In use — cannot delete"':''}
-        onclick="removeTaskCat('${c.id}')">×</button>
+        ${used?'disabled title="In use â€” cannot delete"':''}
+        onclick="removeTaskCat('${c.id}')">Ã—</button>
     </div>`;
   }).join('') || '<div style="color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:8px 0;">No categories defined</div>';
 }
@@ -3029,7 +3029,7 @@ function updateTaskCatColor(id, color) {
   if (c) { c.color = color; saveAll(); renderTasks(); }
 }
 
-// ─── Task status ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Task status â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function onTaskStatusChange(prefix) {
   const status = document.getElementById(prefix+'-status').value;
   const row    = document.getElementById(prefix+'-closure-row');
@@ -3071,7 +3071,7 @@ function saveTask() {
   renderDashboard();
 }
 
-// ═══ PAYMENTS ════════════════════════════════════════════════════════════════
+// â•â•â• PAYMENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderPayments() {
   // Build paid list from all docs' payment records
   const paid = [];
@@ -3088,20 +3088,20 @@ function renderPayments() {
 
   const allEl=document.getElementById('all-payments-list');
   allEl.innerHTML=`
-    <div style="padding:8px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;">Paid — ${paid.length}</div>
+    <div style="padding:8px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;">Paid â€” ${paid.length}</div>
     ${paid.map(p=>`<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 120px 80px;gap:8px;align-items:center;">
-      <div><div style="font-size:13px;font-weight:500;">${p.supplier}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${p.desc||''} · ${p.trade}</div></div>
+      <div><div style="font-size:13px;font-weight:500;">${p.supplier}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${p.desc||''} Â· ${p.trade}</div></div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--text-muted)">${fmtD(p.paid)}</div>
       <div style="font-family:var(--mono);text-align:right;color:var(--green)">${fmt(p.displayAmount)}</div>
     </div>`).join('')||'<div class="empty-state">No payments yet</div>'}
-    <div style="padding:8px 16px;border-bottom:1px solid var(--border);margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;">Pending — ${pending.length}</div>
+    <div style="padding:8px 16px;border-bottom:1px solid var(--border);margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;">Pending â€” ${pending.length}</div>
     ${pending.map(p=>{
       const days=daysUntil(p.due); const col=days<0?'var(--red)':days<14?'var(--orange)':'var(--text-muted)';
       const tag = p.partial?'<span style="font-family:var(--mono);font-size:9px;color:var(--yellow);margin-left:4px;">PART</span>':
                   p.synthetic?'<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-left:4px;">BAL</span>':'';
       return`<div style="padding:10px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 120px 80px;gap:8px;align-items:center;">
-        <div><div style="font-size:13px;font-weight:500">${p.supplier}${tag}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${p.desc||''} · ${p.trade}</div></div>
-        <div style="font-family:var(--mono);font-size:11px;color:${col}">${p.due?fmtD(p.due):'—'}</div>
+        <div><div style="font-size:13px;font-weight:500">${p.supplier}${tag}</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-muted)">${p.desc||''} Â· ${p.trade}</div></div>
+        <div style="font-family:var(--mono);font-size:11px;color:${col}">${p.due?fmtD(p.due):'â€”'}</div>
         <div style="font-family:var(--mono);text-align:right;color:var(--orange)">${fmt(p.amount)}</div>
       </div>`;
     }).join('')||'<div class="empty-state">No pending payments</div>'}
@@ -3121,7 +3121,7 @@ function renderPayments() {
   </div>`;
 }
 
-// ═══ CATEGORIES ══════════════════════════════════════════════════════════════
+// â•â•â• CATEGORIES â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderCategories() {
   const cats={};
   docs.forEach(d=>{
@@ -3139,7 +3139,7 @@ function renderCategories() {
         <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">${typeBadge(d)} ${statusBadge(d)}</div>
         <div style="min-width:0;overflow:hidden;">
           <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.supplier}</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${fmtD(d.date)}${d.docnum?' · '+d.docnum:''}</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${fmtD(d.date)}${d.docnum?' Â· '+d.docnum:''}</div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
           <div style="font-family:var(--mono);font-size:13px;">${fmt(d.amount)}</div>
@@ -3152,14 +3152,14 @@ function renderCategories() {
   }).join('');
 }
 
-// ═══ SHARED ══════════════════════════════════════════════════════════════════
+// â•â•â• SHARED â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setFilter(f,el) { currentFilter=f; document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderQuotes(); }
 function filterSearch(v) { currentSearch=v; renderQuotes(); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function openPaymentModal(docId) {
   paymentTarget = docId;
   const d = docs.find(x=>x.id===docId);
-  document.getElementById('pm-modal-title').textContent = 'Add Payment' + (d?' — '+d.supplier:'');
+  document.getElementById('pm-modal-title').textContent = 'Add Payment' + (d?' â€” '+d.supplier:'');
   ['pm-desc','pm-amount','pm-due','pm-paid-date','pm-paid-amount','pm-ref','pm-bank','pm-bsb','pm-acc','pm-txn'].forEach(i=>{const el=document.getElementById(i); if(el) el.value='';});
   document.getElementById('pm-status').value = 'pending';
   document.getElementById('pm-method').value = 'direct';
@@ -3173,7 +3173,7 @@ function openPaymentModal(docId) {
   document.getElementById('pm-paid-section').style.display = 'none';
   document.getElementById('payment-modal').classList.add('open');
 }
-// pmUpdateGST removed — GST field removed from payment modal
+// pmUpdateGST removed â€” GST field removed from payment modal
 function pmTogglePaidFields() {
   const status = document.getElementById('pm-status').value;
   const section = document.getElementById('pm-paid-section');
@@ -3211,7 +3211,7 @@ function savePayment() {
   if(!d.payments) d.payments=[];
   d.payments.push(p);
   if (document.getElementById('pm-add-gantt').checked && due) {
-    dates.push({id:uid(),title:`${d.supplier} — ${desc}`,date:due,endDate:'',type:'payment',trade:d.trade,priority:'med',notes:fmt(amount)+' due',source:'doc',sourceDoc:d.id,done:false,deps:[]});
+    dates.push({id:uid(),title:`${d.supplier} â€” ${desc}`,date:due,endDate:'',type:'payment',trade:d.trade,priority:'med',notes:fmt(amount)+' due',source:'doc',sourceDoc:d.id,done:false,deps:[]});
   }
   saveAll();
   closeModal('payment-modal');
@@ -3228,7 +3228,7 @@ function confirmDelete() {
   renderDashboard(); renderQuotes(); renderTasks();
 }
 
-// ═══ DOCUMENT MODAL ══════════════════════════════════════════════════════════
+// â•â•â• DOCUMENT MODAL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function openAddModal() {
   ['f-supplier','f-desc','f-docnum','f-expiry','f-notes'].forEach(i=>{const e=document.getElementById(i); if(e) e.value='';});
   document.getElementById('f-type').value='quote';
@@ -3240,8 +3240,8 @@ function openAddModal() {
   refreshAllTradeSelects();
   // Populate supplier datalist
   refreshSupplierDatalist();
-  const qOpts=docs.filter(d=>d.type==='quote').map(d=>`<option value="${d.id}">${d.supplier} — ${d.docnum||d.trade} (${fmt(d.amount)})</option>`).join('');
-  ['f-linked-quote','u-linked-quote','p-linked-quote'].forEach(id=>{const e=document.getElementById(id); if(e) e.innerHTML='<option value="">— Not linked —</option>'+qOpts;});
+  const qOpts=docs.filter(d=>d.type==='quote').map(d=>`<option value="${d.id}">${d.supplier} â€” ${d.docnum||d.trade} (${fmt(d.amount)})</option>`).join('');
+  ['f-linked-quote','u-linked-quote','p-linked-quote'].forEach(id=>{const e=document.getElementById(id); if(e) e.innerHTML='<option value="">â€” Not linked â€”</option>'+qOpts;});
   document.getElementById('payment-rows').innerHTML='';
   paymentRowCount=0;
   docFileEntries=[];
@@ -3272,7 +3272,7 @@ function addPaymentRow() {
   const row=document.createElement('div');
   row.id='pr-'+id;
   row.style.cssText='display:grid;grid-template-columns:1fr 110px 120px auto;gap:8px;margin-bottom:8px;';
-  row.innerHTML=`<input class="form-control" placeholder="e.g. 20% Deposit" id="pr-desc-${id}"/><input class="form-control" type="number" placeholder="Amount" id="pr-amt-${id}" step="0.01"/><input class="form-control" type="date" id="pr-due-${id}"/><button class="btn btn-danger btn-sm" onclick="document.getElementById('pr-${id}').remove()">×</button>`;
+  row.innerHTML=`<input class="form-control" placeholder="e.g. 20% Deposit" id="pr-desc-${id}"/><input class="form-control" type="number" placeholder="Amount" id="pr-amt-${id}" step="0.01"/><input class="form-control" type="date" id="pr-due-${id}"/><button class="btn btn-danger btn-sm" onclick="document.getElementById('pr-${id}').remove()">Ã—</button>`;
   document.getElementById('payment-rows').appendChild(row);
 }
 function onAmountInput() {
@@ -3285,12 +3285,12 @@ function onAmountInput() {
     const excl = Math.round(raw / 1.1 * 100) / 100;
     const gst  = Math.round((raw - excl) * 100) / 100;
     if (!gstEl._manuallySet) gstEl.value = gst.toFixed(2);
-    preview.textContent = `Excl GST: $${excl.toFixed(2)} · GST: $${gst.toFixed(2)}`;
+    preview.textContent = `Excl GST: $${excl.toFixed(2)} Â· GST: $${gst.toFixed(2)}`;
     preview.style.color = 'var(--yellow)';
   } else {
     const gst = Math.round(raw * 0.1 * 100) / 100;
     if (!gstEl._manuallySet) gstEl.value = gst.toFixed(2);
-    preview.textContent = `GST: $${gst.toFixed(2)} · Total incl: $${(raw + gst).toFixed(2)}`;
+    preview.textContent = `GST: $${gst.toFixed(2)} Â· Total incl: $${(raw + gst).toFixed(2)}`;
     preview.style.color = 'var(--text-dim)';
   }
 }
@@ -3340,7 +3340,7 @@ function saveDocument() {
   const files = docFileEntries.slice();
   docFileEntries = [];
   // GST for new doc: only auto-calc if no GST field exists on the add form
-  // (add form doesn't have a GST field — always auto-calc at 10%)
+  // (add form doesn't have a GST field â€” always auto-calc at 10%)
   const newGst = Math.round(amount * 0.1 * 100) / 100;
   const doc={id:uid(),type,status,supplier,trade,desc,docnum,date,expiry:type==='quote'?expiry:'',amount,gst:newGst,notes,payments,attachmentName,linkedQuote:type==='invoice'?linkedQuote:'',importMethod:currentImportTab,bankDetails,files,systemGroup:systemGroup||null};
   docs.unshift(doc);
@@ -3352,10 +3352,10 @@ function handleDrag(e){e.preventDefault();e.currentTarget.classList.add('drag-ov
 function handleDragLeave(e){e.currentTarget.classList.remove('drag-over');}
 function handleDrop(e){e.preventDefault();e.currentTarget.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)showFilePreview(f);}
 function handleFileSelect(e){const f=e.target.files[0];if(f)showFilePreview(f);}
-function showFilePreview(f){const prev=document.getElementById('file-preview');prev.style.display='flex';prev.innerHTML=`<span>📎 ${f.name}</span><span class="text-green">Attached</span>`;const s=document.getElementById('u-supplier');if(s&&!s.value)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');}
-function parsePaste(){const text=document.getElementById('paste-content').value;const am=text.match(/\$[\s]*([\d,]+(?:\.\d{2})?)/);if(am)document.getElementById('p-amount').value=parseFloat(am[1].replace(/,/g,''));const dm=text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);if(dm){const[,d,m,y]=dm;const yr=y.length===2?'20'+y:y;document.getElementById('p-date').value=`${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}const im=text.match(/(?:INV|INVOICE|Quote No|Q)[#\-\s]?(\w+[-\w]*)/i);if(im)document.getElementById('p-docnum').value=im[0];alert('Basic extraction done — please review and correct.');}
+function showFilePreview(f){const prev=document.getElementById('file-preview');prev.style.display='flex';prev.innerHTML=`<span>ðŸ“Ž ${f.name}</span><span class="text-green">Attached</span>`;const s=document.getElementById('u-supplier');if(s&&!s.value)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');}
+function parsePaste(){const text=document.getElementById('paste-content').value;const am=text.match(/\$[\s]*([\d,]+(?:\.\d{2})?)/);if(am)document.getElementById('p-amount').value=parseFloat(am[1].replace(/,/g,''));const dm=text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);if(dm){const[,d,m,y]=dm;const yr=y.length===2?'20'+y:y;document.getElementById('p-date').value=`${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}const im=text.match(/(?:INV|INVOICE|Quote No|Q)[#\-\s]?(\w+[-\w]*)/i);if(im)document.getElementById('p-docnum').value=im[0];alert('Basic extraction done â€” please review and correct.');}
 
-// ═══ EDIT DOCUMENT ════════════════════════════════════════════════════════════
+// â•â•â• EDIT DOCUMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let editingDocId = null;
 let editDateRowCount = 0;
 let editingPaymentDocId = null;
@@ -3387,7 +3387,7 @@ function openEditModal(docId) {
   document.getElementById('e-balance-due').value = d.balanceDue || '';
   document.getElementById('e-notes').value = d.notes || '';
   document.getElementById('e-attachment').value = d.attachmentName || '';
-  document.getElementById('edit-modal-title').textContent = 'Edit — ' + d.supplier;
+  document.getElementById('edit-modal-title').textContent = 'Edit â€” ' + d.supplier;
   document.getElementById('edit-type-badge').className = 'badge '+(d.type==='invoice'?'badge-invoice':'badge-quote');
   document.getElementById('edit-type-badge').textContent = d.type==='invoice'?'Invoice':'Quote';
 
@@ -3420,7 +3420,7 @@ function openEditModal(docId) {
       <select class="form-control" id="edr-type-${dt.id}">
         ${['milestone','payment','inspection','delivery','task','permit','design','other'].map(t=>`<option${t===dt.type?' selected':''}>${t}</option>`).join('')}
       </select>
-      <button class="btn btn-danger btn-sm" onclick="removeEditDateRow('${dt.id}',true)">×</button>
+      <button class="btn btn-danger btn-sm" onclick="removeEditDateRow('${dt.id}',true)">Ã—</button>
     `;
     row.setAttribute('data-existing-id', dt.id);
     rowsEl.appendChild(row);
@@ -3456,7 +3456,7 @@ function addEditDateRow() {
       <option value="" disabled style="color:var(--text-dim);font-style:italic;">Depends on...</option>
       ${depsOpts}
     </select>
-    <button class="btn btn-danger btn-sm" onclick="removeEditDateRow('${id}',false)">×</button>
+    <button class="btn btn-danger btn-sm" onclick="removeEditDateRow('${id}',false)">Ã—</button>
   `;
   rowsEl.appendChild(row);
 }
@@ -3482,7 +3482,7 @@ function saveEdit() {
   const date = document.getElementById('e-date').value;
   const rawAmount = parseFloat(document.getElementById('e-amount').value) || 0;
   const inclGST   = document.getElementById('e-gst-incl') && document.getElementById('e-gst-incl').checked;
-  // If checkbox ticked: entered amount includes GST — strip it out for storage
+  // If checkbox ticked: entered amount includes GST â€” strip it out for storage
   const amount = inclGST ? Math.round(rawAmount / 1.1 * 100) / 100 : rawAmount;
   if (!supplier || !date || !amount) { alert('Supplier, Date and Amount required.'); return; }
   // GST: use field value if entered (even 0), only auto-calc if field is completely empty
@@ -3551,7 +3551,7 @@ function saveEdit() {
   renderGantt();
 }
 
-// ═══ EDIT PAYMENT ═════════════════════════════════════════════════════════════
+// â•â•â• EDIT PAYMENT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function openEditPayment(docId, payId) {
   const d = docs.find(x=>x.id===docId);
   const p = (d?.payments||[]).find(x=>x.id===payId);
@@ -3590,11 +3590,11 @@ function saveEditPayment() {
   refreshPanel(editingPaymentDocId);
 }
 
-// ═══ CONTACTS ════════════════════════════════════════════════════════════════
+// â•â•â• CONTACTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let editingContactId = null;
 let currentContactFilter = '';
 
-// syncContactFromDoc removed — contacts now use explicit supplier field
+// syncContactFromDoc removed â€” contacts now use explicit supplier field
 
 function reseedContacts() {
   // Save supplier links and edits from any existing seeded contacts before re-seeding
@@ -3627,15 +3627,15 @@ function openContactModal(id) {
 
   // Populate trade select
   const trEl = document.getElementById('ct-trade');
-  if (trEl) trEl.innerHTML = '<option value="">— General —</option>' + tradeOptions(c?.trade);
+  if (trEl) trEl.innerHTML = '<option value="">â€” General â€”</option>' + tradeOptions(c?.trade);
 
-  // Populate supplier select — all unique suppliers from docs + existing contact suppliers
+  // Populate supplier select â€” all unique suppliers from docs + existing contact suppliers
   const supplierSet = new Set();
   docs.forEach(d => { if (d.supplier) supplierSet.add(d.supplier); });
   contacts.forEach(ct => { if (ct.supplier) supplierSet.add(ct.supplier); });
   const supEl = document.getElementById('ct-supplier');
   if (supEl) {
-    supEl.innerHTML = '<option value="">— Not linked —</option>' +
+    supEl.innerHTML = '<option value="">â€” Not linked â€”</option>' +
       [...supplierSet].sort().map(s => `<option value="${s}"${(c?.supplier||'')=== s?' selected':''}>${s}</option>`).join('');
   }
 
@@ -3696,7 +3696,7 @@ function deleteContact(id) {
   saveAll(); renderContacts();
 }
 
-// ─── Contact activity helpers ─────────────────────────────────────────────────
+// â”€â”€â”€ Contact activity helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getContactActivity(c) {
   // Docs: match by explicit supplier field (exact) or contact id on doc
   const relDocs = c.supplier
@@ -3712,20 +3712,20 @@ function getContactActivity(c) {
   // Build unified timeline
   const events = [];
   relDocs.forEach(d => events.push({
-    date: d.date, type:'doc', icon: d.type==='invoice'?'🧾':'📄',
+    date: d.date, type:'doc', icon: d.type==='invoice'?'ðŸ§¾':'ðŸ“„',
     label: `${d.type==='invoice'?'Invoice':'Quote'}: ${d.desc||d.trade}`,
-    sub: `${fmt(d.amount)} excl GST · ${statusBadge(d)}`,
+    sub: `${fmt(d.amount)} excl GST Â· ${statusBadge(d)}`,
     id: d.id, action: `navigateToDoc('${d.id}')`
   }));
   relTasks.forEach(t => events.push({
-    date: t.due||t.created||'', type:'task', icon: t.done?'✅':'📋',
+    date: t.due||t.created||'', type:'task', icon: t.done?'âœ…':'ðŸ“‹',
     label: `Task: ${t.title}`,
-    sub: `${t.priority} priority · ${t.done?'Done':'Open'}${t.due?' · due '+fmtD(t.due):''}`,
+    sub: `${t.priority} priority Â· ${t.done?'Done':'Open'}${t.due?' Â· due '+fmtD(t.due):''}`,
     id: t.id, action: `navigateToDoc('tasks')`
   }));
   relQuestions.forEach(q => events.push({
-    date: q.asked||'', type:'question', icon: q.answered||q.answer?'✅':'❓',
-    label: `Question: ${q.text.slice(0,60)}${q.text.length>60?'…':''}`,
+    date: q.asked||'', type:'question', icon: q.answered||q.answer?'âœ…':'â“',
+    label: `Question: ${q.text.slice(0,60)}${q.text.length>60?'â€¦':''}`,
     sub: q.answered ? `Answered ${fmtD(q.answered)}` : 'Awaiting answer',
     id: q.id, action: `showTab('questions',Array.from(document.querySelectorAll('.tab')).find(x=>x.getAttribute('onclick')&&x.getAttribute('onclick').includes("'questions'")))`
   }));
@@ -3752,27 +3752,27 @@ function renderContactCard(c) {
           ${c.trade?`<span class="badge" style="font-size:9px;border-color:var(--accent);color:var(--accent);">${c.trade}</span>`:''}
         </div>
         ${c.company?`<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${c.company}</div>`:''}
-        ${c.supplier?`<div style="font-family:var(--mono);font-size:10px;color:var(--purple);margin-top:3px;">🔗 ${c.supplier}</div>`:'<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:3px;">No supplier linked</div>'}
+        ${c.supplier?`<div style="font-family:var(--mono);font-size:10px;color:var(--purple);margin-top:3px;">ðŸ”— ${c.supplier}</div>`:'<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:3px;">No supplier linked</div>'}
         <div style="display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:5px;">
-          ${c.mobile?`<a href="tel:${c.mobile}" style="color:inherit;text-decoration:none;">📱 ${c.mobile}</a>`:''}
-          ${c.phone?`<a href="tel:${c.phone}" style="color:inherit;text-decoration:none;">☎ ${c.phone}</a>`:''}
-          ${c.email?`<a href="mailto:${c.email}" style="color:var(--blue);">✉ ${c.email}</a>`:''}
+          ${c.mobile?`<a href="tel:${c.mobile}" style="color:inherit;text-decoration:none;">ðŸ“± ${c.mobile}</a>`:''}
+          ${c.phone?`<a href="tel:${c.phone}" style="color:inherit;text-decoration:none;">â˜Ž ${c.phone}</a>`:''}
+          ${c.email?`<a href="mailto:${c.email}" style="color:var(--blue);">âœ‰ ${c.email}</a>`:''}
           ${c.abn?`<span>ABN: ${c.abn}</span>`:''}
           ${c.licence?`<span>Lic: ${c.licence}</span>`:''}
         </div>
-        ${c.address?`<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">📍 ${c.address}</div>`:''}
+        ${c.address?`<div style="font-size:11px;color:var(--text-dim);margin-top:3px;">ðŸ“ ${c.address}</div>`:''}
       </div>
       <!-- Stats pills -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;align-items:flex-start;">
-        ${act.docs.length?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--border);color:var(--text-muted);">📄 ${act.docs.length} doc${act.docs.length!==1?'s':''}</div>`:''}
+        ${act.docs.length?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--border);color:var(--text-muted);">ðŸ“„ ${act.docs.length} doc${act.docs.length!==1?'s':''}</div>`:''}
         ${totalSpend?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--border);color:var(--accent);">${fmt(totalSpend)}</div>`:''}
         ${paidSpend?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--green);color:var(--green);">${fmt(paidSpend)} paid</div>`:''}
-        ${openTasks?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--orange);color:var(--orange);">📋 ${openTasks} task${openTasks!==1?'s':''}</div>`:''}
-        ${openQs?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--red);color:var(--red);">❓ ${openQs} unanswered</div>`:''}
+        ${openTasks?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--orange);color:var(--orange);">ðŸ“‹ ${openTasks} task${openTasks!==1?'s':''}</div>`:''}
+        ${openQs?`<div style="font-family:var(--mono);font-size:10px;padding:3px 8px;border:1px solid var(--red);color:var(--red);">â“ ${openQs} unanswered</div>`:''}
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="btn btn-ghost btn-sm" onclick="openContactModal('${c.id}')">✎ Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteContact('${c.id}')">×</button>
+        <button class="btn btn-ghost btn-sm" onclick="openContactModal('${c.id}')">âœŽ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteContact('${c.id}')">Ã—</button>
       </div>
     </div>
     ${c.notes?`<div style="padding:8px 16px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border);background:var(--bg);">${c.notes}</div>`:''}
@@ -3794,8 +3794,8 @@ function renderContactCard(c) {
     <div style="padding:8px 16px;display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" onclick="quickAddTask('${c.id}')">+ Task</button>
       <button class="btn btn-ghost btn-sm" onclick="quickAddQuestion('${c.id}')">+ Question</button>
-      ${c.email?`<a href="mailto:${c.email}" class="btn btn-ghost btn-sm">✉ Email</a>`:''}
-      ${c.mobile?`<a href="tel:${c.mobile}" class="btn btn-ghost btn-sm">📱 Call</a>`:''}
+      ${c.email?`<a href="mailto:${c.email}" class="btn btn-ghost btn-sm">âœ‰ Email</a>`:''}
+      ${c.mobile?`<a href="tel:${c.mobile}" class="btn btn-ghost btn-sm">ðŸ“± Call</a>`:''}
     </div>
   </div>`;
 }
@@ -3816,7 +3816,7 @@ function renderContacts() {
   const el = document.getElementById('contacts-list');
   if (!filtered.length) { el.innerHTML='<div class="empty-state">No contacts found</div>'; return; }
 
-  // Group by linked supplier — ungrouped if no supplier
+  // Group by linked supplier â€” ungrouped if no supplier
   const bySupplier = {};
   filtered.forEach(c => {
     const key = c.supplier || '(No supplier linked)';
@@ -3833,7 +3833,7 @@ function renderContacts() {
 
   el.innerHTML = sorted.map(([supplier, cs])=>
     `<div class="task-group-header">
-      <span style="color:var(--purple);">🔗 ${supplier}</span>
+      <span style="color:var(--purple);">ðŸ”— ${supplier}</span>
       <span style="font-size:10px;">${cs.length} contact${cs.length!==1?'s':''}</span>
     </div>` +
     cs.map(c=>renderContactCard(c)).join('')
@@ -3854,12 +3854,12 @@ function refreshContactSelect(selectId, selectedId) {
     if (!a.supplier && b.supplier) return 1;
     return (a.name||a.company).localeCompare(b.name||b.company);
   });
-  el.innerHTML = '<option value="">— None —</option>' +
+  el.innerHTML = '<option value="">â€” None â€”</option>' +
     sorted.map(c=>`<option value="${c.id}"${c.id===selectedId?' selected':''}>${c.name}${c.supplier?' ('+c.supplier+')':c.company?' ('+c.company+')':''}</option>`).join('');
 }
 
 
-// ═══ CONTACT DEDUP ════════════════════════════════════════════════════════════
+// â•â•â• CONTACT DEDUP â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 function findDuplicateContacts() {
   const groups = [];
@@ -3897,7 +3897,7 @@ function findDuplicateContacts() {
 
   const el = document.getElementById('dedup-results');
   if (!groups.length) {
-    el.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--mono);color:var(--green);">✓ No duplicate contacts found!</div>';
+    el.innerHTML = '<div style="padding:24px;text-align:center;font-family:var(--mono);color:var(--green);">âœ“ No duplicate contacts found!</div>';
     openModal('dedup-modal');
     return;
   }
@@ -3905,18 +3905,18 @@ function findDuplicateContacts() {
   el.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:8px 0 12px;">Found ${groups.length} group${groups.length!==1?'s':''} of possible duplicates. Review and merge or delete as needed.</div>` +
     groups.map((g, gi) => `
       <div style="border:1px solid var(--border);margin-bottom:16px;background:var(--bg);">
-        <div style="padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--yellow);">⚠ ${g.reason}</div>
+        <div style="padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--yellow);">âš  ${g.reason}</div>
         ${g.contacts.map((c,ci) => `
           <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
             <div style="flex:1;min-width:0;">
-              <div style="font-weight:600;font-size:13px;">${c.name||'—'}</div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${c.company||''} ${c.supplier?'· 🔗 '+c.supplier:''}</div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">${c.role||''} ${c.mobile?'· '+c.mobile:''} ${c.email?'· '+c.email:''}</div>
+              <div style="font-weight:600;font-size:13px;">${c.name||'â€”'}</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">${c.company||''} ${c.supplier?'Â· ðŸ”— '+c.supplier:''}</div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">${c.role||''} ${c.mobile?'Â· '+c.mobile:''} ${c.email?'Â· '+c.email:''}</div>
             </div>
             <div style="display:flex;gap:6px;flex-shrink:0;">
-              <button class="btn btn-ghost btn-sm" onclick="openContactModal('${c.id}');closeModal('dedup-modal')">✎ Edit</button>
-              ${gi > 0 || ci > 0 ? `<button class="btn btn-primary btn-sm" onclick="mergeIntoContact('${g.contacts[0].id}','${c.id}')">← Merge into first</button>` : '<span style="font-family:var(--mono);font-size:9px;color:var(--green);padding:2px 6px;">KEEP</span>'}
-              <button class="btn btn-danger btn-sm" onclick="deleteAndRefreshDedup('${c.id}')">× Delete</button>
+              <button class="btn btn-ghost btn-sm" onclick="openContactModal('${c.id}');closeModal('dedup-modal')">âœŽ Edit</button>
+              ${gi > 0 || ci > 0 ? `<button class="btn btn-primary btn-sm" onclick="mergeIntoContact('${g.contacts[0].id}','${c.id}')">â† Merge into first</button>` : '<span style="font-family:var(--mono);font-size:9px;color:var(--green);padding:2px 6px;">KEEP</span>'}
+              <button class="btn btn-danger btn-sm" onclick="deleteAndRefreshDedup('${c.id}')">Ã— Delete</button>
             </div>
           </div>`).join('')}
       </div>`).join('');
@@ -3968,7 +3968,7 @@ function quickAddQuestion(contactId) {
   }, 50);
 }
 
-// ═══ QUESTIONS ═══════════════════════════════════════════════════════════════
+// â•â•â• QUESTIONS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let editingQuestionId = null;
 let currentQFilter = 'all';
 
@@ -3989,7 +3989,7 @@ function openQuestionModal(id) {
   document.getElementById('q-priority').value = q?q.priority||'med':'med';
   // trade select
   const trEl = document.getElementById('q-trade');
-  if (trEl) trEl.innerHTML = '<option value="">— General —</option>' + tradeOptions(q?.trade);
+  if (trEl) trEl.innerHTML = '<option value="">â€” General â€”</option>' + tradeOptions(q?.trade);
   if (q && q.trade && trEl) trEl.value = q.trade;
   refreshContactSelect('q-linked-contact', q?.linkedContact||'');
   openModal('question-modal');
@@ -4053,21 +4053,21 @@ function renderQuestions() {
           <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);text-transform:uppercase;">${q.for}</span>
           ${q.trade?`<span class="badge" style="font-size:9px;color:var(--text-muted)">${q.trade}</span>`:''}
           <span style="font-family:var(--mono);font-size:9px;color:${priCol[q.priority]||'var(--text-dim)'};">${q.priority?.toUpperCase()}</span>
-          ${isAnswered?`<span class="badge badge-paid" style="font-size:9px;">✓ Answered ${fmtD(q.answered)}</span>`:'<span class="badge badge-quote" style="font-size:9px;">Awaiting Answer</span>'}
+          ${isAnswered?`<span class="badge badge-paid" style="font-size:9px;">âœ“ Answered ${fmtD(q.answered)}</span>`:'<span class="badge badge-quote" style="font-size:9px;">Awaiting Answer</span>'}
         </div>
         <div style="font-weight:500;margin-bottom:6px;">${q.text}</div>
         ${q.answer?`<div style="background:var(--surface2);border-left:3px solid var(--green);padding:8px 12px;font-size:12px;color:var(--text-muted);border-radius:0 4px 4px 0;">${q.answer}</div>`:''}
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:4px;">Asked: ${fmtD(q.asked)}${q.notes?' · '+q.notes:''}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:4px;">Asked: ${fmtD(q.asked)}${q.notes?' Â· '+q.notes:''}</div>
       </div>
       <div style="display:flex;gap:4px;flex-shrink:0;">
-        <button class="btn btn-ghost btn-sm" onclick="openQuestionModal('${q.id}')">✎</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${q.id}')">×</button>
+        <button class="btn btn-ghost btn-sm" onclick="openQuestionModal('${q.id}')">âœŽ</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${q.id}')">Ã—</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ═══ TASK EDITING ════════════════════════════════════════════════════════════
+// â•â•â• TASK EDITING â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let editingTaskId = null;
 let subtaskRowCount = 0;
 
@@ -4075,7 +4075,7 @@ function openEditTaskModal(id) {
   editingTaskId = id;
   const t = tasks.find(x=>x.id===id);
   if (!t) return;
-  document.getElementById('edit-task-title').textContent = 'Edit Task — ' + t.title;
+  document.getElementById('edit-task-title').textContent = 'Edit Task â€” ' + t.title;
   document.getElementById('et-title').value = t.title||'';
   document.getElementById('et-desc').value  = t.desc||'';
   refreshTaskCatSelects(t.cat||'');
@@ -4089,8 +4089,8 @@ function openEditTaskModal(id) {
   document.getElementById('et-assign').value   = t.assign||'';
   document.getElementById('et-due').value      = t.due||'';
   document.getElementById('et-notes').value    = t.notes||'';
-  const opts = docs.map(d=>`<option value="${d.id}"${d.id===t.linkedDoc?' selected':''}>${d.supplier} — ${d.trade}</option>`).join('');
-  document.getElementById('et-linked-doc').innerHTML = '<option value="">— None —</option>'+opts;
+  const opts = docs.map(d=>`<option value="${d.id}"${d.id===t.linkedDoc?' selected':''}>${d.supplier} â€” ${d.trade}</option>`).join('');
+  document.getElementById('et-linked-doc').innerHTML = '<option value="">â€” None â€”</option>'+opts;
   // Render existing subtasks
   subtaskRowCount = 0;
   const sr = document.getElementById('subtask-rows');
@@ -4111,7 +4111,7 @@ function addSubtaskRow(existing) {
     <input type="checkbox" id="stc-${i}" style="accent-color:var(--green);width:16px;height:16px;" ${existing?.done?'checked':''}>
     <input class="form-control" id="stt-${i}" value="${existing?.title||''}" placeholder="Subtask description..." style="font-size:12px;"/>
     <input class="form-control" type="date" id="std-${i}" value="${existing?.due||''}" style="font-size:12px;"/>
-    <button class="btn btn-danger btn-sm" onclick="document.getElementById('str-${i}').remove()">×</button>`;
+    <button class="btn btn-danger btn-sm" onclick="document.getElementById('str-${i}').remove()">Ã—</button>`;
   sr.appendChild(div);
 }
 
@@ -4162,7 +4162,7 @@ function toggleSubtask(taskId, subtaskId) {
   if (s) { s.done = !s.done; saveAll(); renderTasks(); }
 }
 
-// ═══ FILES / ATTACHMENTS ══════════════════════════════════════════════════════
+// â•â•â• FILES / ATTACHMENTS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let docFileEntries = []; // temp storage while add modal is open
 
 function addFileEntry(prefix) {
@@ -4180,9 +4180,9 @@ function renderFileEntries(prefix) {
   if (!el) return;
   if (!docFileEntries.length) { el.innerHTML=''; return; }
   el.innerHTML = docFileEntries.map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg);border:1px solid var(--border);margin-bottom:4px;font-size:12px;">
-    <span style="font-family:var(--mono);">📎 ${f.name}</span>
+    <span style="font-family:var(--mono);">ðŸ“Ž ${f.name}</span>
     ${f.desc?`<span style="color:var(--text-muted);">${f.desc}</span>`:''}
-    <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="removeFileEntry('${f.id}','${prefix}')">×</button>
+    <button class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="removeFileEntry('${f.id}','${prefix}')">Ã—</button>
   </div>`).join('');
 }
 
@@ -4211,7 +4211,7 @@ function removeFileFromDoc(docId, fileId) {
   refreshPanel(docId);
 }
 
-// ═══ GANTT ALIGN / FREEZE ════════════════════════════════════════════════════
+// â•â•â• GANTT ALIGN / FREEZE â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function ganttScrollToDate(dateStr) {
   if (!dateStr) return;
   const ganttWrap = document.getElementById('gantt-wrap') || document.querySelector('.gantt-wrap');
@@ -4233,14 +4233,14 @@ function ganttJumpToSelected() {
   if (sel?.value) ganttScrollToDate(sel.value);
 }
 
-// ═══ PAID STATUS HELPERS ══════════════════════════════════════════════════════
+// â•â•â• PAID STATUS HELPERS â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // paidTotal/pendingTotal/isPaymentPaid defined earlier near line 1334
 
 function markPaid(docId, payId) {
   const d = docs.find(x=>x.id===docId);
   const p = (d?.payments||[]).find(x=>x.id===payId);
   if (!p) return;
-  const ref = prompt(`Enter bank confirmation / receipt reference for this payment:\n(BSB, Account, transaction ID, receipt number etc.)\n\nPayment: ${p.desc} — ${fmt(p.amount)}`);
+  const ref = prompt(`Enter bank confirmation / receipt reference for this payment:\n(BSB, Account, transaction ID, receipt number etc.)\n\nPayment: ${p.desc} â€” ${fmt(p.amount)}`);
   if (ref === null) return;
   if (!ref.trim()) { alert('Bank confirmation reference is required.'); return; }
   p.paid   = today();
@@ -4258,16 +4258,16 @@ function markPaid(docId, payId) {
   renderDashboard();
 }
 
-// ═══ INIT ════════════════════════════════════════════════════════════════════
+// â•â•â• INIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // FIXTURES & FITTINGS
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 let fxDwellingFilter = 'all';
 let fxEditId = null;
 
-// ── Rooms & Categories (user-editable via settings, defaulting to built-in) ──
+// â”€â”€ Rooms & Categories (user-editable via settings, defaulting to built-in) â”€â”€
 function getFxRooms()    { try { return JSON.parse(localStorage.getItem('_fx_rooms'))||DEFAULT_FX_ROOMS; } catch { return DEFAULT_FX_ROOMS; } }
 function getFxCats()     { try { return JSON.parse(localStorage.getItem('_fx_cats'))||DEFAULT_FX_CATS;  } catch { return DEFAULT_FX_CATS; }  }
 
@@ -4278,7 +4278,7 @@ function setFxDwelling(v, btn) {
   renderFixtures();
 }
 
-// ── Modal open/close ──────────────────────────────────────────────────────────
+// â”€â”€ Modal open/close â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function openFixtureModal(id) {
   fxEditId = id || null;
   const modal = document.getElementById('fixture-modal');
@@ -4319,7 +4319,7 @@ function openFixtureModal(id) {
     document.getElementById('fx-price').value  = '';
     document.getElementById('fx-status').value = 'needed';
     document.getElementById('fx-dwelling').value = 'Both';
-    document.getElementById('fx-total-preview').textContent = '—';
+    document.getElementById('fx-total-preview').textContent = 'â€”';
   }
   openModal('fixture-modal');
 }
@@ -4328,7 +4328,7 @@ function fxUpdateTotal() {
   const qty   = parseFloat(document.getElementById('fx-qty').value)||0;
   const price = parseFloat(document.getElementById('fx-price').value)||0;
   const total = qty * price;
-  document.getElementById('fx-total-preview').textContent = total > 0 ? fmt(total) : '—';
+  document.getElementById('fx-total-preview').textContent = total > 0 ? fmt(total) : 'â€”';
 }
 
 function saveFixture() {
@@ -4376,7 +4376,7 @@ function deleteFixture() {
   renderDashboard();
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderFixtures() {
   const search     = (document.getElementById('fx-search')||{}).value||'';
   const statusFilt = (document.getElementById('fx-status-filter')||{}).value||'all';
@@ -4402,11 +4402,11 @@ function renderFixtures() {
 
   const el = document.getElementById('fixtures-list');
   if (!items.length) {
-    el.innerHTML = '<div class="empty-state">' + (fixtures.length ? 'No items match your filters.' : 'No items yet — click "+ Add Item" to start building your list.') + '</div>';
+    el.innerHTML = '<div class="empty-state">' + (fixtures.length ? 'No items match your filters.' : 'No items yet â€” click "+ Add Item" to start building your list.') + '</div>';
     return;
   }
 
-  // Group by room → category
+  // Group by room â†’ category
   const byRoom = {};
   items.forEach(f => {
     const room = f.room || 'General';
@@ -4421,14 +4421,14 @@ function renderFixtures() {
     const roomCount = Object.values(cats).flat().length;
     return `<div style="margin-bottom:20px;">
       <div class="fx-group-header">
-        <span>📍 ${room}</span>
-        <span>${roomCount} item${roomCount!==1?'s':''} ${roomTotal>0?'· '+fmt(roomTotal):''}</span>
+        <span>ðŸ“ ${room}</span>
+        <span>${roomCount} item${roomCount!==1?'s':''} ${roomTotal>0?'Â· '+fmt(roomTotal):''}</span>
       </div>
       ${Object.entries(cats).sort(([a],[b])=>a.localeCompare(b)).map(([cat, catItems]) => {
         const catTotal = catItems.reduce((s,f)=>s+f.qty*f.price,0);
         return `<div class="fx-cat-header">
             <span>${cat}</span>
-            <span>${catItems.length} item${catItems.length!==1?'s':''} ${catTotal>0?'· '+fmt(catTotal):''}</span>
+            <span>${catItems.length} item${catItems.length!==1?'s':''} ${catTotal>0?'Â· '+fmt(catTotal):''}</span>
           </div>
           ${catItems.map(f => renderFixtureItem(f)).join('')}`;
       }).join('')}
@@ -4451,16 +4451,16 @@ function renderFixtureItem(f) {
         <span class="fx-status-badge ${statusCls}">${statusLabel}</span>
         ${dwellTag}
       </div>
-      ${hasMeta ? `<div class="fx-item-meta">${metaParts.join(' · ')}</div>` : ''}
+      ${hasMeta ? `<div class="fx-item-meta">${metaParts.join(' Â· ')}</div>` : ''}
       <div class="fx-item-meta" style="margin-top:4px;">
-        ${f.supplier ? `<span>📦 ${f.supplier}</span>` : ''}
-        ${f.url ? `&nbsp;·&nbsp;<a class="fx-url-link" href="${f.url}" target="_blank" onclick="event.stopPropagation()">View product ↗</a>` : ''}
+        ${f.supplier ? `<span>ðŸ“¦ ${f.supplier}</span>` : ''}
+        ${f.url ? `&nbsp;Â·&nbsp;<a class="fx-url-link" href="${f.url}" target="_blank" onclick="event.stopPropagation()">View product â†—</a>` : ''}
         ${f.notes ? `<span style="display:block;margin-top:2px;color:var(--text-dim);">${f.notes}</span>` : ''}
       </div>
     </div>
     <div>
       ${total > 0 ? `<div class="fx-item-price">${fmt(total)}</div>
-        <div class="fx-item-sub">qty ${f.qty} × ${fmt(f.price)}</div>` :
+        <div class="fx-item-sub">qty ${f.qty} Ã— ${fmt(f.price)}</div>` :
         `<div class="fx-item-sub" style="color:var(--text-dim);">No price yet</div>`}
     </div>
   </div>`;
@@ -4483,7 +4483,7 @@ function renderFxSummary(items) {
     </div>
     <div class="fx-summary-card">
       <div class="stat-label">Estimated Cost</div>
-      <div style="font-family:var(--mono);font-size:18px;color:var(--accent);">${totalAll>0?fmt(totalAll):'—'}</div>
+      <div style="font-family:var(--mono);font-size:18px;color:var(--accent);">${totalAll>0?fmt(totalAll):'â€”'}</div>
       <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);">excl GST</div>
     </div>
     ${FX_STATUS_ORDER.map(s=>`
@@ -4495,7 +4495,7 @@ function renderFxSummary(items) {
   `;
 }
 
-// ── Print report ──────────────────────────────────────────────────────────────
+// â”€â”€ Print report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function printFixturesReport() {
   const byRoom = {};
   fixtures.forEach(f => {
@@ -4508,7 +4508,7 @@ function printFixturesReport() {
   const priceCount = fixtures.filter(f=>f.price>0).length;
 
   const w = window.open('','_blank','width=900,height=700');
-  w.document.write(`<!DOCTYPE html><html><head><title>Fixtures & Fittings — 128 Dairy Creek Road</title>
+  w.document.write(`<!DOCTYPE html><html><head><title>Fixtures & Fittings â€” 128 Dairy Creek Road</title>
   <style>
     body { font-family: Arial, sans-serif; font-size: 12px; color: #222; padding: 30px; max-width: 900px; margin: 0 auto; }
     h1 { font-size: 20px; margin-bottom: 4px; }
@@ -4529,10 +4529,10 @@ function printFixturesReport() {
     .sum-label { font-size: 10px; color: #888; text-transform: uppercase; }
     .sum-val { font-size: 18px; font-weight: 600; }
     @media print { body { padding: 10px; } }
- /* ═══════════════════════════════════════════════════════════════════
-   FIXTURES PRICE SEARCH — CSS
+ /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   FIXTURES PRICE SEARCH â€” CSS
    Add inside the existing <style> tag in index.html
-   ═══════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Price search button on fixture rows */
 .btn-price-search {
@@ -4589,7 +4589,7 @@ function printFixturesReport() {
   animation: price-spin 0.7s linear infinite;
 }
 
-/* Price results panel — slides in below fixture row */
+/* Price results panel â€” slides in below fixture row */
 .price-results-panel {
   background: var(--surface2, #1e2021);
   border: 1px solid var(--border);
@@ -4834,40 +4834,40 @@ function printFixturesReport() {
 }
  </style></head><body>
   <h1>Fixtures & Fittings List</h1>
-  <div class="sub">128 Dairy Creek Road, Gundaroo NSW 2620 — DA250507 — Generated ${new Date().toLocaleDateString('en-AU')}</div>
+  <div class="sub">128 Dairy Creek Road, Gundaroo NSW 2620 â€” DA250507 â€” Generated ${new Date().toLocaleDateString('en-AU')}</div>
   <div class="summary">
     <div class="sum-card"><div class="sum-label">Total Items</div><div class="sum-val">${fixtures.length}</div></div>
     <div class="sum-card"><div class="sum-label">Priced Items</div><div class="sum-val">${priceCount}</div></div>
-    <div class="sum-card"><div class="sum-label">Estimated Cost</div><div class="sum-val">${totalCost>0?'$'+totalCost.toLocaleString('en-AU',{minimumFractionDigits:0}):'—'}</div></div>
+    <div class="sum-card"><div class="sum-label">Estimated Cost</div><div class="sum-val">${totalCost>0?'$'+totalCost.toLocaleString('en-AU',{minimumFractionDigits:0}):'â€”'}</div></div>
     <div class="sum-card"><div class="sum-label">Unpriced Items</div><div class="sum-val">${fixtures.length-priceCount}</div></div>
   </div>
   ${Object.entries(byRoom).sort(([a],[b])=>a.localeCompare(b)).map(([room,items])=>{
     const roomTotal = items.reduce((s,f)=>s+f.qty*f.price,0);
-    return `<h2>${room} ${roomTotal>0?'— $'+roomTotal.toLocaleString('en-AU',{minimumFractionDigits:0}):''}</h2>
+    return `<h2>${room} ${roomTotal>0?'â€” $'+roomTotal.toLocaleString('en-AU',{minimumFractionDigits:0}):''}</h2>
     <table><thead><tr>
       <th>Item</th><th>Brand / Model</th><th>Code</th><th>Dwelling</th><th>Supplier</th><th>Qty</th><th>Unit $</th><th>Total</th><th>Status</th>
     </tr></thead><tbody>
     ${items.map(f=>`<tr>
       <td>${f.name}${f.finish?'<br><small style="color:#888;">'+f.finish+'</small>':''}</td>
       <td>${[f.brand,f.model].filter(Boolean).join(' ')}</td>
-      <td style="font-family:monospace;font-size:10px;">${f.code||'—'}</td>
+      <td style="font-family:monospace;font-size:10px;">${f.code||'â€”'}</td>
       <td>${f.dwelling||'Both'}</td>
-      <td>${f.supplier||'—'}</td>
+      <td>${f.supplier||'â€”'}</td>
       <td style="text-align:center;">${f.qty||1}</td>
-      <td style="text-align:right;">${f.price>0?'$'+Number(f.price).toLocaleString('en-AU',{minimumFractionDigits:2}):'—'}</td>
-      <td style="text-align:right;font-weight:600;">${f.qty*f.price>0?'$'+(f.qty*f.price).toLocaleString('en-AU',{minimumFractionDigits:0}):'—'}</td>
+      <td style="text-align:right;">${f.price>0?'$'+Number(f.price).toLocaleString('en-AU',{minimumFractionDigits:2}):'â€”'}</td>
+      <td style="text-align:right;font-weight:600;">${f.qty*f.price>0?'$'+(f.qty*f.price).toLocaleString('en-AU',{minimumFractionDigits:0}):'â€”'}</td>
       <td><span class="status status-${f.status||'needed'}">${FX_STATUS_LABELS[f.status||'needed']}</span></td>
     </tr>`).join('')}
     </tbody></table>`;
   }).join('')}
-  <p style="margin-top:24px;font-size:10px;color:#aaa;">All prices exclude GST. Status: Needed → Researching → Selected → Ordered → Delivered</p>
+  <p style="margin-top:24px;font-size:10px;color:#aaa;">All prices exclude GST. Status: Needed â†’ Researching â†’ Selected â†’ Ordered â†’ Delivered</p>
   
-<!-- ═══ MANAGE SYSTEMS MODAL ═══ -->
+<!-- â•â•â• MANAGE SYSTEMS MODAL â•â•â• -->
 <div class="modal-overlay" id="systems-modal">
   <div class="modal" style="width:520px;">
     <div class="modal-header">
       <div class="modal-title">Manage System Groups</div>
-      <button class="modal-close" onclick="closeModal('systems-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('systems-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">System groups let you track which building systems you need quotes for and which you've already obtained. Assign docs to a system group via the Add/Edit document form.</p>
@@ -4889,9 +4889,9 @@ function printFixturesReport() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SYSTEM GROUPS
-// ═══════════════════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 let currentQuoteView = 'list'; // 'list' | 'system'
 
@@ -4921,7 +4921,7 @@ function setQuoteView(view, btn) {
 function refreshSystemGroupSelect(elId, selected) {
   const el = document.getElementById(elId);
   if (!el) return;
-  el.innerHTML = '<option value="">— None —</option>' +
+  el.innerHTML = '<option value="">â€” None â€”</option>' +
     systems.map(s=>`<option value="${s}"${s===selected?' selected':''}>${s}</option>`).join('');
 }
 
@@ -4967,7 +4967,7 @@ function renderSystemsEdit() {
   const el = document.getElementById('systems-list-edit');
   if (!el) return;
   if (!systems.length) {
-    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">No systems yet — add one below.</div>';
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">No systems yet â€” add one below.</div>';
     return;
   }
   el.innerHTML = systems.map(s => {
@@ -4978,7 +4978,7 @@ function renderSystemsEdit() {
         onblur="renameSystem('${s}', this.value)"
         onkeydown="if(event.key==='Enter')this.blur()"/>
       <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);white-space:nowrap;">${count} doc${count!==1?'s':''}</span>
-      <button class="btn btn-danger btn-sm" onclick="deleteSystem('${s}')">×</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteSystem('${s}')">Ã—</button>
     </div>`;
   }).join('');
 }
@@ -5004,19 +5004,19 @@ function renderSystemView() {
     // Status indicator
     let sysStatus, sysStatusColor;
     if (sysDocs.length===0) {
-      sysStatus = '○ No quotes yet'; sysStatusColor = 'var(--text-dim)';
+      sysStatus = 'â—‹ No quotes yet'; sysStatusColor = 'var(--text-dim)';
     } else if (hasAccepted) {
-      sysStatus = '✓ Accepted'; sysStatusColor = 'var(--green)';
+      sysStatus = 'âœ“ Accepted'; sysStatusColor = 'var(--green)';
     } else if (hasQuote) {
-      sysStatus = '◑ Quotes received'; sysStatusColor = 'var(--yellow)';
+      sysStatus = 'â—‘ Quotes received'; sysStatusColor = 'var(--yellow)';
     } else {
-      sysStatus = '◌ In progress'; sysStatusColor = 'var(--blue)';
+      sysStatus = 'â—Œ In progress'; sysStatusColor = 'var(--blue)';
     }
 
     html += `<div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-bottom:${sysDocs.length?'none':'1px solid var(--border)'};">
         <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">⬡ ${sys}</span>
+          <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">â¬¡ ${sys}</span>
           <span style="font-family:var(--mono);font-size:10px;color:${sysStatusColor};">${sysStatus}</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
@@ -5026,7 +5026,7 @@ function renderSystemView() {
       </div>
       ${sysDocs.length ? sysDocs.map(d=>renderSystemDocRow(d)).join('') :
         `<div style="padding:12px 16px;border:1px solid var(--border);font-size:12px;color:var(--text-dim);font-style:italic;">
-          No documents yet — assign quotes to this system via Add/Edit document
+          No documents yet â€” assign quotes to this system via Add/Edit document
         </div>`}
     </div>`;
   });
@@ -5035,7 +5035,7 @@ function renderSystemView() {
   if (unassigned.length) {
     html += `<div style="margin-bottom:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-bottom:none;">
-        <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);">— Unassigned</span>
+        <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);">â€” Unassigned</span>
         <span style="font-size:11px;color:var(--text-muted);">${unassigned.length} doc${unassigned.length!==1?'s':''}</span>
       </div>
       ${unassigned.map(d=>renderSystemDocRow(d)).join('')}
@@ -5043,7 +5043,7 @@ function renderSystemView() {
   }
 
   if (!allSystems.length && !unassigned.length) {
-    html = '<div class="empty-state">No systems defined yet — click ⚙ Systems to create your first system group.</div>';
+    html = '<div class="empty-state">No systems defined yet â€” click âš™ Systems to create your first system group.</div>';
   }
 
   el.innerHTML = html;
@@ -5058,20 +5058,20 @@ function renderSystemDocRow(d) {
         <span style="font-size:13px;font-weight:500;color:var(--text);">${d.supplier}</span>
         ${typeBadge(d)} ${statusBadge(d)}
       </div>
-      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${d.trade}${d.desc?' · '+d.desc:''}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${d.trade}${d.desc?' Â· '+d.desc:''}</div>
     </div>
     <div style="text-align:right;flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:13px;color:var(--accent);">${fmt(d.amount)}</div>
       ${pct>0?`<div style="font-family:var(--mono);font-size:10px;color:${pct>=100?'var(--green)':'var(--yellow)'};">${pct}% paid</div>`:''}
     </div>
     <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
-      <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">✎</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">âœŽ</button>
       <button class="btn btn-danger btn-sm" onclick="deleteItem('${d.id}','doc')">Del</button>
     </div>
   </div>`;
 }
 
-// ── App startup ──────────────────────────────────────────────────────────────
+// â”€â”€ App startup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 loadQueue();
 loadAll(); // instant load from cache
 
@@ -5085,7 +5085,7 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
 });
 
-// Connect to Supabase in background — doesn't block UI
+// Connect to Supabase in background â€” doesn't block UI
 (async () => {
   if (initSupabase()) {
     const ok = await checkConnection();
@@ -5104,12 +5104,12 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
 })();
 </script>
 
-<!-- ═══ CONTACT DEDUP MODAL ═══ -->
+<!-- â•â•â• CONTACT DEDUP MODAL â•â•â• -->
 <div class="modal-overlay" id="dedup-modal">
   <div class="modal" style="width:640px;max-height:80vh;">
     <div class="modal-header">
       <div class="modal-title">Find & Merge Duplicate Contacts</div>
-      <button class="modal-close" onclick="closeModal('dedup-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('dedup-modal')">Ã—</button>
     </div>
     <div class="modal-body" style="overflow-y:auto;max-height:calc(80vh - 120px);">
       <div id="dedup-results"></div>
@@ -5120,7 +5120,7 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   </div>
 </div>
 
-<!-- ═══ FIXTURES & FITTINGS TAB ═══ -->
+<!-- â•â•â• FIXTURES & FITTINGS TAB â•â•â• -->
 <div id="tab-fixtures" class="main" style="display:none;">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
     <div>
@@ -5146,7 +5146,7 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
       </select>
       <input class="filter-search" id="fx-search" placeholder="Search items..." oninput="renderFixtures()" style="width:180px;">
       <button class="btn btn-primary btn-sm" onclick="openFixtureModal()">+ Add Item</button>
-      <button class="btn btn-ghost btn-sm" onclick="printFixturesReport()">⎙ Print Report</button>
+      <button class="btn btn-ghost btn-sm" onclick="printFixturesReport()">âŽ™ Print Report</button>
     </div>
   </div>
 
@@ -5157,12 +5157,12 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   <div id="fixtures-list"></div>
 </div>
 
-<!-- ═══ FIXTURE ITEM MODAL ═══ -->
+<!-- â•â•â• FIXTURE ITEM MODAL â•â•â• -->
 <div class="modal-overlay" id="fixture-modal">
   <div class="modal" style="width:680px;max-height:90vh;overflow-y:auto;">
     <div class="modal-header">
       <div class="modal-title" id="fixture-modal-title">Add Fixture / Fitting</div>
-      <button class="modal-close" onclick="closeModal('fixture-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('fixture-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;">
@@ -5191,7 +5191,7 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
         <div class="form-group">
           <label class="form-label">Status</label>
           <select class="form-control" id="fx-status">
-            <option value="needed">Needed — placeholder</option>
+            <option value="needed">Needed â€” placeholder</option>
             <option value="researching">Researching</option>
             <option value="selected">Selected</option>
             <option value="ordered">Ordered</option>
@@ -5233,7 +5233,7 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
         </div>
         <div class="form-group">
           <label class="form-label">Total (excl GST)</label>
-          <div id="fx-total-preview" style="font-family:var(--mono);font-size:16px;color:var(--accent);padding:8px 0;">—</div>
+          <div id="fx-total-preview" style="font-family:var(--mono);font-size:16px;color:var(--accent);padding:8px 0;">â€”</div>
         </div>
         <div class="form-group full">
           <label class="form-label">Product URL</label>
@@ -5256,12 +5256,12 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
 </div>
 
 
-<!-- ═══ MANAGE SYSTEMS MODAL ═══ -->
+<!-- â•â•â• MANAGE SYSTEMS MODAL â•â•â• -->
 <div class="modal-overlay" id="systems-modal">
   <div class="modal" style="width:520px;">
     <div class="modal-header">
       <div class="modal-title">Manage System Groups</div>
-      <button class="modal-close" onclick="closeModal('systems-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('systems-modal')">Ã—</button>
     </div>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">System groups let you track which building systems you need quotes for and which you've already obtained. Assign docs to a system group via the Add/Edit document form.</p>
@@ -5278,176 +5278,6 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
 </div>
 
 
-// Searches Australian retail prices for a fixture/fitting using Claude + web search
-
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json',
-  };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
-
-  let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
-  }
-
-  const { brand, model, sku, category, unitPrice, qty } = body;
-
-  if (!brand && !model) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Brand or model required' }) };
-  }
-
-  const searchTerm = [brand, model, sku].filter(Boolean).join(' ');
-  const userQuoteTotal = unitPrice && qty ? (parseFloat(unitPrice) * parseInt(qty)) : null;
-
-  const prompt = `You are a price research assistant for an Australian construction project. 
-Search for the current Australian retail price for this product:
-
-**Product:** ${searchTerm}
-**Category:** ${category || 'building fixture/fitting'}
-${unitPrice ? `**Current quoted price (excl GST):** $${unitPrice} AUD per unit` : ''}
-${qty ? `**Quantity needed:** ${qty}` : ''}
-
-Search Australian retail and trade suppliers for this exact product or close equivalent. 
-Focus on: Reece Plumbing, Tradelink, Bunnings, Beaumont Tiles, Harvey Norman, Winning Appliances, 
-Beacon Lighting, Plumbing Plus, Reece, Tradelink, Mitre 10, Meir, ABI Interiors, 
-and any specialist Australian suppliers.
-
-Return a JSON object with this EXACT structure (no markdown, just raw JSON):
-{
-  "searchTerm": "${searchTerm}",
-  "results": [
-    {
-      "supplier": "Supplier Name",
-      "price": 299.00,
-      "priceType": "RRP" or "Trade" or "Sale",
-      "url": "https://...",
-      "note": "Brief note e.g. 'In stock', 'Trade account required', 'Discontinued'"
-    }
-  ],
-  "bestPrice": 249.00,
-  "bestSupplier": "Supplier Name",
-  "priceRange": { "min": 199, "max": 399 },
-  "verdict": "competitive" or "savings_available" or "overpriced" or "no_data",
-  "savingPerUnit": 50.00,
-  "savingTotal": ${userQuoteTotal ? `${userQuoteTotal}` : 'null'},
-  "summary": "One sentence summary of findings",
-  "searchedAt": "${new Date().toISOString()}",
-  "australianAvailability": "Widely available" or "Limited" or "Import only" or "Unknown"
-}
-
-If the exact model isn't found, search for the closest equivalent and note it.
-If no Australian pricing is found at all, set verdict to "no_data" and explain in summary.
-Return ONLY the JSON object, no other text.`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'interleaved-thinking-2025-05-14',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        tools: [
-          {
-            type: 'web_search_20250305',
-            name: 'web_search',
-          },
-        ],
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Anthropic API error:', response.status, errText);
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: `API error ${response.status}`, detail: errText }),
-      };
-    }
-
-    const data = await response.json();
-
-    // Extract text from response (may be after tool_use blocks)
-    let resultText = '';
-    for (const block of data.content || []) {
-      if (block.type === 'text') {
-        resultText += block.text;
-      }
-    }
-
-    // Parse JSON from response
-    let priceData;
-    try {
-      // Strip any markdown code fences if present
-      const cleaned = resultText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      // Find the JSON object
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        priceData = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('No JSON found in response');
-      }
-    } catch (parseErr) {
-      console.error('Parse error:', parseErr, 'Raw text:', resultText);
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          error: 'Could not parse price data',
-          verdict: 'no_data',
-          summary: 'Search completed but results could not be parsed. Try again.',
-          searchTerm,
-          results: [],
-        }),
-      };
-    }
-
-    // Add comparison data if we have a quoted price
-    if (unitPrice && priceData.bestPrice) {
-      const quoted = parseFloat(unitPrice);
-      const best = parseFloat(priceData.bestPrice);
-      const diff = quoted - best;
-      const pct = Math.round((diff / quoted) * 100);
-      priceData.quotedPrice = quoted;
-      priceData.priceDiffPct = pct;
-      priceData.priceDiffAbs = diff;
-      if (qty) {
-        priceData.potentialSaving = diff * parseInt(qty);
-      }
-    }
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(priceData),
-    };
-  } catch (err) {
-    console.error('Function error:', err);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: err.message }),
-    };
-  }
-};
 <script src="price-search.js"></script>
 </body>
 </html>
