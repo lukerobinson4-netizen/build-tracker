@@ -515,14 +515,21 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 <div id="tab-quotes" class="main" style="display:none;">
   <div class="section">
     <div class="section-header">
-      <div class="section-title">All Documents</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="section-title">All Documents</div>
+        <div style="display:flex;gap:4px;">
+          <button class="btn btn-ghost btn-sm" id="view-list-btn" onclick="setQuoteView('list',this)" style="border-color:var(--accent);color:var(--accent);">≡ List</button>
+          <button class="btn btn-ghost btn-sm" id="view-system-btn" onclick="setQuoteView('system',this)">⬡ By System</button>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span class="section-count" id="doc-count">0 items</span>
+        <button class="btn btn-ghost btn-sm" onclick="openModal('systems-modal');renderSystemsEdit()">⚙ Systems</button>
         <button class="btn btn-blue btn-sm" onclick="openExtractModal()">↓ Extract Dates</button>
         <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add</button>
       </div>
     </div>
-    <div class="filter-row">
+    <div class="filter-row" id="quotes-filter-row">
       <div class="filter-chip active" onclick="setFilter('all',this)">All</div>
       <div class="filter-chip" onclick="setFilter('quote',this)">Quotes</div>
       <div class="filter-chip" onclick="setFilter('invoice',this)">Invoices</div>
@@ -531,6 +538,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="filter-chip" onclick="setFilter('expired',this)">Expired</div>
       <input class="filter-search" placeholder="Search supplier, trade..." oninput="filterSearch(this.value)" id="search-input">
     </div>
+    <div id="quotes-system-view" style="display:none;"></div>
     <div class="quote-list" id="quotes-list"></div>
   </div>
 </div>
@@ -652,6 +660,10 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <div class="form-group" id="expiry-group">
             <label class="form-label">Quote Valid Until</label>
             <input class="form-control" type="date" id="f-expiry" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">System Group</label>
+            <select class="form-control" id="f-system-group"><option value="">— None —</option></select>
           </div>
           <div class="form-group full" id="linked-quote-group" style="display:none;">
             <label class="form-label">Linked Quote</label>
@@ -915,8 +927,8 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);">Payment Details</div>
       <div class="form-grid">
         <div class="form-group full"><label class="form-label">Description *</label><input class="form-control" id="pm-desc" placeholder="e.g. 10% Deposit, Progress Claim 1, Final Payment"/></div>
-        <div class="form-group"><label class="form-label">Amount (excl GST) *</label><input class="form-control" type="number" id="pm-amount" step="0.01" oninput="pmUpdateGST()"/></div>
-        <div class="form-group"><label class="form-label">GST</label><input class="form-control" type="number" id="pm-gst" step="0.01" placeholder="Auto"/></div>
+        <div class="form-group"><label class="form-label">Amount *</label><input class="form-control" type="number" id="pm-amount" step="0.01"/></div>
+        <div class="form-group"></div>
         <div class="form-group"><label class="form-label">Due Date</label><input class="form-control" type="date" id="pm-due"/></div>
         <div class="form-group"><label class="form-label">Payment Status</label>
           <select class="form-control" id="pm-status" onchange="pmTogglePaidFields()">
@@ -1031,6 +1043,10 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <input class="form-control" type="date" id="e-expiry" />
         </div>
         <div class="form-group" id="e-expiry-placeholder" style="display:none;"></div>
+        <div class="form-group">
+          <label class="form-label">System Group</label>
+          <select class="form-control" id="e-system-group"><option value="">— None —</option></select>
+        </div>
         <div class="form-group full">
           <label class="form-label">Notes / Inclusions / Exclusions</label>
           <textarea class="form-control" id="e-notes" rows="3"></textarea>
@@ -1302,6 +1318,13 @@ const FX_STATUS_LABELS = {
 };
 const FX_STATUS_ORDER = ['needed','researching','selected','ordered','delivered'];
 
+const DEFAULT_SYSTEMS = [
+  'Solar & Battery','Hot Water System','Hydronic Heating','Air Conditioning',
+  'Water & Plumbing','Septic & Wastewater','Electrical','Fencing & Gates',
+  'Pool','Landscaping','Structural & Precast','Roofing & Cladding',
+  'Windows & Doors','Other'
+];
+
 const DEFAULT_TRADES = [
   'Roofing & Cladding','Electrical','Plumbing','Solar & Battery',
   'Hydronic Heating','Concrete & Floors','Pool','Earthworks',
@@ -1319,6 +1342,7 @@ let contacts  = [];
 let questions = [];
 
 let docs     = [];
+let systems  = []; // user-defined quote groupings
 let fixtures = [];
 let dates = [];  // gantt/timeline items
 let tasks = [];
@@ -1352,14 +1376,16 @@ function docToRow(d)  {
     trade:d.trade, description:d.desc, docnum:d.docnum, doc_date:d.date,
     expiry:d.expiry, amount:Number(d.amount)||0, gst:Number(d.gst)||0,
     notes:d.notes, payments:d.payments||[], attachment_name:d.attachmentName,
-    import_method:d.importMethod, bank_details:d.bankDetails||null };
+    import_method:d.importMethod, bank_details:d.bankDetails||null,
+    system_group:d.systemGroup||null };
 }
 function rowToDoc(r)  {
   return { id:r.id, type:r.type, status:r.status, supplier:r.supplier,
     trade:r.trade, desc:r.description, docnum:r.docnum, date:r.doc_date,
     expiry:r.expiry, amount:Number(r.amount)||0, gst:Number(r.gst)||0,
     notes:r.notes, payments:r.payments||[], attachmentName:r.attachment_name,
-    importMethod:r.import_method, bankDetails:r.bank_details||null };
+    importMethod:r.import_method, bankDetails:r.bank_details||null,
+    systemGroup:r.system_group||null };
 }
 function dateToRow(d) {
   return { id:d.id, title:d.title, date:d.date, end_date:d.endDate,
@@ -1612,6 +1638,7 @@ async function loadFromSupabase() {
     const sv = (settingsR.data||[]);
     const getSetting = (k,def) => { const r=sv.find(x=>x.key===k); return r?r.value:def; };
     trades    = getSetting('trades',    []);
+    systems   = getSetting('systems',   []);
     suppliers = getSetting('suppliers', []);
     taskCats  = getSetting('task_cats', []);
 
@@ -1621,6 +1648,7 @@ async function loadFromSupabase() {
     if (!tasks.length)     { seedTasks();     await pushCollection('tasks', tasks.map(taskToRow)); }
     if (!contacts.length)  { seedContacts();  await pushCollection('contacts', contacts.map(contactToRow)); }
     if (!trades.length)    { trades=DEFAULT_TRADES.slice();  await sbSaveSetting('trades',trades); }
+    if (!systems.length)   { systems=DEFAULT_SYSTEMS.slice(); await sbSaveSetting('systems',systems); }
     if (!suppliers.length) { suppliers=DEFAULT_SUPPLIERS.slice(); await sbSaveSetting('suppliers',suppliers); }
     if (!taskCats.length)  { taskCats=DEFAULT_TASK_CATS.slice();  await sbSaveSetting('task_cats',taskCats); }
 
@@ -1670,6 +1698,7 @@ function loadAll() {
 
   // Settings from old localStorage keys OR new cache keys
   try { trades    = JSON.parse(localStorage.getItem('_cache_setting_trades'))    ||JSON.parse(localStorage.getItem(TRADES_KEY))    ||[]; } catch { trades=[]; }
+  try { systems   = JSON.parse(localStorage.getItem('_cache_setting_systems'))   ||JSON.parse(localStorage.getItem('dairy_systems_v1'))  ||[]; } catch { systems=[]; }
   try { suppliers = JSON.parse(localStorage.getItem('_cache_setting_suppliers')) ||JSON.parse(localStorage.getItem(SUPPLIERS_KEY)) ||[]; } catch { suppliers=[]; }
   try { taskCats  = JSON.parse(localStorage.getItem('_cache_setting_task_cats')) ||JSON.parse(localStorage.getItem(TASK_CATS_KEY)) ||[]; } catch { taskCats=[]; }
 
@@ -1685,6 +1714,7 @@ function loadAll() {
   if (!dates.length)     seedDates();
   if (!tasks.length)     seedTasks();
   if (!trades.length)    trades    = [...DEFAULT_TRADES];
+  if (!systems.length)   systems   = [...DEFAULT_SYSTEMS];
   if (!suppliers.length) suppliers = [...DEFAULT_SUPPLIERS];
   if (!contacts.length)  seedContacts();
   docs.forEach(d=>{ if(d.supplier&&!suppliers.includes(d.supplier)) suppliers.push(d.supplier); });
@@ -1698,6 +1728,7 @@ function saveAll() {
   localStorage.setItem(DATES_KEY,     JSON.stringify(dates));
   localStorage.setItem(TASKS_KEY,     JSON.stringify(tasks));
   localStorage.setItem(TRADES_KEY,    JSON.stringify(trades));
+  localStorage.setItem('dairy_systems_v1', JSON.stringify(systems));
   localStorage.setItem(SUPPLIERS_KEY, JSON.stringify(suppliers));
   localStorage.setItem(CONTACTS_KEY,  JSON.stringify(contacts));
   localStorage.setItem(TASK_CATS_KEY, JSON.stringify(taskCats));
@@ -1732,6 +1763,7 @@ function syncToSupabase() {
           {key:'trades',    value:trades},
           {key:'suppliers', value:suppliers},
           {key:'task_cats', value:taskCats},
+        {key:'systems',   value:systems},
         ], {onConflict:'key'}),
       ]);
       // Prune deleted rows — delete any Supabase rows not in current arrays
@@ -2199,7 +2231,6 @@ function pendingPaymentRows(doc) {
     payments.forEach(p => {
       const scheduledAmt = Number(p.amount) || 0;
       if (p.status === 'partial') {
-        // Partially paid row — show only the remaining balance
         const paid = Number(p.paidAmount || 0);
         const owed = scheduledAmt - paid;
         if (owed > 0.005) {
@@ -2207,11 +2238,20 @@ function pendingPaymentRows(doc) {
             trade: doc.trade, desc: (p.desc || '') + ' (balance)', partial: true });
         }
       } else if (!isPaymentPaid(p)) {
-        // Unpaid scheduled payment — show in full
         rows.push({ ...p, docId: doc.id, supplier: doc.supplier, trade: doc.trade });
       }
-      // status === 'paid' → fully paid, skip
     });
+    // If no payment rows were generated but there's still an outstanding balance,
+    // show a synthetic balance row (covers edge cases like D&J where payment data is partial)
+    if (rows.length === 0 && docPaid < docAmount - 0.005) {
+      rows.push({
+        id: 'syn-bal-' + doc.id,
+        desc: 'Outstanding balance',
+        amount: docAmount - docPaid,
+        due: payments[0]?.due || '',
+        docId: doc.id, supplier: doc.supplier, trade: doc.trade, synthetic: true
+      });
+    }
   }
   return rows;
 }
@@ -3115,7 +3155,7 @@ function openPaymentModal(docId) {
   paymentTarget = docId;
   const d = docs.find(x=>x.id===docId);
   document.getElementById('pm-modal-title').textContent = 'Add Payment' + (d?' — '+d.supplier:'');
-  ['pm-desc','pm-amount','pm-gst','pm-due','pm-paid-date','pm-paid-amount','pm-ref','pm-bank','pm-bsb','pm-acc','pm-txn'].forEach(i=>{const el=document.getElementById(i); if(el) el.value='';});
+  ['pm-desc','pm-amount','pm-due','pm-paid-date','pm-paid-amount','pm-ref','pm-bank','pm-bsb','pm-acc','pm-txn'].forEach(i=>{const el=document.getElementById(i); if(el) el.value='';});
   document.getElementById('pm-status').value = 'pending';
   document.getElementById('pm-method').value = 'direct';
   document.getElementById('pm-add-gantt').checked = true;
@@ -3128,11 +3168,7 @@ function openPaymentModal(docId) {
   document.getElementById('pm-paid-section').style.display = 'none';
   document.getElementById('payment-modal').classList.add('open');
 }
-function pmUpdateGST() {
-  const amt = parseFloat(document.getElementById('pm-amount').value)||0;
-  const gstEl = document.getElementById('pm-gst');
-  if (gstEl && !gstEl._manuallySet) gstEl.value = (Math.round(amt*0.1*100)/100).toFixed(2);
-}
+// pmUpdateGST removed — GST field removed from payment modal
 function pmTogglePaidFields() {
   const status = document.getElementById('pm-status').value;
   const section = document.getElementById('pm-paid-section');
@@ -3154,7 +3190,7 @@ function savePayment() {
   }
   const p = {
     id:uid(), desc, amount,
-    gst: parseFloat(document.getElementById('pm-gst').value)||Math.round(amount*0.1*100)/100,
+    gst: Math.round(amount*0.1*100)/100,
     due,
     paid: (status==='paid'||status==='partial') ? (document.getElementById('pm-paid-date').value||today()) : '',
     paidAmount: status==='partial' ? parseFloat(document.getElementById('pm-paid-amount').value)||amount : '',
@@ -3191,6 +3227,7 @@ function confirmDelete() {
 function openAddModal() {
   ['f-supplier','f-desc','f-docnum','f-expiry','f-notes'].forEach(i=>{const e=document.getElementById(i); if(e) e.value='';});
   document.getElementById('f-type').value='quote';
+  refreshSystemGroupSelect('f-system-group', '');
   document.getElementById('f-status').value='pending';
   document.getElementById('f-date').value=today();
   document.getElementById('f-amount').value='';
@@ -3262,7 +3299,7 @@ function onGstInclChange() {
 }
 
 function saveDocument() {
-  let type,status,supplier,trade,desc,docnum,date,expiry,amount,notes,linkedQuote,attachmentName='';
+  let type,status,supplier,trade,desc,docnum,date,expiry,amount,notes,linkedQuote,attachmentName='',systemGroup='';
   let bankDetails = {};
   if(currentImportTab==='form'){
     type=document.getElementById('f-type').value; status=document.getElementById('f-status').value;
@@ -3270,6 +3307,7 @@ function saveDocument() {
     desc=document.getElementById('f-desc').value.trim(); docnum=document.getElementById('f-docnum').value.trim();
     date=document.getElementById('f-date').value; expiry=document.getElementById('f-expiry').value;
     amount=parseFloat(document.getElementById('f-amount').value)||0; notes=document.getElementById('f-notes').value.trim();
+    systemGroup=document.getElementById('f-system-group')?.value||'';
     linkedQuote=document.getElementById('f-linked-quote').value;
     bankDetails = { bank:document.getElementById('f-bank').value.trim(), bsb:document.getElementById('f-bsb').value.trim(), acc:document.getElementById('f-acc-num').value.trim(), accName:document.getElementById('f-acc-name').value.trim() };
   } else if(currentImportTab==='upload'){
@@ -3299,7 +3337,7 @@ function saveDocument() {
   // GST for new doc: only auto-calc if no GST field exists on the add form
   // (add form doesn't have a GST field — always auto-calc at 10%)
   const newGst = Math.round(amount * 0.1 * 100) / 100;
-  const doc={id:uid(),type,status,supplier,trade,desc,docnum,date,expiry:type==='quote'?expiry:'',amount,gst:newGst,notes,payments,attachmentName,linkedQuote:type==='invoice'?linkedQuote:'',importMethod:currentImportTab,bankDetails,files};
+  const doc={id:uid(),type,status,supplier,trade,desc,docnum,date,expiry:type==='quote'?expiry:'',amount,gst:newGst,notes,payments,attachmentName,linkedQuote:type==='invoice'?linkedQuote:'',importMethod:currentImportTab,bankDetails,files,systemGroup:systemGroup||null};
   docs.unshift(doc);
   autoSaveSupplier(supplier);
   // Sync contact
@@ -3340,6 +3378,7 @@ function openEditModal(docId) {
   if (amtLbl) amtLbl.textContent = 'Amount (excl GST) *';
   document.getElementById('e-gst-preview').textContent = d.gst ? 'GST: $'+d.gst : '';
   document.getElementById('e-expiry').value = d.expiry || '';
+  refreshSystemGroupSelect('e-system-group', d.systemGroup||'');
   document.getElementById('e-notes').value = d.notes || '';
   document.getElementById('e-attachment').value = d.attachmentName || '';
   document.getElementById('edit-modal-title').textContent = 'Edit — ' + d.supplier;
@@ -3458,6 +3497,7 @@ function saveEdit() {
   d.amount = amount;
   d.gst = gst;
   d.expiry = d.type==='quote' ? document.getElementById('e-expiry').value : '';
+  d.systemGroup = document.getElementById('e-system-group')?.value || null;
   d.notes = document.getElementById('e-notes').value.trim();
   d.attachmentName = document.getElementById('e-attachment').value.trim();
 
@@ -4193,15 +4233,22 @@ function markPaid(docId, payId) {
   const d = docs.find(x=>x.id===docId);
   const p = (d?.payments||[]).find(x=>x.id===payId);
   if (!p) return;
-  // Show confirmation dialog to capture bank details
   const ref = prompt(`Enter bank confirmation / receipt reference for this payment:\n(BSB, Account, transaction ID, receipt number etc.)\n\nPayment: ${p.desc} — ${fmt(p.amount)}`);
-  if (ref === null) return; // cancelled
+  if (ref === null) return;
   if (!ref.trim()) { alert('Bank confirmation reference is required.'); return; }
   p.paid   = today();
   p.status = 'paid';
   p.ref    = ref.trim();
+  // Auto-mark invoice as paid if all payments now cover the full amount
+  const totalPaidNow = paidTotal(d);
+  const docAmt = Number(d.amount) || 0;
+  if (d.type === 'invoice' && totalPaidNow >= docAmt - 0.005 && docAmt > 0) {
+    d.status = 'paid';
+  }
   saveAll();
   refreshPanel(docId);
+  renderQuotes();
+  renderDashboard();
 }
 
 // ═══ INIT ════════════════════════════════════════════════════════════════════
@@ -4504,9 +4551,214 @@ function printFixturesReport() {
     </tbody></table>`;
   }).join('')}
   <p style="margin-top:24px;font-size:10px;color:#aaa;">All prices exclude GST. Status: Needed → Researching → Selected → Ordered → Delivered</p>
-  </body></html>`);
+  
+<!-- ═══ MANAGE SYSTEMS MODAL ═══ -->
+<div class="modal-overlay" id="systems-modal">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <div class="modal-title">Manage System Groups</div>
+      <button class="modal-close" onclick="closeModal('systems-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">System groups let you track which building systems you need quotes for and which you've already obtained. Assign docs to a system group via the Add/Edit document form.</p>
+      <div id="systems-list-edit" style="margin-bottom:14px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input class="form-control" id="new-system-name" placeholder="New system name e.g. Rainwater Harvesting" style="flex:1;"/>
+        <button class="btn btn-primary btn-sm" onclick="addSystem()">+ Add</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('systems-modal')">Done</button>
+    </div>
+  </div>
+</div>
+
+</body></html>`);
   w.document.close();
   w.print();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SYSTEM GROUPS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+let currentQuoteView = 'list'; // 'list' | 'system'
+
+function setQuoteView(view, btn) {
+  currentQuoteView = view;
+  document.querySelectorAll('#view-list-btn,#view-system-btn').forEach(b=>{
+    b.style.borderColor=''; b.style.color='';
+  });
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color       = 'var(--accent)';
+  const listEl   = document.getElementById('quotes-list');
+  const systemEl = document.getElementById('quotes-system-view');
+  const filterRow= document.getElementById('quotes-filter-row');
+  if (view === 'system') {
+    listEl.style.display    = 'none';
+    systemEl.style.display  = 'block';
+    filterRow.style.display = 'none';
+    renderSystemView();
+  } else {
+    listEl.style.display    = 'block';
+    systemEl.style.display  = 'none';
+    filterRow.style.display = 'flex';
+    renderQuotes();
+  }
+}
+
+function refreshSystemGroupSelect(elId, selected) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '<option value="">— None —</option>' +
+    systems.map(s=>`<option value="${s}"${s===selected?' selected':''}>${s}</option>`).join('');
+}
+
+function addSystem() {
+  const name = document.getElementById('new-system-name').value.trim();
+  if (!name) return;
+  if (systems.includes(name)) { alert('System already exists.'); return; }
+  systems.push(name);
+  saveAll();
+  document.getElementById('new-system-name').value = '';
+  renderSystemsEdit();
+  refreshSystemGroupSelect('e-system-group', '');
+  refreshSystemGroupSelect('f-system-group', '');
+}
+
+function deleteSystem(name) {
+  if (!confirm(`Delete system "${name}"? Documents assigned to it will lose this grouping.`)) return;
+  systems = systems.filter(s=>s!==name);
+  // Remove from any docs that reference it
+  docs.forEach(d=>{ if(d.systemGroup===name) d.systemGroup=null; });
+  saveAll();
+  renderSystemsEdit();
+  refreshSystemGroupSelect('e-system-group', '');
+  refreshSystemGroupSelect('f-system-group', '');
+  if (currentQuoteView==='system') renderSystemView();
+}
+
+function renameSystem(oldName, newName) {
+  newName = newName.trim();
+  if (!newName || newName===oldName) return;
+  if (systems.includes(newName)) { alert('A system with that name already exists.'); return; }
+  const idx = systems.indexOf(oldName);
+  if (idx>=0) systems[idx] = newName;
+  docs.forEach(d=>{ if(d.systemGroup===oldName) d.systemGroup=newName; });
+  saveAll();
+  renderSystemsEdit();
+  refreshSystemGroupSelect('e-system-group', '');
+  refreshSystemGroupSelect('f-system-group', '');
+  if (currentQuoteView==='system') renderSystemView();
+}
+
+function renderSystemsEdit() {
+  const el = document.getElementById('systems-list-edit');
+  if (!el) return;
+  if (!systems.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">No systems yet — add one below.</div>';
+    return;
+  }
+  el.innerHTML = systems.map(s => {
+    const count = docs.filter(d=>d.systemGroup===s).length;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <input class="form-control" value="${s}" id="sys-rename-${s.replace(/[^a-z0-9]/gi,'_')}"
+        style="flex:1;height:30px;font-size:12px;"
+        onblur="renameSystem('${s}', this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()"/>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-muted);white-space:nowrap;">${count} doc${count!==1?'s':''}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteSystem('${s}')">×</button>
+    </div>`;
+  }).join('');
+}
+
+function renderSystemView() {
+  const el = document.getElementById('quotes-system-view');
+  if (!el) return;
+
+  // Build a list of all systems + an "Unassigned" bucket
+  const allSystems = [...systems];
+  const unassigned = docs.filter(d=>!d.systemGroup || !systems.includes(d.systemGroup));
+
+  let html = '';
+
+  // Render each system
+  allSystems.forEach(sys => {
+    const sysDocs = docs.filter(d=>d.systemGroup===sys);
+    const hasQuote   = sysDocs.some(d=>d.type==='quote');
+    const hasAccepted= sysDocs.some(d=>d.status==='accepted'||d.status==='paid');
+    const hasInvoice = sysDocs.some(d=>d.type==='invoice');
+    const totalAmt   = sysDocs.reduce((s,d)=>s+Number(d.amount),0);
+
+    // Status indicator
+    let sysStatus, sysStatusColor;
+    if (sysDocs.length===0) {
+      sysStatus = '○ No quotes yet'; sysStatusColor = 'var(--text-dim)';
+    } else if (hasAccepted) {
+      sysStatus = '✓ Accepted'; sysStatusColor = 'var(--green)';
+    } else if (hasQuote) {
+      sysStatus = '◑ Quotes received'; sysStatusColor = 'var(--yellow)';
+    } else {
+      sysStatus = '◌ In progress'; sysStatusColor = 'var(--blue)';
+    }
+
+    html += `<div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-bottom:${sysDocs.length?'none':'1px solid var(--border)'};">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);">⬡ ${sys}</span>
+          <span style="font-family:var(--mono);font-size:10px;color:${sysStatusColor};">${sysStatus}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          ${totalAmt>0?`<span style="font-family:var(--mono);font-size:12px;color:var(--accent);">${fmt(totalAmt)}</span>`:''}
+          <span style="font-size:11px;color:var(--text-muted);">${sysDocs.length} doc${sysDocs.length!==1?'s':''}</span>
+        </div>
+      </div>
+      ${sysDocs.length ? sysDocs.map(d=>renderSystemDocRow(d)).join('') :
+        `<div style="padding:12px 16px;border:1px solid var(--border);font-size:12px;color:var(--text-dim);font-style:italic;">
+          No documents yet — assign quotes to this system via Add/Edit document
+        </div>`}
+    </div>`;
+  });
+
+  // Unassigned
+  if (unassigned.length) {
+    html += `<div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg);border:1px solid var(--border);border-bottom:none;">
+        <span style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);">— Unassigned</span>
+        <span style="font-size:11px;color:var(--text-muted);">${unassigned.length} doc${unassigned.length!==1?'s':''}</span>
+      </div>
+      ${unassigned.map(d=>renderSystemDocRow(d)).join('')}
+    </div>`;
+  }
+
+  if (!allSystems.length && !unassigned.length) {
+    html = '<div class="empty-state">No systems defined yet — click ⚙ Systems to create your first system group.</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function renderSystemDocRow(d) {
+  const paid = paidTotal(d);
+  const pct  = d.amount>0 ? Math.min(100,Math.round(paid/d.amount*100)) : 0;
+  return `<div style="padding:10px 16px;border:1px solid var(--border);border-top:none;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:background 0.1s;" onclick="toggleExpand('${d.id}')" onmouseover="this.style.background='rgba(255,255,255,0.025)'" onmouseout="this.style.background=''">
+    <div style="flex:1;min-width:0;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:500;color:var(--text);">${d.supplier}</span>
+        ${typeBadge(d)} ${statusBadge(d)}
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${d.trade}${d.desc?' · '+d.desc:''}</div>
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:13px;color:var(--accent);">${fmt(d.amount)}</div>
+      ${pct>0?`<div style="font-family:var(--mono);font-size:10px;color:${pct>=100?'var(--green)':'var(--yellow)'};">${pct}% paid</div>`:''}
+    </div>
+    <div style="display:flex;gap:4px;" onclick="event.stopPropagation()">
+      <button class="btn btn-ghost btn-sm" onclick="openEditModal('${d.id}')">✎</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteItem('${d.id}','doc')">Del</button>
+    </div>
+  </div>`;
 }
 
 // ── App startup ──────────────────────────────────────────────────────────────
@@ -4689,6 +4941,28 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
         <button class="btn btn-ghost" onclick="closeModal('fixture-modal')">Cancel</button>
         <button class="btn btn-primary" onclick="saveFixture()">Save Item</button>
       </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ MANAGE SYSTEMS MODAL ═══ -->
+<div class="modal-overlay" id="systems-modal">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <div class="modal-title">Manage System Groups</div>
+      <button class="modal-close" onclick="closeModal('systems-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">System groups let you track which building systems you need quotes for and which you've already obtained. Assign docs to a system group via the Add/Edit document form.</p>
+      <div id="systems-list-edit" style="margin-bottom:14px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input class="form-control" id="new-system-name" placeholder="New system name e.g. Rainwater Harvesting" style="flex:1;"/>
+        <button class="btn btn-primary btn-sm" onclick="addSystem()">+ Add</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('systems-modal')">Done</button>
     </div>
   </div>
 </div>
