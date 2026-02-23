@@ -619,17 +619,6 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
     <div class="timeline-strip-scroll" id="timeline-strip"></div>
   </div>
 
-  <!-- TASK STRIP -->
-  <div class="timeline-strip" style="border-left-color:var(--purple);margin-bottom:20px;">
-    <div class="timeline-strip-header">
-      <div class="timeline-strip-title" style="color:var(--purple);">Open Tasks</div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" onclick="openModal('task-modal')">+ Add Task</button>
-        <button class="btn btn-ghost btn-sm" onclick="showTab('tasks',document.querySelectorAll('.tab')[1])">View All →</button>
-      </div>
-    </div>
-    <div class="timeline-strip-scroll" id="task-strip"></div>
-  </div>
 
   <div class="stats-row" id="stats-row"></div>
 
@@ -2349,6 +2338,7 @@ function renderTaskStrip() {
   const other = tasks.filter(t=>!t.done && t.priority!=='high').sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')).slice(0,6);
   const all = [...open,...other];
   const el = document.getElementById('task-strip');
+  if (!el) return;
   if (!all.length) { el.innerHTML='<div style="padding:16px;font-family:var(--mono);font-size:11px;color:var(--text-dim);">No open tasks</div>'; return; }
   el.innerHTML = all.map(t=>{
     const days = daysUntil(t.due);
@@ -2537,7 +2527,7 @@ function renderDashboardOpenTasks() {
     const priCol = t.priority==='high'?'var(--red)':t.priority==='med'?'var(--orange)':'var(--text-dim)';
     const dueCol = !t.due?'var(--text-dim)':days<0?'var(--red)':days<3?'var(--orange)':'var(--text-muted)';
     const dueStr = t.due ? (days<0?`${Math.abs(days)}d overdue`:days===0?'today':days<7?`${days}d`:fmtD(t.due)) : '';
-    return `<div style="padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+    return `<div style="padding:8px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="showTab('tasks');setTimeout(()=>openTaskModal('${t.id}'),300)">
       <span style="width:6px;height:6px;border-radius:50%;background:${priCol};flex-shrink:0;"></span>
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${t.title}</div>
