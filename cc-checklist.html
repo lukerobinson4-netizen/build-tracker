@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA250507 — CC Checklist</title>
+<style>
+  :root {
+    --bg: #0e0f0f;
+    --surface: #161818;
+    --surface2: #1e2021;
+    --border: #2a2c2e;
+    --text: #e8e4de;
+    --text-muted: #7a7875;
+    --text-dim: #4a4845;
+    --green: #4caf7d;
+    --orange: #e07f3a;
+    --red: #e05555;
+    --blue: #5b8fcc;
+    --accent: #c8a96e;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif; font-size: 14px; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-title { font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: var(--mono); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .btn { padding: 6px 14px; border-radius: 3px; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; border: 1px solid; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .auth-status { font-family: var(--mono); font-size: 10px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+  .auth-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+  .auth-dot.connected { background: var(--green); }
+
+  /* PROGRESS */
+  .progress-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; }
+  .progress-stats { display: flex; gap: 24px; margin-bottom: 8px; }
+  .progress-stat { font-family: var(--mono); font-size: 11px; }
+  .progress-stat span { color: var(--accent); font-weight: 600; }
+  .progress-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+
+  /* CONTENT */
+  .content { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+  /* SECTION */
+  .section-block { margin-bottom: 24px; }
+  .section-heading { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .section-count { color: var(--text-dim); }
+
+  /* CHECKLIST ITEM */
+  .checklist-item { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 6px; overflow: hidden; transition: border-color 0.15s; }
+  .checklist-item:hover { border-color: #3a3c3e; }
+  .checklist-item.status-completed { border-left: 3px solid var(--green); }
+  .checklist-item.status-outstanding { border-left: 3px solid var(--border); }
+
+  .item-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .item-check { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all 0.15s; }
+  .status-completed .item-check { background: var(--green); border-color: var(--green); color: var(--bg); }
+
+  .item-num { font-family: var(--mono); font-size: 10px; color: var(--text-dim); min-width: 32px; }
+  .item-title { flex: 1; font-size: 13px; font-weight: 500; }
+  .item-da { font-family: var(--mono); font-size: 9px; color: var(--text-dim); white-space: nowrap; }
+  .item-status-badge { font-family: var(--mono); font-size: 9px; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .badge-outstanding { background: rgba(122,120,117,0.15); color: var(--text-dim); }
+  .badge-completed { background: rgba(76,175,125,0.15); color: var(--green); }
+  .item-expand { color: var(--text-dim); font-size: 10px; transition: transform 0.2s; }
+  .item-expand.open { transform: rotate(180deg); }
+
+  /* ITEM DETAIL */
+  .item-detail { border-top: 1px solid var(--border); padding: 12px 14px; background: var(--surface2); display: none; }
+  .item-detail.open { display: block; }
+  .item-description { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+  .item-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  .status-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; font-family: var(--mono); font-size: 10px; border-radius: 3px; cursor: pointer; }
+  .notes-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 10px; font-family: var(--mono); font-size: 11px; border-radius: 3px; margin-bottom: 10px; resize: vertical; min-height: 48px; }
+  .notes-input:focus { outline: none; border-color: var(--accent); }
+
+  /* FILE UPLOAD */
+  .upload-zone { border: 1px dashed var(--border); border-radius: 3px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.15s; }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(200,169,110,0.05); }
+  .upload-zone-text { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+  .upload-zone-text strong { color: var(--accent); }
+  .upload-input { display: none; }
+
+  /* UPLOADED FILES */
+  .uploaded-files { margin-top: 8px; }
+  .uploaded-file { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(76,175,125,0.08); border: 1px solid rgba(76,175,125,0.2); border-radius: 3px; margin-bottom: 4px; }
+  .uploaded-file-name { font-family: var(--mono); font-size: 10px; color: var(--green); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .uploaded-file-link { font-family: var(--mono); font-size: 9px; color: var(--blue); text-decoration: none; }
+  .uploaded-file-link:hover { text-decoration: underline; }
+  .upload-progress { font-family: var(--mono); font-size: 10px; color: var(--orange); display: flex; align-items: center; gap: 6px; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 20px; right: 20px; z-index: 9999; background: var(--surface2); border: 1px solid var(--green); color: var(--text); padding: 10px 16px; border-radius: 4px; font-size: 12px; font-family: var(--mono); box-shadow: 0 4px 12px rgba(0,0,0,0.4); animation: fadeIn 0.2s; }
+  .toast.error { border-color: var(--red); }
+  .toast.warning { border-color: var(--orange); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SPINNER */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 10px; height: 10px; border: 1.5px solid currentColor; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.7s linear infinite; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">DA250507 -- Construction Certificate Checklist</div>
+    <div class="header-sub">128 Dairy Creek Road, Gundaroo NSW 2620 -- Capital Certifiers CC.05.26</div>
+  </div>
+  <div class="header-right">
+    <div class="auth-status">
+      <div class="auth-dot" id="auth-dot"></div>
+      <span id="auth-label">Not connected to Google Drive</span>
+    </div>
+    <button class="btn btn-ghost" id="btn-auth" onclick="handleAuth()">Connect Drive</button>
+    <button class="btn btn-ghost" onclick="exportStatus()">Export Status</button>
+  </div>
+</div>
+
+<div class="progress-bar">
+  <div class="progress-stats">
+    <div class="progress-stat">Total: <span id="stat-total">0</span></div>
+    <div class="progress-stat">Completed: <span id="stat-completed" style="color:var(--green)">0</span></div>
+    <div class="progress-stat">Outstanding: <span id="stat-outstanding" style="color:var(--text-dim)">0</span></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<div class="content" id="checklist-content"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────
+var CLIENT_ID = '915894844697-9omjhav6sl4mrgnkqbooisig4e78aidn.apps.googleusercontent.com';
+var DRIVE_FOLDER_ID = '1HDn1qHKOBrjQRBW3s9ZuacMtNcuc-e56';
+var SCOPES = 'https://www.googleapis.com/auth/drive.file';
+var DA_NUMBER = 'DA250507';
+
+// ── CHECKLIST DATA ───────────────────────────────────────────────────
+var SECTIONS = [
+  {
+    title: '3. Architectural Plans',
+    items: [
+      { id: '3.1', code: 'ARCH_SMOKE', title: 'Smoke Alarm Locations', da: '33', description: 'Plans must show smoke alarm locations complying with AS 3786:2014 and NCC 2022 Part 9.5.4. Required on each floor, at intermediate stair levels, outside bedrooms.' },
+      { id: '3.2', code: 'ARCH_SMOKE2', title: 'Smoke Alarm Specification', da: '33', description: 'Specify whether smoke alarms comply with AS 3786:2014. Specific details and location must be clearly shown on plans.' },
+      { id: '3.3', code: 'ARCH_LAUNDRY', title: 'Laundry Facility', da: '', description: 'Laundry facility to comprise washing machine and dedicated washtub within the same room to comply with NCC 2022 Part 10.4.1(c). Must be clearly identified on plans.' },
+      { id: '3.4', code: 'ARCH_LIGHTING', title: 'Natural Lighting', da: '', description: 'Natural lighting required to all habitable rooms. Aggregate light transmitting area not less than 10% of floor area, open to sky. NCC 2022 Part 10.5.1.' },
+      { id: '3.5', code: 'ARCH_VENT', title: 'Natural Ventilation', da: '', description: 'Natural ventilation required to all habitable rooms via window or door openings with ventilating area not less than 5% of floor area. NCC 2022 Part 10.6.' },
+      { id: '3.6', code: 'ARCH_HEIGHTS', title: 'Floor to Ceiling Heights', da: '', description: 'Floor to ceiling heights of all rooms to be clearly indicated on plans. NCC 2022 Part 10.3 Room Heights. Sloped ceilings: required height for at least 2/3 of floor area.' },
+    ]
+  },
+  {
+    title: '6. Energy Efficiency',
+    items: [
+      { id: '6.1a', code: 'BASIX', title: 'BASIX Certificate', da: '12', description: 'Provide copy of BASIX certificate applicable to the proposal. Must be less than 3 months old if not referenced as approved document on DA consent. BASIX commitments to be clearly marked on plans.' },
+      { id: '6.1b', code: 'NATHERS', title: 'NatHERS / ABSA Assessors Certificate', da: '12', description: 'If referenced on the BASIX Certificate, provide the Assessors Certificate (ABSA or NatHERS). Commitment areas and energy commitments to be checked during construction phase.' },
+    ]
+  },
+  {
+    title: '7. Structural Engineering',
+    items: [
+      { id: '7.1', code: 'STRUCT', title: 'Structural Engineering Plans & Design Certificate', da: '22', description: 'Provide structural engineering plans endorsed with signature OR design certificate from registered practicing structural engineer on NER register, ACSE or accredited engineer. No exclusions (D&C elements, seismic restraints). Certification for entire structure. Drawings issued "For Construction".' },
+    ]
+  },
+  {
+    title: '8. Geotechnical',
+    items: [
+      { id: '8.1', code: 'GEO', title: 'Soil Classification Report', da: '21', description: 'Structural Engineering Plans must reference a soil classification report. Confirm compliant soil classification report submitted and referenced in Structural Engineering.' },
+    ]
+  },
+  {
+    title: '9. Stormwater',
+    items: [
+      { id: '9.1', code: 'STORM', title: 'Stormwater Plans & Design Certificate', da: '72,74', description: 'Stormwater Plans to minimum scale 1:100. Design certificate from hydraulic engineer stating design complies with NCC 2022 Part 3.3 Drainage and/or AS/NZS 3500.3:2021. Drawings issued "For Construction".' },
+    ]
+  },
+  {
+    title: '15. General',
+    items: [
+      { id: '15.1', code: 'SPEC', title: 'Architectural Building Specification', da: '29', description: 'Submit copies of general building housing specifications clearly referencing all clauses and parts of the BCA with Australian Standards required for the project. BCA reference and Australian Standards must be up to date with latest editions.' },
+      { id: '15.2', code: 'SEWAGE', title: 'Onsite Sewage Management Certificate of Accreditation', da: '26', description: 'NSW Health Certificate of Accreditation for the on site sewage management system must be submitted to Council.' },
+      { id: '15.3', code: 'COLOURS', title: 'External Colour & Material Schedule', da: '10', description: 'Colours and external materials must be compatible with those of existing development in the locality. Zincalume is not permitted for roof or wall panels.' },
+      { id: '15.4', code: 'TANK', title: 'Rainwater Tank Specifications', da: '30', description: "Manufacturer's specifications of the rainwater tank to be installed must be submitted to the principal certifier." },
+      { id: '15.5', code: 'POOL', title: 'Pool Pump & Filtration Specifications', da: '31', description: "Manufacturer's specifications of the swimming pool pump and filtration system must be submitted to and approved by the principal certifier and Council." },
+      { id: '15.6', code: 'HEATER', title: 'Solid Fuel Heater Details', da: '32', description: 'Solid fuel heater details must be submitted to the principal certifier and Council.' },
+      { id: '15.7', code: 'LSL', title: 'Long Service Levy Payment Receipt', da: '19', description: 'Provide receipt of payment of the long service levy for 0.25% of the cost of works (works over $250,000). Payment via Council or online via Service NSW. Cost of works on application and receipt must match.' },
+      { id: '15.8', code: 'COUNCIL_FEES', title: 'Council Fees Payment Receipt', da: '17,18', description: 'Make payment as outlined in development consent conditions (bonds/deposits, guarantees, section 7.12 contributions) prior to issue of Construction Certificate. Forward receipt to certifying authority.' },
+      { id: '15.9', code: 'ROAD', title: 'Road & Public Domain Approval', da: '11,27', description: 'Provide construction drawings for upgrading existing access crossing and paving of internal accessway. Provide copy of Road and Public Domain approval from Council, Section 138 of the Roads Act 1993.' },
+      { id: '15.10', code: 'OB', title: 'Owner Builder Permit / Home Warranty Insurance', da: '13,20', description: 'Under Home Building Act 1989, domestic building works over $20,000 by licensed builders require Home Warranty Insurance or HBCF Certificate. Owner builders must provide copy of owner builder permit.' },
+    ]
+  },
+  {
+    title: '16. Before Works Commence',
+    items: [
+      { id: '16.1', code: 'PRE_GENERAL', title: 'General Pre-commencement Measures', da: '34-38', description: 'General measures to be in place before building work commences as per DA conditions 34, 35, 36, 37, 38.' },
+      { id: '16.2', code: 'SURVEY_SET', title: 'Set Out by Registered Surveyor', da: '39', description: 'Building/s must be set out by a registered surveyor to verify the correct position of each structure in relation to property boundaries.' },
+      { id: '16.3', code: 'ROAD_APP', title: 'Application for Works in Road Reserve', da: '40', description: 'Application for Activities in a Council Road Reserve (Form 35) must be lodged with and approved by Council.' },
+      { id: '16.4', code: 'PLUMBER', title: 'Notice of Work - Plumbers and Drainers', da: '41', description: 'Each plumber and drainer must submit to Council a Notice of Work (Form 11) no later than two business days prior to works commencing.' },
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────
+var state = {};
+var tokenClient = null;
+var accessToken = null;
+var gapiReady = false;
+var gisReady = false;
+
+function loadState() {
+  var saved = localStorage.getItem('cc_checklist_state');
+  if (saved) {
+    try { state = JSON.parse(saved); } catch(e) { state = {}; }
+  }
+}
+
+function saveState() {
+  localStorage.setItem('cc_checklist_state', JSON.stringify(state));
+}
+
+function getItem(id) {
+  if (!state[id]) state[id] = { status: 'outstanding', notes: '', files: [] };
+  return state[id];
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────
+function initGapi() {
+  gapi.load('client', function() {
+    gapi.client.init({
+      apiKey: '',
+      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+    }).then(function() {
+      gapiReady = true;
+      checkReady();
+    });
+  });
+}
+
+function initGis() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: function(response) {
+      if (response.error) { showToast('Auth error: ' + response.error, 'error'); return; }
+      accessToken = response.access_token;
+      gapi.client.setToken({ access_token: accessToken });
+      updateAuthUI(true);
+      showToast('Connected to Google Drive', 'success');
+    },
+  });
+  gisReady = true;
+  checkReady();
+}
+
+function checkReady() {
+  if (gapiReady && gisReady) {
+    var saved = localStorage.getItem('cc_drive_token');
+    if (saved) {
+      accessToken = saved;
+      gapi.client.setToken({ access_token: saved });
+      updateAuthUI(true);
+    }
+  }
+}
+
+function handleAuth() {
+  if (accessToken) {
+    accessToken = null;
+    localStorage.removeItem('cc_drive_token');
+    gapi.client.setToken(null);
+    updateAuthUI(false);
+    showToast('Disconnected from Google Drive');
+    return;
+  }
+  if (!tokenClient) { showToast('Auth not ready yet, try again', 'warning'); return; }
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function updateAuthUI(connected) {
+  var dot = document.getElementById('auth-dot');
+  var label = document.getElementById('auth-label');
+  var btn = document.getElementById('btn-auth');
+  if (connected) {
+    dot.classList.add('connected');
+    label.textContent = 'Connected to Google Drive';
+    btn.textContent = 'Disconnect';
+    if (accessToken) localStorage.setItem('cc_drive_token', accessToken);
+  } else {
+    dot.classList.remove('connected');
+    label.textContent = 'Not connected to Google Drive';
+    btn.textContent = 'Connect Drive';
+  }
+}
+
+// ── DRIVE UPLOAD ──────────────────────────────────────────────────────
+function generateFileName(itemId, code, originalName) {
+  var ext = originalName.split('.').pop().toLowerCase();
+  var today = new Date();
+  var date = today.getFullYear().toString() +
+    String(today.getMonth()+1).padStart(2,'0') +
+    String(today.getDate()).padStart(2,'0');
+  var desc = originalName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g,'_').substring(0,30);
+  return DA_NUMBER + '_CC_' + itemId + '_' + code + '_' + desc + '_' + date + '.' + ext;
+}
+
+async function uploadToDrive(file, itemId, code, progressEl) {
+  if (!accessToken) {
+    showToast('Connect to Google Drive first', 'warning');
+    return null;
+  }
+
+  var fileName = generateFileName(itemId, code, file.name);
+  progressEl.innerHTML = '<span class="spinner"></span> Uploading ' + fileName + '...';
+
+  try {
+    var metadata = {
+      name: fileName,
+      parents: [DRIVE_FOLDER_ID],
+    };
+
+    var form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
+
+    var response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + accessToken },
+      body: form,
+    });
+
+    if (!response.ok) {
+      var err = await response.json();
+      if (response.status === 401) {
+        accessToken = null;
+        localStorage.removeItem('cc_drive_token');
+        updateAuthUI(false);
+        showToast('Drive session expired - please reconnect', 'error');
+        return null;
+      }
+      throw new Error(err.error && err.error.message || 'Upload failed');
+    }
+
+    var data = await response.json();
+    progressEl.innerHTML = '';
+    return { id: data.id, name: fileName, url: data.webViewLink };
+
+  } catch(e) {
+    progressEl.innerHTML = '';
+    showToast('Upload failed: ' + e.message, 'error');
+    return null;
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────
+function render() {
+  var html = '';
+  var totalItems = 0;
+  var completed = 0, outstanding = 0;
+
+  SECTIONS.forEach(function(section) {
+    var sectionDone = 0;
+    var sectionHtml = '';
+
+    section.items.forEach(function(item) {
+      totalItems++;
+      var s = getItem(item.id);
+      if (s.status === 'completed') { completed++; sectionDone++; }
+      else outstanding++;
+
+      var badgeClass = 'badge-' + s.status;
+      var badgeText = s.status === 'completed' ? 'Completed' : 'Outstanding';
+      var checkIcon = s.status === 'completed' ? '&#10003;' : '';
+
+      var filesHtml = '';
+      if (s.files && s.files.length) {
+        filesHtml = '<div class="uploaded-files">' +
+          s.files.map(function(f) {
+            return '<div class="uploaded-file">' +
+              '<span class="uploaded-file-name">&#10003; ' + f.name + '</span>' +
+              (f.url ? '<a class="uploaded-file-link" href="' + f.url + '" target="_blank">View in Drive</a>' : '') +
+              '</div>';
+          }).join('') +
+          '</div>';
+      }
+
+      sectionHtml += '<div class="checklist-item status-' + s.status + '" id="item-' + item.id + '">' +
+        '<div class="item-header" onclick="toggleItem(\'' + item.id + '\')">' +
+          '<div class="item-check">' + checkIcon + '</div>' +
+          '<div class="item-num">' + item.id + '</div>' +
+          '<div class="item-title">' + item.title + '</div>' +
+          (item.da ? '<div class="item-da">DA Cond: ' + item.da + '</div>' : '') +
+          '<div class="item-status-badge ' + badgeClass + '">' + badgeText + '</div>' +
+          '<div class="item-expand" id="expand-' + item.id + '">&#9660;</div>' +
+        '</div>' +
+        '<div class="item-detail" id="detail-' + item.id + '">' +
+          '<div class="item-description">' + item.description + '</div>' +
+          '<div class="item-actions">' +
+            '<button class="btn ' + (s.status === 'completed' ? 'btn-primary' : 'btn-ghost') + '" onclick="toggleStatus(\'' + item.id + '\')">' +
+              (s.status === 'completed' ? '&#10003; Completed' : 'Mark Complete') +
+            '</button>' +
+          '</div>' +
+          '<textarea class="notes-input" placeholder="Notes (contact, status, follow-up...)" onblur="updateNotes(\'' + item.id + '\', this.value)">' + (s.notes||'') + '</textarea>' +
+          '<div class="upload-zone" onclick="document.getElementById(\'upload-' + item.id + '\').click()">' +
+            '<input type="file" class="upload-input" id="upload-' + item.id + '" onchange="handleUpload(\'' + item.id + '\', \'' + item.code + '\', this)" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">' +
+            '<div class="upload-zone-text"><strong>Click to upload</strong> document to Google Drive -- will be named: <br>' + DA_NUMBER + '_CC_' + item.id + '_' + item.code + '_[filename]_[date].pdf</div>' +
+          '</div>' +
+          '<div id="progress-' + item.id + '"></div>' +
+          filesHtml +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '<div class="section-block">' +
+      '<div class="section-heading">' +
+        section.title +
+        '<span class="section-count">' + sectionDone + ' / ' + section.items.length + ' completed</span>' +
+      '</div>' +
+      sectionHtml +
+      '</div>';
+  });
+
+  document.getElementById('checklist-content').innerHTML = html;
+  document.getElementById('stat-total').textContent = totalItems;
+  document.getElementById('stat-completed').textContent = completed;
+  document.getElementById('stat-outstanding').textContent = outstanding;
+  var pct = totalItems > 0 ? Math.round((completed / totalItems) * 100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────
+function toggleItem(id) {
+  var detail = document.getElementById('detail-' + id);
+  var expand = document.getElementById('expand-' + id);
+  var isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  expand.classList.toggle('open', !isOpen);
+}
+
+function toggleStatus(id) {
+  var item = getItem(id);
+  item.status = item.status === 'completed' ? 'outstanding' : 'completed';
+  saveState();
+  render();
+  toggleItem(id);
+}
+
+function updateNotes(id, notes) {
+  getItem(id).notes = notes;
+  saveState();
+}
+
+async function handleUpload(itemId, code, input) {
+  var files = Array.from(input.files);
+  if (!files.length) return;
+  var progressEl = document.getElementById('progress-' + itemId);
+
+  for (var i = 0; i < files.length; i++) {
+    var result = await uploadToDrive(files[i], itemId, code, progressEl);
+    if (result) {
+      var item = getItem(itemId);
+      if (!item.files) item.files = [];
+      item.files.push(result);
+      saveState();
+      showToast('Uploaded: ' + result.name, 'success');
+      render();
+      toggleItem(itemId);
+    }
+  }
+  input.value = '';
+}
+
+function exportStatus() {
+  var lines = ['DA250507 -- CC Checklist Status -- ' + new Date().toLocaleDateString('en-AU'), ''];
+  SECTIONS.forEach(function(section) {
+    lines.push(section.title);
+    section.items.forEach(function(item) {
+      var s = getItem(item.id);
+      var status = s.status === 'completed' ? 'Completed' : 'Outstanding';
+      lines.push('  [' + item.id + '] ' + item.title + ' -- ' + status);
+      if (s.notes) lines.push('      Notes: ' + s.notes);
+      if (s.files && s.files.length) {
+        s.files.forEach(function(f) { lines.push('      File: ' + f.name); });
+      }
+    });
+    lines.push('');
+  });
+
+  var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'DA250507_CC_Checklist_Status_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+}
+
+function showToast(message, type) {
+  type = type || 'success';
+  var colors = { success: 'var(--green)', error: 'var(--red)', warning: 'var(--orange)' };
+  var toast = document.createElement('div');
+  toast.className = 'toast' + (type !== 'success' ? ' ' + type : '');
+  toast.style.borderColor = colors[type] || colors.success;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+loadState();
+render();
+</script>
+
+<!-- Google APIs -->
+<script src="https://apis.google.com/js/api.js" onload="initGapi()"></script>
+<script src="https://accounts.google.com/gsi/client" onload="initGis()"></script>
+
+</body>
+</html>
