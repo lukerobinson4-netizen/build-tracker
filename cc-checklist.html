@@ -121,6 +121,9 @@
     </div>
     <button class="btn btn-ghost" id="btn-auth" onclick="handleAuth()">Connect Drive</button>
     <button class="btn btn-ghost" onclick="exportStatus()">Export Status</button>
+    <button class="btn btn-ghost" onclick="exportStateJson()">Export State</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('import-input').click()">Import State</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importStateJson(this)">
   </div>
 </div>
 
@@ -507,6 +510,36 @@ function showToast(message, type) {
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(function() { toast.remove(); }, 3500);
+}
+
+// ── STATE EXPORT / IMPORT ─────────────────────────────────────────────
+function exportStateJson() {
+  var data = localStorage.getItem('cc_checklist_state') || '{}';
+  var blob = new Blob([data], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'DA250507_CC_State_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  showToast('State exported', 'success');
+}
+
+function importStateJson(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var parsed = JSON.parse(e.target.result);
+      localStorage.setItem('cc_checklist_state', JSON.stringify(parsed));
+      loadState();
+      render();
+      showToast('State imported — ' + Object.keys(parsed).length + ' items restored', 'success');
+    } catch(err) {
+      showToast('Import failed: invalid JSON file', 'error');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
