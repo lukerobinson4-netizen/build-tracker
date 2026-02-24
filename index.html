@@ -232,6 +232,10 @@ textarea.form-control { resize: vertical; min-height: 72px; }
 .drop-zone { border: 2px dashed var(--border-light); padding: 36px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
 .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(200,169,110,0.05); }
 .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.new-supplier-banner { background: rgba(224,127,58,0.1); border: 1px solid var(--orange); border-radius: 4px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.banner-text { font-family: var(--mono); font-size: 11px; color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.banner-icon { color: var(--orange); font-size: 13px; }
+.pdf-extracting { font-family: var(--mono); font-size: 10px; color: var(--accent); display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 .drop-icon { font-size: 28px; margin-bottom: 10px; color: var(--text-dim); }
 .drop-text { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
 .drop-hint { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
@@ -915,7 +919,15 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <div class="drop-text">Drop PDF or click to select</div>
           <div class="drop-hint">PDF, JPG, PNG, DOC supported</div>
         </div>
-        <div id="file-preview" style="display:none;margin-top:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);font-family:var(--mono);font-size:11px;display:none;justify-content:space-between;"></div>
+        <div id="file-preview" style="display:none;margin-top:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);font-family:var(--mono);font-size:11px;display:none;justify-content:space-between;align-items:center;gap:8px;"></div>
+        <div id="pdf-extracting" class="pdf-extracting" style="display:none;"><span class="spinner"></span> Extracting data from PDF...</div>
+        <div id="new-supplier-banner" class="new-supplier-banner" style="display:none;">
+          <div class="banner-text"><span class="banner-icon">⚠</span> New supplier <strong id="banner-supplier-name"></strong> — not found in contacts</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn-sm btn-primary" onclick="promptAddContact()">Add to Contacts</button>
+            <button class="btn btn-sm btn-ghost" onclick="dismissNewSupplierBanner()">Dismiss</button>
+          </div>
+        </div>
         <div class="divider"></div>
         <div class="form-grid">
           <div class="form-group"><label class="form-label">Type *</label><select class="form-control" id="u-type" onchange="onTypeChangeU()"><option value="quote">Quote</option><option value="invoice">Invoice</option></select></div>
@@ -3398,7 +3410,7 @@ function renderCategories() {
 // ═══ SHARED ══════════════════════════════════════════════════════════════════
 function setFilter(f,el) { currentFilter=f; document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderQuotes(); }
 function filterSearch(v) { currentSearch=v; renderQuotes(); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); if(id==='add-modal')dismissNewSupplierBanner(); }
 function openPaymentModal(docId) {
   paymentTarget = docId;
   const d = docs.find(x=>x.id===docId);
@@ -3595,8 +3607,193 @@ function handleDrag(e){e.preventDefault();e.currentTarget.classList.add('drag-ov
 function handleDragLeave(e){e.currentTarget.classList.remove('drag-over');}
 function handleDrop(e){e.preventDefault();e.currentTarget.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)showFilePreview(f);}
 function handleFileSelect(e){const f=e.target.files[0];if(f)showFilePreview(f);}
-function showFilePreview(f){const prev=document.getElementById('file-preview');prev.style.display='flex';prev.innerHTML=`<span>📎 ${f.name}</span><span class="text-green">Attached</span>`;const s=document.getElementById('u-supplier');if(s&&!s.value)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');}
-function parsePaste(){const text=document.getElementById('paste-content').value;const am=text.match(/\$[\s]*([\d,]+(?:\.\d{2})?)/);if(am)document.getElementById('p-amount').value=parseFloat(am[1].replace(/,/g,''));const dm=text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);if(dm){const[,d,m,y]=dm;const yr=y.length===2?'20'+y:y;document.getElementById('p-date').value=`${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}const im=text.match(/(?:INV|INVOICE|Quote No|Q)[#\-\s]?(\w+[-\w]*)/i);if(im)document.getElementById('p-docnum').value=im[0];alert('Basic extraction done — please review and correct.');}
+async function showFilePreview(f){
+  dismissNewSupplierBanner();
+  const prev=document.getElementById('file-preview');
+  prev.style.display='flex';
+  prev.innerHTML=`<span>📎 ${f.name}</span><span class="text-green">Attached</span>`;
+  const s=document.getElementById('u-supplier');
+  if(s&&!s.value)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');
+  // PDF extraction
+  if((f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'))&&typeof pdfjsLib!=='undefined'){
+    const extEl=document.getElementById('pdf-extracting');
+    extEl.style.display='flex';
+    try{
+      const text=await extractPdfText(f);
+      const extracted=parseAustralianDoc(text);
+      fillUploadForm(extracted);
+      checkNewSupplier(extracted);
+      showToast('PDF data extracted — please review fields','success');
+    }catch(e){
+      showToast('PDF extraction failed — fill in manually','warning');
+    }finally{
+      extEl.style.display='none';
+    }
+  }
+}
+
+async function extractPdfText(file){
+  const arrayBuffer=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+  let text='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const content=await page.getTextContent();
+    text+=content.items.map(item=>item.str).join(' ')+'\n';
+  }
+  return text;
+}
+
+function parseAustralianDoc(text){
+  const r={};
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(Boolean);
+
+  // ABN — 11 digits (XX XXX XXX XXX)
+  const abnM=text.match(/\bABN[:\s]*(\d[\d\s]{9,12}\d)/i);
+  if(abnM)r.abn=abnM[1].replace(/\s/g,'').replace(/(\d{2})(\d{3})(\d{3})(\d{3})/,'$1 $2 $3 $4');
+
+  // Supplier / company name — look for explicit labels first, then Pty Ltd patterns
+  const fromM=text.match(/(?:From|Issued by|Bill(?:ed)? (?:from|by)|Trading as)[:\s]+([^\n,]{3,60})/i);
+  if(fromM){
+    r.supplier=fromM[1].trim();
+  } else {
+    // Find first line containing company suffix
+    const companyLine=lines.find(l=>/\b(Pty\.?\s*Ltd|Pty\.?\s*Limited|P\/L|Contracting|Constructions?|Building|Plumbing|Electrical|Services|Group|Holdings|Solutions|Landscapes?)\b/i.test(l)&&l.length<80);
+    if(companyLine)r.supplier=companyLine.replace(/\bABN\b.*/i,'').trim();
+  }
+
+  // Email
+  const emailM=text.match(/[\w.+'-]+@[\w-]+\.[a-z]{2,}/i);
+  if(emailM)r.email=emailM[0];
+
+  // Phone / mobile (Australian formats)
+  const phoneM=text.match(/(?:\+61[\s-]?)?(?:\(0\d\)[\s-]?\d{4}[\s-]?\d{4}|04\d{2}[\s-]?\d{3}[\s-]?\d{3}|0[2-9][\s-]?\d{4}[\s-]?\d{4})/);
+  if(phoneM){
+    const digits=phoneM[0].replace(/\D/g,'');
+    if(digits.startsWith('04'))r.mobile=phoneM[0].trim();
+    else r.phone=phoneM[0].trim();
+  }
+
+  // Contact person name — look for label
+  const ctM=text.match(/(?:Attention|Attn|Contact|Prepared by|Account Manager)[:\s]+([A-Z][a-z]+ [A-Z][a-z]+)/);
+  if(ctM)r.contactName=ctM[1].trim();
+
+  // Doc number — invoice / quote
+  const docM=text.match(/(?:Invoice|Tax Invoice|Inv|Quote|Quotation|Job|PO|Order)[:\s#\-\.]*([A-Z0-9][\w\-]{1,20})/i);
+  if(docM&&!/^(date|number|no|num)$/i.test(docM[1]))r.docnum=docM[0].replace(/\s+/g,' ').trim();
+
+  // Dates — prefer labelled dates
+  function parseDate(str){
+    if(!str)return null;
+    const m=str.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+    if(!m)return null;
+    const[,d,mo,y]=m;
+    const yr=y.length===2?'20'+y:y;
+    return `${yr}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  const dateLabelM=text.match(/(?:Invoice Date|Date Issued|Issue Date|Date)[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i);
+  r.date=parseDate(dateLabelM?dateLabelM[1]:null)||parseDate((text.match(/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/)||[])[1]);
+  const expiryM=text.match(/(?:Valid Until|Expiry|Expir[ey]s?|Due Date|Valid To)[:\s]+(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/i);
+  if(expiryM)r.expiry=parseDate(expiryM[1]);
+
+  // Amounts — prefer GST-exclusive labelled amounts
+  function parseDollar(str){return str?parseFloat(str.replace(/[,$\s]/g,'')):null;}
+  const exclM=text.match(/(?:Sub[\s-]?total|Ex(?:cl)?\.?\s*GST|Before GST|Net)[:\s]*\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  const gstM=text.match(/\bGST\b[:\s]*\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  const totalM=text.match(/(?:Total|Amount Due|Balance Due|Grand Total)[:\s]*\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  if(exclM){
+    r.amount=parseDollar(exclM[1]);
+    r.gst=gstM?parseDollar(gstM[1]):Math.round((r.amount*0.1)*100)/100;
+  } else if(totalM&&gstM){
+    r.gst=parseDollar(gstM[1]);
+    r.amount=Math.round((parseDollar(totalM[1])-r.gst)*100)/100;
+  } else if(totalM){
+    // Assume total is GST-inclusive
+    const total=parseDollar(totalM[1]);
+    r.amount=Math.round((total/1.1)*100)/100;
+    r.gst=Math.round((total-r.amount)*100)/100;
+  } else {
+    // Fallback: largest dollar amount
+    const allAmounts=[...text.matchAll(/\$\s*([\d,]+(?:\.\d{2})?)/g)].map(m=>parseDollar(m[1])).filter(n=>n>0);
+    if(allAmounts.length)r.amount=Math.max(...allAmounts);
+  }
+
+  // Bank details
+  const bsbM=text.match(/\bBSB[:\s#]*(\d{3}[\s\-]?\d{3})/i);
+  if(bsbM)r.bsb=bsbM[1].replace(/\s/g,'-');
+  const accM=text.match(/(?:Account|Acc)\.?\s*(?:No|Number|#)?[:\s]*(\d{5,12})\b/i);
+  if(accM)r.acc=accM[1];
+  const accNameM=text.match(/(?:Account Name|Acc\.?\s*Name)[:\s]+([^\n]{3,50})/i);
+  if(accNameM)r.accName=accNameM[1].trim();
+  const banks=['ANZ','Commonwealth|CBA','Westpac','NAB','Bendigo','Bank of Queensland|BOQ','Macquarie','ING','Suncorp','St George','Bank West|BankWest'];
+  for(const b of banks){const bm=text.match(new RegExp('\\b('+b+')\\b','i'));if(bm){r.bank=bm[1];break;}}
+
+  // Description — look for labelled field, else first meaningful non-header line
+  const descM=text.match(/(?:Description|RE:|For:|Subject|Works?)[:\s]+([^\n]{5,120})/i);
+  if(descM)r.desc=descM[1].trim();
+
+  return r;
+}
+
+function fillUploadForm(ex){
+  function set(id,val){if(!val&&val!==0)return;const el=document.getElementById(id);if(el&&!el.value)el.value=val;}
+  set('u-supplier',ex.supplier);
+  set('u-amount',ex.amount);
+  set('u-docnum',ex.docnum);
+  set('u-date',ex.date);
+  set('u-expiry',ex.expiry);
+  set('u-desc',ex.desc);
+  // Store bank details for use when saving
+  if(ex.bsb||ex.acc||ex.bank||ex.accName){
+    window._pdfBankDetails={bank:ex.bank||'',bsb:ex.bsb||'',acc:ex.acc||'',accName:ex.accName||''};
+  }
+  // Auto-detect type from doc number
+  if(ex.docnum&&/invoice|inv|tax/i.test(ex.docnum)){const t=document.getElementById('u-type');if(t)t.value='invoice';}
+}
+
+let pendingContactData=null;
+
+function checkNewSupplier(ex){
+  if(!ex.supplier)return;
+  const name=ex.supplier;
+  const known=suppliers.some(s=>s.toLowerCase()===name.toLowerCase())||
+    contacts.some(c=>(c.supplier||'').toLowerCase()===name.toLowerCase()||(c.company||'').toLowerCase()===name.toLowerCase());
+  if(!known){
+    pendingContactData=ex;
+    document.getElementById('banner-supplier-name').textContent=name;
+    document.getElementById('new-supplier-banner').style.display='flex';
+  }
+}
+
+function promptAddContact(){
+  const d=pendingContactData;
+  dismissNewSupplierBanner();
+  openContactModal(null);
+  if(!d)return;
+  setTimeout(()=>{
+    if(d.contactName)document.getElementById('ct-name').value=d.contactName;
+    if(d.supplier){
+      document.getElementById('ct-company').value=d.supplier;
+      const supEl=document.getElementById('ct-supplier');
+      if(supEl){
+        if(![...supEl.options].some(o=>o.value===d.supplier)){
+          const opt=document.createElement('option');opt.value=d.supplier;opt.textContent=d.supplier;supEl.appendChild(opt);
+        }
+        supEl.value=d.supplier;
+      }
+    }
+    if(d.email)document.getElementById('ct-email').value=d.email;
+    if(d.mobile||d.phone)document.getElementById('ct-mobile').value=d.mobile||d.phone;
+    if(d.abn)document.getElementById('ct-abn').value=d.abn;
+  },50);
+}
+
+function dismissNewSupplierBanner(){
+  document.getElementById('new-supplier-banner').style.display='none';
+  pendingContactData=null;
+}
+
+function parsePaste(){const text=document.getElementById('paste-content').value;const extracted=parseAustralianDoc(text);const am=extracted.amount;if(am)document.getElementById('p-amount').value=am;if(extracted.date)document.getElementById('p-date').value=extracted.date;if(extracted.docnum)document.getElementById('p-docnum').value=extracted.docnum;if(extracted.supplier)document.getElementById('p-supplier').value=extracted.supplier;showToast('Extraction done — please review and correct');}
 
 // ═══ EDIT DOCUMENT ════════════════════════════════════════════════════════════
 let editingDocId = null;
@@ -5217,5 +5414,8 @@ document.querySelectorAll('.modal-overlay').forEach(o=>{
   </div>
 </div>
 
-<script src="price-search.js"></script></body>
+<script src="price-search.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(typeof pdfjsLib!=='undefined')pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+</body>
 </html>
