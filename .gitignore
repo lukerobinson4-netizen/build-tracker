@@ -1,2 +1,6 @@
 # Local Netlify folder
 .netlify
+
+# Claude worktrees
+.claude/worktrees/
+.claude/settings.local.json
