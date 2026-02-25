@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Agent — 128 Dairy Creek Rd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f0e;
+    --surface: #161714;
+    --surface2: #1d1f1b;
+    --border: #2a2c28;
+    --accent: #c8a96e;
+    --accent2: #4caf7d;
+    --accent3: #5b8fcc;
+    --text: #e8e4dc;
+    --text2: #9a9690;
+    --text3: #5a5852;
+    --danger: #cc5f4a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .header-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .header-title {
+    font-family: var(--mono);
+    font-size: 13px; font-weight: 600;
+    color: var(--text); letter-spacing: 0.02em;
+  }
+
+  .header-sub { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-top: 1px; }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+
+  .back-link {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--text3); text-decoration: none;
+    padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .back-link:hover { color: var(--text2); border-color: var(--text3); }
+
+  .header-status { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .quick-bar {
+    display: flex; gap: 6px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto; flex-shrink: 0;
+    scrollbar-width: none;
+  }
+  .quick-bar::-webkit-scrollbar { display: none; }
+
+  .quick-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border: 1px solid var(--border); border-radius: 4px;
+    background: transparent; color: var(--text2);
+    font-family: var(--mono); font-size: 11px;
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(200,169,110,0.06); }
+
+  .messages {
+    flex: 1; overflow-y: auto;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  .msg { display: flex; gap: 12px; animation: fadeUp 0.2s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 4px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+
+  .msg.agent .msg-avatar { background: var(--surface2); border: 1px solid var(--border); }
+  .msg.user .msg-avatar { background: var(--accent); }
+
+  .msg-content { max-width: 76%; }
+  .msg.user .msg-content { align-items: flex-end; display: flex; flex-direction: column; }
+
+  .msg-bubble {
+    padding: 10px 14px; border-radius: 8px;
+    line-height: 1.6; font-size: 13.5px;
+  }
+
+  .msg.agent .msg-bubble {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 2px 8px 8px 8px;
+  }
+
+  .msg.user .msg-bubble {
+    background: var(--accent); color: #1a1400;
+    font-weight: 500; border-radius: 8px 2px 8px 8px;
+  }
+
+  .msg-time { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 4px; padding: 0 2px; }
+
+  /* Thinking dots */
+  .thinking {
+    display: flex; gap: 4px;
+    padding: 12px 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 2px 8px 8px 8px; width: fit-content;
+  }
+
+  .thinking span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text3); animation: blink 1.2s infinite;
+  }
+
+  .thinking span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  /* Tool execution indicator */
+  .tool-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; margin: 2px 0;
+    background: rgba(91,143,204,0.1); border: 1px solid rgba(91,143,204,0.25);
+    border-radius: 3px; font-family: var(--mono); font-size: 11px; color: var(--accent3);
+  }
+
+  .tool-badge.write {
+    background: rgba(200,169,110,0.08); border-color: rgba(200,169,110,0.2);
+    color: var(--accent);
+  }
+
+  .tool-badge.success {
+    background: rgba(76,175,125,0.1); border-color: rgba(76,175,125,0.25);
+    color: var(--accent2);
+  }
+
+  /* Data tables in messages */
+  .data-table {
+    margin-top: 8px;
+    border: 1px solid var(--border); border-radius: 6px;
+    overflow: hidden; width: 100%;
+    font-family: var(--mono); font-size: 12px;
+  }
+
+  .data-table-row {
+    display: flex; justify-content: space-between;
+    padding: 7px 12px; border-bottom: 1px solid var(--border);
+  }
+  .data-table-row:last-child { border-bottom: none; }
+  .data-table-row .k { color: var(--text3); flex-shrink: 0; margin-right: 12px; }
+  .data-table-row .v { color: var(--text); text-align: right; }
+  .data-table-row .v.green { color: var(--accent2); }
+  .data-table-row .v.amber { color: var(--accent); }
+  .data-table-row .v.blue { color: var(--accent3); }
+  .data-table-row .v.red { color: var(--danger); }
+
+  /* Input */
+  .input-area {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
+
+  textarea {
+    flex: 1;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text);
+    font-family: var(--sans); font-size: 13.5px;
+    padding: 10px 14px; resize: none;
+    min-height: 44px; max-height: 140px;
+    outline: none; transition: border-color 0.15s; line-height: 1.5;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 44px; height: 44px; border-radius: 6px;
+    border: none; background: var(--accent);
+    color: #1a1400; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; }
+
+  .input-hint { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 6px; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .msg-content { max-width: 88%; }
+    .header { padding: 10px 14px; }
+    .messages { padding: 14px; }
+    .input-area { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">🏗</div>
+    <div>
+      <div class="header-title">BUILD AGENT</div>
+      <div class="header-sub">128 Dairy Creek Rd — Goulburn</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="/" class="back-link">← Back to tracker</a>
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span id="conn-label">Connecting...</span>
+    </div>
+  </div>
+</div>
+
+<div class="quick-bar">
+  <button class="quick-btn" onclick="quickPrompt('Give me a full build status summary')">📊 Status</button>
+  <button class="quick-btn" onclick="quickPrompt('Show me all open tasks')">✅ Tasks</button>
+  <button class="quick-btn" onclick="quickPrompt('Show me all pending quotes')">💰 Quotes</button>
+  <button class="quick-btn" onclick="quickPrompt('Show upcoming dates and milestones')">📅 Schedule</button>
+  <button class="quick-btn" onclick="quickPrompt('Show all unanswered questions')">❓ Questions</button>
+  <button class="quick-btn" onclick="quickPrompt('What is my total committed spend so far?')">💳 Spend</button>
+  <button class="quick-btn" onclick="quickPrompt('Show all invoices and payment status')">🧾 Invoices</button>
+</div>
+
+<div class="messages" id="messages">
+  <div class="msg agent">
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-content">
+      <div class="msg-bubble">
+        G'day Luke. I'm your build agent for 128 Dairy Creek Rd.<br><br>
+        I'm connected to your Supabase database and can help you:<br>
+        • Log quotes, invoices and contracts<br>
+        • Update tasks and milestones<br>
+        • Add contacts and dates<br>
+        • Record questions for your trades<br>
+        • Summarise build status and costs<br><br>
+        Tell me what's happened on site, paste in a quote or email, or use the quick buttons above.
+      </div>
+      <div class="msg-time" id="init-time"></div>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="input-row">
+    <textarea
+      id="input"
+      placeholder="e.g. Just got a quote from Hive Electrical — $8,400 for rough-in and fit-off, valid 30 days..."
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send (Enter)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+  <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+</div>
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://nqoylzfsdxnjdwrbghsn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xb3lsemZzZHhuamR3cmJnaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODU3NTIsImV4cCI6MjA4NzM2MTc1Mn0.SVoZxD2NEQKLECyAgCmK3NRVHCttGpPBU9C6IZwr9bM';
+const AGENT_API = '/api/agent';
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById('init-time').textContent = fmtTime();
+document.getElementById('conn-label').textContent = 'Connected';
+
+// ─── Supabase ─────────────────────────────────────────────────────────────────
+async function sbQuery(table, params = '') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&order=created_at.desc&limit=200`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!r.ok) throw new Error(`DB error: ${await r.text()}`);
+  return r.json();
+}
+
+async function sbInsert(table, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=representation'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error(`Insert failed: ${await r.text()}`);
+  return r.json();
+}
+
+async function sbUpdate(table, id, data) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=representation'
+    },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) throw new Error(`Update failed: ${await r.text()}`);
+  return r.json();
+}
+
+// ─── Context ──────────────────────────────────────────────────────────────────
+async function loadContext() {
+  const [docs, tasks, dates, contacts, questions, settings] = await Promise.all([
+    sbQuery('docs', 'select=id,type,status,supplier,trade,amount,gst,description,doc_date,expiry,docnum,notes,system_group,balance_due,payments'),
+    sbQuery('tasks', 'select=id,title,status,cat,priority,due,assign,done,notes,linked_doc'),
+    sbQuery('dates', 'select=id,title,date,end_date,type,trade,priority,done,notes,source_doc'),
+    sbQuery('contacts', 'select=id,name,company,supplier,role,trade,mobile,email,notes'),
+    sbQuery('questions', 'select=id,question_text,for_name,asked,answer,answered,priority,linked_doc,linked_contact'),
+    sbQuery('settings', 'select=key,value')
+  ]);
+
+  const s = {};
+  if (Array.isArray(settings)) settings.forEach(r => s[r.key] = r.value);
+
+  return {
+    docs: Array.isArray(docs) ? docs : [],
+    tasks: Array.isArray(tasks) ? tasks : [],
+    dates: Array.isArray(dates) ? dates : [],
+    contacts: Array.isArray(contacts) ? contacts : [],
+    questions: Array.isArray(questions) ? questions : [],
+    trades: s.trades || [],
+    suppliers: s.suppliers || [],
+    task_cats: s.task_cats || [],
+    systems: s.systems || []
+  };
+}
+
+// ─── Tools ────────────────────────────────────────────────────────────────────
+const TOOLS = [
+  {
+    name: 'get_build_data',
+    description: 'Fetch current build data. ALWAYS call this first before answering questions about docs, tasks, dates, contacts or questions.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        tables: {
+          type: 'array',
+          items: { type: 'string', enum: ['docs','tasks','dates','contacts','questions','all'] },
+          description: 'Which tables to retrieve. Use ["all"] for status summaries.'
+        }
+      },
+      required: ['tables']
+    }
+  },
+  {
+    name: 'create_doc',
+    description: 'Save a new quote, invoice, contract or receipt to the docs table.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        type: { type: 'string', enum: ['quote','invoice','contract','receipt'] },
+        supplier: { type: 'string' },
+        trade: { type: 'string' },
+        description: { type: 'string' },
+        amount: { type: 'number', description: 'Amount ex GST' },
+        gst: { type: 'number', description: 'GST component' },
+        doc_date: { type: 'string', description: 'YYYY-MM-DD' },
+        expiry: { type: 'string', description: 'Quote expiry YYYY-MM-DD' },
+        docnum: { type: 'string' },
+        notes: { type: 'string' },
+        status: { type: 'string', enum: ['pending','accepted','rejected','paid','cancelled'] },
+        system_group: { type: 'string' }
+      },
+      required: ['type','supplier']
+    }
+  },
+  {
+    name: 'update_doc',
+    description: 'Update fields on an existing doc (status, notes, payments, etc).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        updates: { type: 'object' }
+      },
+      required: ['id','updates']
+    }
+  },
+  {
+    name: 'create_task',
+    description: 'Create a new task.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        cat: { type: 'string', description: 'payment | inspection | admin | construction | quote | design | other' },
+        priority: { type: 'string', enum: ['high','med','low'] },
+        due: { type: 'string', description: 'YYYY-MM-DD' },
+        assign: { type: 'string' },
+        notes: { type: 'string' },
+        linked_doc: { type: 'string' }
+      },
+      required: ['title']
+    }
+  },
+  {
+    name: 'update_task',
+    description: 'Update a task (mark done, change status, etc).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        updates: { type: 'object', description: 'e.g. {done: true, status: "closed"}' }
+      },
+      required: ['id','updates']
+    }
+  },
+  {
+    name: 'create_date',
+    description: 'Add a date or milestone to the schedule.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        date: { type: 'string', description: 'YYYY-MM-DD' },
+        end_date: { type: 'string' },
+        type: { type: 'string', description: 'inspection | milestone | booking | deadline | meeting' },
+        trade: { type: 'string' },
+        priority: { type: 'string', enum: ['high','med','low'] },
+        notes: { type: 'string' }
+      },
+      required: ['title','date']
+    }
+  },
+  {
+    name: 'create_contact',
+    description: 'Add a new contact.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        company: { type: 'string' },
+        supplier: { type: 'string' },
+        role: { type: 'string' },
+        trade: { type: 'string' },
+        mobile: { type: 'string' },
+        email: { type: 'string' },
+        notes: { type: 'string' }
+      },
+      required: ['name']
+    }
+  },
+  {
+    name: 'create_question',
+    description: 'Log a question that needs to be asked of a trade or supplier.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        question_text: { type: 'string' },
+        for_name: { type: 'string' },
+        priority: { type: 'string', enum: ['high','med','low'] },
+        linked_doc: { type: 'string' },
+        linked_contact: { type: 'string' }
+      },
+      required: ['question_text']
+    }
+  },
+  {
+    name: 'answer_question',
+    description: 'Record the answer to an existing question.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        answer: { type: 'string' },
+        answered: { type: 'string', description: 'YYYY-MM-DD' }
+      },
+      required: ['id','answer']
+    }
+  }
+];
+
+// ─── System prompt ────────────────────────────────────────────────────────────
+function buildSystem(ctx) {
+  const totalQuotes = ctx.docs.filter(d => d.type === 'quote').length;
+  const totalInvoices = ctx.docs.filter(d => d.type === 'invoice').length;
+  const openTasks = ctx.tasks.filter(t => !t.done).length;
+  const unanswered = ctx.questions.filter(q => !q.answered).length;
+  const upcomingDates = ctx.dates.filter(d => !d.done).length;
+
+  return `You are a build project management agent for Luke Robinson's home construction at 128 Dairy Creek Rd, Goulburn NSW Australia.
+
+You have direct access to Luke's Supabase build tracking database via the provided tools.
+
+TODAY: ${new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
+
+DATABASE SNAPSHOT:
+- Docs: ${ctx.docs.length} total (${totalQuotes} quotes, ${totalInvoices} invoices)
+- Tasks: ${ctx.tasks.length} total, ${openTasks} open
+- Dates: ${ctx.dates.length} total, ${upcomingDates} upcoming
+- Contacts: ${ctx.contacts.length}
+- Questions: ${ctx.questions.length} total, ${unanswered} unanswered
+
+KNOWN TRADES: ${ctx.trades.join(', ')}
+KNOWN SUPPLIERS: ${ctx.suppliers.join(', ')}
+SYSTEMS: ${ctx.systems.join(', ')}
+TASK CATEGORIES: payment, inspection, admin, construction, quote, design, other
+
+INSTRUCTIONS:
+1. Always call get_build_data before answering questions about specific records or totals.
+2. When Luke pastes in a quote/invoice/email, extract ALL relevant fields and tell him what you found before saving.
+3. Always describe what you're about to save and wait for Luke to confirm ("yes", "save it", "go ahead", etc.) before calling any create_ or update_ tool.
+4. After saving, confirm what was saved and suggest any follow-up actions (e.g. "Want me to create a task to chase this up?").
+5. Format all currency as AUD with $ sign and two decimals.
+6. Be concise and practical — Luke is a busy owner-builder.
+7. When showing lists, keep them scannable with key fields only.
+8. If Luke mentions something that should create BOTH a doc AND a task, suggest doing both.`;
+}
+
+// ─── Conversation state ───────────────────────────────────────────────────────
+let conversation = [];
+let isLoading = false;
+let ctx = null;
+
+// ─── Tool execution ───────────────────────────────────────────────────────────
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+async function runTool(name, input) {
+  switch (name) {
+    case 'get_build_data': {
+      const tables = input.tables.includes('all')
+        ? ['docs','tasks','dates','contacts','questions']
+        : input.tables;
+      const result = {};
+      tables.forEach(t => result[t] = ctx[t]);
+      return JSON.stringify(result, null, 2);
+    }
+    case 'create_doc': {
+      const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      if (!row.status) row.status = 'pending';
+      await sbInsert('docs', row);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true, id: row.id, message: 'Doc saved to database.' });
+    }
+    case 'update_doc': {
+      await sbUpdate('docs', input.id, { ...input.updates, updated_at: new Date().toISOString() });
+      ctx = await loadContext();
+      return JSON.stringify({ success: true });
+    }
+    case 'create_task': {
+      const row = {
+        id: uid(), ...input,
+        status: 'open', done: false,
+        created: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+      };
+      if (!row.priority) row.priority = 'med';
+      await sbInsert('tasks', row);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true, id: row.id });
+    }
+    case 'update_task': {
+      await sbUpdate('tasks', input.id, { ...input.updates, updated_at: new Date().toISOString() });
+      ctx = await loadContext();
+      return JSON.stringify({ success: true });
+    }
+    case 'create_date': {
+      const row = {
+        id: uid(), ...input,
+        done: false, source: 'agent',
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+      };
+      if (!row.priority) row.priority = 'med';
+      await sbInsert('dates', row);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true, id: row.id });
+    }
+    case 'create_contact': {
+      const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      await sbInsert('contacts', row);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true, id: row.id });
+    }
+    case 'create_question': {
+      const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      if (!row.priority) row.priority = 'med';
+      await sbInsert('questions', row);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true, id: row.id });
+    }
+    case 'answer_question': {
+      const updates = {
+        answer: input.answer,
+        answered: input.answered || new Date().toISOString().split('T')[0],
+        updated_at: new Date().toISOString()
+      };
+      await sbUpdate('questions', input.id, updates);
+      ctx = await loadContext();
+      return JSON.stringify({ success: true });
+    }
+    default:
+      return JSON.stringify({ error: `Unknown tool: ${name}` });
+  }
+}
+
+// ─── Agent loop ───────────────────────────────────────────────────────────────
+async function runAgentLoop() {
+  // Tool name labels
+  const toolLabels = {
+    get_build_data: { label: '🔍 Reading build data', write: false },
+    create_doc: { label: '💾 Saving document', write: true },
+    update_doc: { label: '✏️ Updating document', write: true },
+    create_task: { label: '💾 Saving task', write: true },
+    update_task: { label: '✏️ Updating task', write: true },
+    create_date: { label: '💾 Saving date', write: true },
+    create_contact: { label: '💾 Saving contact', write: true },
+    create_question: { label: '💾 Saving question', write: true },
+    answer_question: { label: '✏️ Recording answer', write: true },
+  };
+
+  while (true) {
+    const res = await fetch(AGENT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: buildSystem(ctx),
+        tools: TOOLS,
+        messages: conversation
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    removeThinking();
+
+    const textBlocks = data.content.filter(b => b.type === 'text');
+    const toolBlocks = data.content.filter(b => b.type === 'tool_use');
+
+    // Show text
+    if (textBlocks.length > 0) {
+      const txt = textBlocks.map(b => b.text).join('\n');
+      addAgentMessage(formatMd(txt));
+    }
+
+    if (data.stop_reason === 'end_turn' || toolBlocks.length === 0) {
+      conversation.push({ role: 'assistant', content: data.content });
+      break;
+    }
+
+    // Push assistant turn
+    conversation.push({ role: 'assistant', content: data.content });
+
+    // Execute tools
+    const results = [];
+    for (const tool of toolBlocks) {
+      const meta = toolLabels[tool.name] || { label: tool.name, write: false };
+      showToolBadge(meta.label, meta.write ? 'write' : '');
+
+      let result;
+      try {
+        result = await runTool(tool.name, tool.input);
+        if (meta.write) showToolBadge('✓ Saved', 'success');
+      } catch (e) {
+        result = JSON.stringify({ error: e.message });
+      }
+
+      results.push({ type: 'tool_result', tool_use_id: tool.id, content: result });
+    }
+
+    conversation.push({ role: 'user', content: results });
+    addThinking();
+  }
+}
+
+// ─── Send ─────────────────────────────────────────────────────────────────────
+async function sendMessage() {
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
+  if (!text || isLoading) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  addUserMessage(escHtml(text));
+  conversation.push({ role: 'user', content: text });
+
+  addThinking();
+
+  try {
+    if (!ctx) ctx = await loadContext();
+    await runAgentLoop();
+  } catch (err) {
+    removeThinking();
+    addAgentMessage(`⚠️ Error: ${escHtml(err.message)}`);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('input').focus();
+}
+
+function quickPrompt(text) {
+  document.getElementById('input').value = text;
+  sendMessage();
+}
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function fmtTime() {
+  return new Date().toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  setTimeout(() => m.scrollTop = m.scrollHeight, 30);
+}
+
+function addUserMessage(html) {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `
+    <div class="msg-avatar">👤</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-time">${fmtTime()}</div>
+    </div>`;
+  msgs.appendChild(d);
+  scrollBottom();
+}
+
+let currentAgentMsg = null;
+
+function addAgentMessage(html) {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg agent';
+  d.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-time">${fmtTime()}</div>
+    </div>`;
+  msgs.appendChild(d);
+  currentAgentMsg = d;
+  scrollBottom();
+}
+
+function showToolBadge(label, type = '') {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg agent';
+  d.innerHTML = `
+    <div class="msg-avatar" style="opacity:0"></div>
+    <div class="msg-content">
+      <div class="tool-badge ${type}">${label}</div>
+    </div>`;
+  msgs.appendChild(d);
+  scrollBottom();
+}
+
+function addThinking() {
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg agent';
+  d.id = 'thinking';
+  d.innerHTML = `
+    <div class="msg-avatar">🤖</div>
+    <div class="msg-content">
+      <div class="thinking"><span></span><span></span><span></span></div>
+    </div>`;
+  msgs.appendChild(d);
+  scrollBottom();
+}
+
+function removeThinking() {
+  document.getElementById('thinking')?.remove();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatMd(text) {
+  let h = escHtml(text);
+  h = h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  h = h.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  h = h.replace(/`([^`]+)`/g, '<code style="font-family:var(--mono);background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>');
+  h = h.replace(/\n• /g, '<br>• ');
+  h = h.replace(/\n- /g, '<br>• ');
+  h = h.replace(/\n(\d+)\. /g, '<br>$1. ');
+  h = h.replace(/\n/g, '<br>');
+  h = h.replace(/(\$[\d,]+(\.\d{2})?)/g, '<span style="color:var(--accent);font-family:var(--mono);font-weight:500;">$1</span>');
+  return h;
+}
+</script>
+</body>
+</html>
