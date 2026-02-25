@@ -48,7 +48,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .main { padding: 24px; max-width: 1600px; margin: 0 auto; }
 
 /* STAT CARDS */
-.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; position: relative; overflow: hidden; }
 .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
 .stat-card.gold::before { background: var(--accent); }
@@ -2376,10 +2376,13 @@ function renderStats() {
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
   const openTasks = tasks.filter(t=>!t.done).length;
   const overdueTasks = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
+  const pendingQuotes = docs.filter(d=>d.type==='quote' && d.status==='pending');
+  const totalPendingQuotes = pendingQuotes.reduce((s,d)=>s+Number(d.amount),0);
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card gold"><div class="stat-label">Committed (Accepted)</div><div class="stat-value gold">${fmt(totalCommitted)}</div><div class="stat-sub">${accepted.length} accepted quotes</div></div>
     <div class="stat-card green"><div class="stat-label">Total Paid</div><div class="stat-value green">${fmt(totalPaid)}</div><div class="stat-sub">all documents</div></div>
     <div class="stat-card orange"><div class="stat-label">Payments Pending</div><div class="stat-value orange">${fmt(totalPending)}</div><div class="stat-sub">scheduled not paid</div></div>
+    <div class="stat-card" style="border-top-color:var(--yellow);"><div class="stat-label">Pending Review</div><div class="stat-value" style="color:var(--yellow);">${fmt(totalPendingQuotes)}</div><div class="stat-sub">${pendingQuotes.length} quote${pendingQuotes.length===1?'':'s'} awaiting decision</div></div>
     <div class="stat-card purple"><div class="stat-label">Open Tasks</div><div class="stat-value purple">${openTasks}</div><div class="stat-sub">${overdueTasks} overdue</div></div>
     <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes · ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
     ${fixturesTotal>0?`<div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} items · ${fmt(fixturesOrdered)} ordered</div></div>`:''}
