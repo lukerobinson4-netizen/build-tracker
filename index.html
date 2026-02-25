@@ -3613,7 +3613,7 @@ async function showFilePreview(f){
   prev.style.display='flex';
   prev.innerHTML=`<span>📎 ${f.name}</span><span class="text-green">Attached</span>`;
   const s=document.getElementById('u-supplier');
-  if(s&&!s.value)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');
+  if(s)s.value=f.name.replace(/[_-]/g,' ').replace(/\.(pdf|jpg|png|doc|docx)$/i,'');
   // PDF extraction
   if((f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'))&&typeof pdfjsLib!=='undefined'){
     const extEl=document.getElementById('pdf-extracting');
@@ -3736,17 +3736,16 @@ function parseAustralianDoc(text){
 }
 
 function fillUploadForm(ex){
-  function set(id,val){if(!val&&val!==0)return;const el=document.getElementById(id);if(el&&!el.value)el.value=val;}
+  // Always overwrite — clear to '' if nothing extracted so previous PDF values don't linger
+  function set(id,val){const el=document.getElementById(id);if(el)el.value=val||'';}
   set('u-supplier',ex.supplier);
   set('u-amount',ex.amount);
   set('u-docnum',ex.docnum);
   set('u-date',ex.date);
   set('u-expiry',ex.expiry);
   set('u-desc',ex.desc);
-  // Store bank details for use when saving
-  if(ex.bsb||ex.acc||ex.bank||ex.accName){
-    window._pdfBankDetails={bank:ex.bank||'',bsb:ex.bsb||'',acc:ex.acc||'',accName:ex.accName||''};
-  }
+  // Store bank details for use when saving (reset first so stale data doesn't carry over)
+  window._pdfBankDetails={bank:ex.bank||'',bsb:ex.bsb||'',acc:ex.acc||'',accName:ex.accName||''};
   // Auto-detect type from doc number
   if(ex.docnum&&/invoice|inv|tax/i.test(ex.docnum)){const t=document.getElementById('u-type');if(t)t.value='invoice';}
 }
