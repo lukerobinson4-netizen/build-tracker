@@ -242,6 +242,48 @@
 
   .input-hint { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 6px; }
 
+  .attach-btn {
+    width: 44px; height: 44px; border-radius: 6px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .attach-btn:hover { border-color: var(--accent3); color: var(--accent3); background: rgba(91,143,204,0.06); }
+  .attach-btn svg { width: 18px; height: 18px; }
+
+  .file-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; margin-bottom: 8px;
+    background: rgba(91,143,204,0.1); border: 1px solid rgba(91,143,204,0.3);
+    border-radius: 4px; font-family: var(--mono); font-size: 11px; color: var(--accent3);
+    animation: fadeUp 0.2s ease;
+  }
+  .file-pill-remove {
+    cursor: pointer; opacity: 0.6; font-size: 14px; line-height: 1;
+    background: none; border: none; color: inherit; padding: 0;
+  }
+  .file-pill-remove:hover { opacity: 1; }
+
+  body.drag-over .messages::after {
+    content: 'Drop PDF to attach';
+    position: absolute; inset: 0;
+    background: rgba(14,15,14,0.88);
+    border: 2px dashed var(--accent3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 18px; color: var(--accent3);
+    z-index: 100;
+  }
+  .messages { position: relative; }
+
+  .pdf-msg-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px; margin-bottom: 6px;
+    background: rgba(91,143,204,0.12); border: 1px solid rgba(91,143,204,0.3);
+    border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--accent3);
+  }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -305,13 +347,22 @@
 
 <div class="input-area">
   <div class="input-row">
-    <textarea
-      id="input"
-      placeholder="e.g. Just got a quote from Hive Electrical — $8,400 for rough-in and fit-off, valid 30 days..."
-      rows="1"
-      onkeydown="handleKey(event)"
-      oninput="autoResize(this)"
-    ></textarea>
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div id="filePillWrap"></div>
+      <textarea
+        id="input"
+        placeholder="e.g. Just got a quote from Hive Electrical — $8,400 for rough-in and fit-off, valid 30 days..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+    </div>
+    <input type="file" id="fileInput" accept=".pdf,application/pdf" style="display:none" onchange="handleFileSelect(this)">
+    <button class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Attach PDF">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+      </svg>
+    </button>
     <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send (Enter)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -319,7 +370,7 @@
       </svg>
     </button>
   </div>
-  <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+  <div class="input-hint">Enter to send · Shift+Enter for new line · 📎 attach PDF</div>
 </div>
 
 <script>
@@ -571,12 +622,13 @@ TASK CATEGORIES: payment, inspection, admin, construction, quote, design, other
 INSTRUCTIONS:
 1. Always call get_build_data before answering questions about specific records or totals.
 2. When Luke pastes in a quote/invoice/email, extract ALL relevant fields and tell him what you found before saving.
-3. Always describe what you're about to save and wait for Luke to confirm ("yes", "save it", "go ahead", etc.) before calling any create_ or update_ tool.
-4. After saving, confirm what was saved and suggest any follow-up actions (e.g. "Want me to create a task to chase this up?").
+3. CRITICAL — YOU MUST NEVER call create_* or update_* tools in the same turn you first propose saving something. When you want to save something, describe exactly what you will save and end with "Shall I save this?" or "Want me to go ahead?". Only call write tools AFTER Luke replies with confirmation (yes / save it / go ahead / yep / sure / do it).
+4. After saving, confirm what was saved and suggest any follow-up actions.
 5. Format all currency as AUD with $ sign and two decimals.
 6. Be concise and practical — Luke is a busy owner-builder.
 7. When showing lists, keep them scannable with key fields only.
-8. If Luke mentions something that should create BOTH a doc AND a task, suggest doing both.`;
+8. If Luke mentions something that should create BOTH a doc AND a task, suggest doing both.
+9. If you are ever unsure whether Luke has confirmed, do NOT save — ask again.`;
 }
 
 // ─── Conversation state ───────────────────────────────────────────────────────
@@ -743,19 +795,93 @@ async function runAgentLoop() {
 }
 
 // ─── Send ─────────────────────────────────────────────────────────────────────
+// ─── PDF state ────────────────────────────────────────────────────────────────
+let attachedPdf = null; // { name, base64 }
+
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+    alert('Please select a PDF file.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const base64 = e.target.result.split(',')[1];
+    attachedPdf = { name: file.name, base64 };
+    showFilePill(file.name);
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function showFilePill(name) {
+  const wrap = document.getElementById('filePillWrap');
+  wrap.innerHTML = `
+    <div class="file-pill">
+      📄 ${escHtml(name)}
+      <button class="file-pill-remove" onclick="removeAttachment()" title="Remove">×</button>
+    </div>`;
+}
+
+function removeAttachment() {
+  attachedPdf = null;
+  document.getElementById('filePillWrap').innerHTML = '';
+}
+
+// Drag and drop
+document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag-over'); });
+document.addEventListener('dragleave', e => { if (e.relatedTarget === null) document.body.classList.remove('drag-over'); });
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  document.body.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && (file.type === 'application/pdf' || file.name.endsWith('.pdf'))) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const base64 = ev.target.result.split(',')[1];
+      attachedPdf = { name: file.name, base64 };
+      showFilePill(file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
 async function sendMessage() {
   const inp = document.getElementById('input');
   const text = inp.value.trim();
-  if (!text || isLoading) return;
+  const hasPdf = !!attachedPdf;
+  if (!text && !hasPdf || isLoading) return;
 
   inp.value = '';
   inp.style.height = 'auto';
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
 
-  addUserMessage(escHtml(text));
-  conversation.push({ role: 'user', content: text });
+  // Build user message content
+  let userContent;
+  const displayText = text || `Please read and extract data from this PDF: ${attachedPdf.name}`;
 
+  if (hasPdf) {
+    // Show PDF badge + text in UI
+    const pdfHtml = `<div class="pdf-msg-badge">📄 ${escHtml(attachedPdf.name)}</div><br>${escHtml(displayText)}`;
+    addUserMessage(pdfHtml);
+
+    // Build multipart content for API
+    userContent = [
+      {
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: attachedPdf.base64 }
+      },
+      { type: 'text', text: text || `Please read this PDF (${attachedPdf.name}) and extract all relevant build data from it — supplier, trade, amounts, dates, document number, and any other details. Then tell me what you found before saving anything.` }
+    ];
+    removeAttachment();
+  } else {
+    addUserMessage(escHtml(text));
+    userContent = text;
+  }
+
+  conversation.push({ role: 'user', content: userContent });
   addThinking();
 
   try {
