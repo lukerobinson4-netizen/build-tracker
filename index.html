@@ -2493,9 +2493,14 @@ function renderStats() {
   const totalPaid = docs.reduce((s,d)=>s+paidTotal(d),0);
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
   const invoiceDocs = docs.filter(d=>d.type==='invoice');
-  const totalInvoiced = invoiceDocs.reduce((s,d)=>s+Number(d.amount),0);
-  // For invoices marked paid at doc level, treat full amount as paid; otherwise use milestone tracking
-  const totalInvoicePaid = invoiceDocs.reduce((s,d)=>s+(d.status==='paid'?Number(d.amount):paidTotal(d)),0);
+  const totalInvoiced = invoiceDocs.reduce((s,d)=>s+Number(d.amount)+Number(d.gst||0),0);
+  // For invoices marked paid at doc level, treat full amount incl GST as paid; otherwise scale milestone tracking to incl GST
+  const totalInvoicePaid = invoiceDocs.reduce((s,d)=>{
+    const total = Number(d.amount)+Number(d.gst||0);
+    if (d.status==='paid') return s + total;
+    const factor = Number(d.amount)>0 ? total/Number(d.amount) : 1;
+    return s + paidTotal(d) * factor;
+  }, 0);
   const totalOutstanding = Math.max(0, totalInvoiced - totalInvoicePaid);
   const openTasks = tasks.filter(t=>!t.done).length;
   const overdueTasks = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
@@ -3042,7 +3047,7 @@ function renderQuotes() {
   const el = document.getElementById('quotes-list');
   if (!filtered.length) { el.innerHTML='<div class="empty-state">No documents match filter</div>'; return; }
   el.innerHTML = filtered.map(d=>{
-    const paid=paidTotal(d); const pct=d.amount>0?Math.min(100,Math.round(paid/d.amount*100)):0;
+    const paid=paidTotal(d); const total=Number(d.amount)+Number(d.gst||0); const pct=total>0?Math.min(100,Math.round(paid/total*100)):0;
     const expClass=d.expiry&&daysUntil(d.expiry)<14?'text-orange':'text-muted';
     return `<div class="quote-item" id="qi-${d.id}">
       <div class="quote-row" onclick="toggleExpand('${d.id}')">
