@@ -646,6 +646,13 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         <div class="section-header"><div class="section-title">Open Tasks</div><a onclick="showTab('tasks')" style="font-family:var(--mono);font-size:10px;color:var(--accent);cursor:pointer;text-transform:uppercase;letter-spacing:1px;">View All</a></div>
         <div id="dashboard-open-tasks"></div>
       </div>
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Reminders</div>
+          <button class="btn btn-ghost btn-sm" onclick="openReminderModal()">+ Add</button>
+        </div>
+        <div id="reminders-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -752,7 +759,15 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="filter-chip" onclick="setFilter('accepted',this)">Accepted</div>
       <div class="filter-chip" onclick="setFilter('rejected',this)">Rejected</div>
       <div class="filter-chip" onclick="setFilter('expired',this)">Expired</div>
-      <input class="filter-search" placeholder="Search supplier, trade..." oninput="filterSearch(this.value)" id="search-input">
+      <select id="sort-select" class="form-control" style="margin-left:auto;width:170px;font-size:10px;font-family:var(--mono);padding:4px 8px;height:28px;text-transform:uppercase;letter-spacing:0.5px;" onchange="setSort(this.value)">
+        <option value="date-desc">Date (Newest)</option>
+        <option value="date-asc">Date (Oldest)</option>
+        <option value="status">Status</option>
+        <option value="amount-desc">Amount (High→Low)</option>
+        <option value="amount-asc">Amount (Low→High)</option>
+        <option value="supplier">Supplier (A–Z)</option>
+      </select>
+      <input class="filter-search" placeholder="Search supplier, trade..." oninput="filterSearch(this.value)" id="search-input" style="margin-left:8px;">
     </div>
     <div id="quotes-system-view" style="display:none;"></div>
     <div class="quote-list" id="quotes-list"></div>
@@ -1118,6 +1133,41 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('task-modal')">Cancel</button>
       <button class="btn btn-purple" onclick="saveTask()">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ REMINDER MODAL ═══ -->
+<div class="modal-overlay" id="reminder-modal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="reminder-modal-title">Add Reminder</div>
+      <button class="modal-close" onclick="closeModal('reminder-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Note *</label>
+          <textarea class="form-control" id="rm-note" rows="3" placeholder="What do you need to review or follow up?"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Review Date</label>
+          <input class="form-control" type="date" id="rm-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-control" id="rm-priority">
+            <option value="med">Medium</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="rm-edit-id" value="" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('reminder-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveReminder()">Save Reminder</button>
     </div>
   </div>
 </div>
@@ -1528,7 +1578,8 @@ const TASK_CATS_KEY = 'dairy_task_cats_v1';
 const TRADES_KEY    = 'dairy_trades_v1';
 const SUPPLIERS_KEY = 'dairy_suppliers_v1';
 const CONTACTS_KEY  = 'dairy_contacts_v1';
-const QUESTIONS_KEY = 'dairy_questions_v1';
+const QUESTIONS_KEY  = 'dairy_questions_v1';
+const REMINDERS_KEY  = 'dairy_reminders_v1';
 
 const DEFAULT_FX_ROOMS = [
   'Kitchen','Bathroom 1','Bathroom 2','Ensuite','Laundry',
@@ -1576,8 +1627,11 @@ let fixtures = [];
 let dates = [];  // gantt/timeline items
 let tasks = [];
 
+let reminders = [];
+
 let currentFilter  = 'all';
 let currentSearch  = '';
+let currentSort    = 'date-desc';
 let currentTaskFilter = 'all';
 let currentImportTab  = 'form';
 let ganttMonths    = 6;
@@ -1937,6 +1991,7 @@ function loadAll() {
   if (!tasks.length)    { try { tasks     = JSON.parse(localStorage.getItem(TASKS_KEY))     ||[]; } catch {} }
   if (!contacts.length) { try { contacts  = JSON.parse(localStorage.getItem(CONTACTS_KEY))  ||[]; } catch {} }
   if (!questions.length){ try { questions = JSON.parse(localStorage.getItem(QUESTIONS_KEY)) ||[]; } catch {} }
+  try { reminders = JSON.parse(localStorage.getItem(REMINDERS_KEY)) || []; } catch { reminders = []; }
 
   if (!taskCats.length)  taskCats  = JSON.parse(JSON.stringify(DEFAULT_TASK_CATS));
   if (!docs.length)      seedDocs();
@@ -1962,6 +2017,7 @@ function saveAll() {
   localStorage.setItem(CONTACTS_KEY,  JSON.stringify(contacts));
   localStorage.setItem(TASK_CATS_KEY, JSON.stringify(taskCats));
   localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(reminders));
   // 2) Also write to new cache format
   cacheWriteAll('docs',      docs.map(docToRow));
   localStorage.setItem('_cache_fixtures', JSON.stringify(fixtures));
@@ -2299,6 +2355,67 @@ function renderDashboard() {
   renderRecent();
   renderUpcoming();
   renderDashboardOpenTasks();
+  renderReminders();
+}
+
+function renderReminders() {
+  const el = document.getElementById('reminders-list');
+  if (!el) return;
+  const sorted = [...reminders].sort((a,b)=>{
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const pri = {high:0,med:1,low:2};
+    if (!a.done && a.priority !== b.priority) return (pri[a.priority]??1)-(pri[b.priority]??1);
+    return (a.date||'9999').localeCompare(b.date||'9999');
+  });
+  if (!sorted.length) { el.innerHTML='<div class="empty-state">No reminders yet</div>'; return; }
+  const priColor = {high:'var(--red)',med:'var(--orange)',low:'var(--blue)'};
+  el.innerHTML = sorted.map(r=>`
+    <div style="padding:11px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;${r.done?'opacity:0.45;':''}" id="rm-row-${r.id}">
+      <div style="width:8px;height:8px;border-radius:50%;background:${priColor[r.priority]||'var(--orange)'};margin-top:4px;flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:13px;font-weight:500;${r.done?'text-decoration:line-through;color:var(--text-dim);':''}">${r.note.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        ${r.date?`<div style="font-family:var(--mono);font-size:10px;color:${!r.done&&daysUntil(r.date)<0?'var(--red)':daysUntil(r.date)<=3?'var(--orange)':'var(--text-muted)'};margin-top:3px;">Review: ${fmtD(r.date)}${!r.done&&daysUntil(r.date)<0?' · Overdue':daysUntil(r.date)===0?' · Today':''}</div>`:''}
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <button class="btn btn-ghost btn-sm" onclick="toggleReminder('${r.id}')" title="${r.done?'Mark open':'Mark done'}" style="${r.done?'color:var(--text-dim);':'color:var(--green);border-color:var(--green);'}">${r.done?'↩':'✓'}</button>
+        <button class="btn btn-ghost btn-sm" onclick="openReminderModal('${r.id}')">✎</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteReminder('${r.id}')">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function openReminderModal(id) {
+  const r = id ? reminders.find(x=>x.id===id) : null;
+  document.getElementById('reminder-modal-title').textContent = r ? 'Edit Reminder' : 'Add Reminder';
+  document.getElementById('rm-note').value     = r ? r.note     : '';
+  document.getElementById('rm-date').value     = r ? (r.date||'') : '';
+  document.getElementById('rm-priority').value = r ? (r.priority||'med') : 'med';
+  document.getElementById('rm-edit-id').value  = r ? r.id : '';
+  openModal('reminder-modal');
+  setTimeout(()=>document.getElementById('rm-note').focus(), 100);
+}
+
+function saveReminder() {
+  const note = document.getElementById('rm-note').value.trim();
+  if (!note) { alert('Please enter a note.'); return; }
+  const editId = document.getElementById('rm-edit-id').value;
+  if (editId) {
+    const r = reminders.find(x=>x.id===editId);
+    if (r) { r.note=note; r.date=document.getElementById('rm-date').value; r.priority=document.getElementById('rm-priority').value; }
+  } else {
+    reminders.push({id:uid(), note, date:document.getElementById('rm-date').value, priority:document.getElementById('rm-priority').value, done:false, created:today()});
+  }
+  saveAll(); closeModal('reminder-modal'); renderReminders();
+}
+
+function toggleReminder(id) {
+  const r = reminders.find(x=>x.id===id);
+  if (r) { r.done = !r.done; saveAll(); renderReminders(); }
+}
+
+function deleteReminder(id) {
+  reminders = reminders.filter(x=>x.id!==id);
+  saveAll(); renderReminders();
 }
 
 function markDateDone(id, event) {
@@ -2375,6 +2492,10 @@ function renderStats() {
   const fixturesOrdered = fixtures.filter(f=>['ordered','delivered'].includes(f.status)).reduce((s,f)=>s+f.qty*f.price,0);
   const totalPaid = docs.reduce((s,d)=>s+paidTotal(d),0);
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
+  const invoiceDocs = docs.filter(d=>d.type==='invoice');
+  const totalInvoiced = invoiceDocs.reduce((s,d)=>s+Number(d.amount),0);
+  const totalInvoicePaid = invoiceDocs.reduce((s,d)=>s+paidTotal(d),0);
+  const totalOutstanding = totalInvoiced - totalInvoicePaid;
   const openTasks = tasks.filter(t=>!t.done).length;
   const overdueTasks = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
   const pendingQuotes = docs.filter(d=>d.type==='quote' && d.status==='pending');
@@ -2382,7 +2503,7 @@ function renderStats() {
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card gold"><div class="stat-label">Committed (Accepted)</div><div class="stat-value gold">${fmt(totalCommitted)}</div><div class="stat-sub">${accepted.length} accepted quotes</div></div>
     <div class="stat-card green"><div class="stat-label">Total Paid</div><div class="stat-value green">${fmt(totalPaid)}</div><div class="stat-sub">all documents</div></div>
-    <div class="stat-card orange"><div class="stat-label">Payments Pending</div><div class="stat-value orange">${fmt(totalPending)}</div><div class="stat-sub">scheduled not paid</div></div>
+    <div class="stat-card orange"><div class="stat-label">Outstanding (Invoices)</div><div class="stat-value orange">${fmt(totalOutstanding)}</div><div class="stat-sub">${fmt(totalInvoiced)} invoiced − ${fmt(totalInvoicePaid)} paid</div></div>
     <div class="stat-card" style="border-top-color:var(--yellow);"><div class="stat-label">Pending Review</div><div class="stat-value" style="color:var(--yellow);">${fmt(totalPendingQuotes)}</div><div class="stat-sub">${pendingQuotes.length} quote${pendingQuotes.length===1?'':'s'} awaiting decision</div></div>
     <div class="stat-card purple"><div class="stat-label">Open Tasks</div><div class="stat-value purple">${openTasks}</div><div class="stat-sub">${overdueTasks} overdue</div></div>
     <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes · ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
@@ -2897,11 +3018,24 @@ function openGanttItemMenu(itemId) {
 }
 
 // ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
+const STATUS_ORDER = {accepted:0, invoice:1, pending:2, expired:3, rejected:4};
+function setSort(s) { currentSort=s; renderQuotes(); }
+
 function renderQuotes() {
   const filtered = docs.filter(d=>{
     const mf = currentFilter==='all'||d.status===currentFilter||d.type===currentFilter;
     const ms = !currentSearch||[d.supplier,d.trade,d.desc,d.docnum,d.notes,...(d.payments||[]).map(p=>p.txn||'')].join(' ').toLowerCase().includes(currentSearch.toLowerCase());
     return mf && ms;
+  });
+  filtered.sort((a,b)=>{
+    switch(currentSort) {
+      case 'date-asc':    return (a.date||'').localeCompare(b.date||'');
+      case 'status':      return (STATUS_ORDER[a.status]??9)-(STATUS_ORDER[b.status]??9)||a.supplier.localeCompare(b.supplier);
+      case 'amount-desc': return Number(b.amount)-Number(a.amount);
+      case 'amount-asc':  return Number(a.amount)-Number(b.amount);
+      case 'supplier':    return a.supplier.localeCompare(b.supplier);
+      default:            return (b.date||'').localeCompare(a.date||''); // date-desc
+    }
   });
   document.getElementById('doc-count').textContent = `${filtered.length} items`;
   const el = document.getElementById('quotes-list');
