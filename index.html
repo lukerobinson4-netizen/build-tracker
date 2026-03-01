@@ -2493,8 +2493,9 @@ function renderStats() {
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
   const invoiceDocs = docs.filter(d=>d.type==='invoice');
   const totalInvoiced = invoiceDocs.reduce((s,d)=>s+Number(d.amount),0);
-  const totalInvoicePaid = invoiceDocs.reduce((s,d)=>s+paidTotal(d),0);
-  const totalOutstanding = totalInvoiced - totalInvoicePaid;
+  // For invoices marked paid at doc level, treat full amount as paid; otherwise use milestone tracking
+  const totalInvoicePaid = invoiceDocs.reduce((s,d)=>s+(d.status==='paid'?Number(d.amount):paidTotal(d)),0);
+  const totalOutstanding = Math.max(0, totalInvoiced - totalInvoicePaid);
   const openTasks = tasks.filter(t=>!t.done).length;
   const overdueTasks = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
   const pendingQuotes = docs.filter(d=>d.type==='quote' && d.status==='pending');
