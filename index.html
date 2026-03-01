@@ -2494,12 +2494,11 @@ function renderStats() {
   const totalPending = docs.reduce((s,d)=>s+pendingTotal(d),0);
   const invoiceDocs = docs.filter(d=>d.type==='invoice');
   const totalInvoiced = invoiceDocs.reduce((s,d)=>s+Number(d.amount)+Number(d.gst||0),0);
-  // For invoices marked paid at doc level, treat full amount incl GST as paid; otherwise scale milestone tracking to incl GST
+  // Milestones are entered as incl-GST amounts, so use paidTotal directly against the incl-GST total
   const totalInvoicePaid = invoiceDocs.reduce((s,d)=>{
     const total = Number(d.amount)+Number(d.gst||0);
     if (d.status==='paid') return s + total;
-    const factor = Number(d.amount)>0 ? total/Number(d.amount) : 1;
-    return s + paidTotal(d) * factor;
+    return s + paidTotal(d);
   }, 0);
   const totalOutstanding = Math.max(0, totalInvoiced - totalInvoicePaid);
   const openTasks = tasks.filter(t=>!t.done).length;
