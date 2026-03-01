@@ -2513,7 +2513,7 @@ function renderStats() {
 }
 
 function renderRecent() {
-  const recent = [...docs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  const recent = [...docs].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,8);
   const el = document.getElementById('recent-list');
   if (!recent.length) { el.innerHTML='<div class="empty-state">No documents yet</div>'; return; }
   el.innerHTML = recent.map(d=>`
