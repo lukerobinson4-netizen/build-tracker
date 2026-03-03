@@ -627,16 +627,29 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 
   <div class="stats-row" id="stats-row"></div>
 
-  <div class="two-col">
-    <div>
-      <div class="section">
-        <div class="section-header">
-          <div class="section-title">Recent Activity</div>
-          <button class="btn btn-ghost btn-sm" onclick="showTab('quotes',document.querySelectorAll('.tab')[3])">View All</button>
-        </div>
-        <div id="recent-list"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 360px;gap:16px;align-items:start;">
+    <!-- Recent Activity -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Recent Activity</div>
+        <button class="btn btn-ghost btn-sm" onclick="showTab('quotes',document.querySelectorAll('.tab')[3])">View All</button>
       </div>
+      <div id="recent-list"></div>
     </div>
+
+    <!-- Principal Items -->
+    <div class="section" style="border-left:3px solid var(--purple);">
+      <div class="section-header">
+        <div class="section-title">Principal Items</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="section-count" id="pi-count"></span>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('systems-modal');renderSystemsEdit()">⚙ Manage</button>
+        </div>
+      </div>
+      <div id="principal-items-list"></div>
+    </div>
+
+    <!-- Right sidebar -->
     <div style="display:flex;flex-direction:column;gap:16px;">
       <div class="section">
         <div class="section-header"><div class="section-title">Upcoming Payments</div></div>
@@ -1628,6 +1641,7 @@ let dates = [];  // gantt/timeline items
 let tasks = [];
 
 let reminders = [];
+let budget = 0; // manually set project budget
 
 let currentFilter  = 'all';
 let currentSearch  = '';
@@ -1924,6 +1938,7 @@ async function loadFromSupabase() {
     systems   = getSetting('systems',   []);
     suppliers = getSetting('suppliers', []);
     taskCats  = getSetting('task_cats', []);
+    budget    = Number(getSetting('budget', 0)) || 0;
 
     // Seed if empty
     if (!docs.length)      { seedDocs();      await pushCollection('docs',  docs.map(docToRow)); }
@@ -1984,6 +1999,7 @@ function loadAll() {
   try { systems   = JSON.parse(localStorage.getItem('_cache_setting_systems'))   ||JSON.parse(localStorage.getItem('dairy_systems_v1'))  ||[]; } catch { systems=[]; }
   try { suppliers = JSON.parse(localStorage.getItem('_cache_setting_suppliers')) ||JSON.parse(localStorage.getItem(SUPPLIERS_KEY)) ||[]; } catch { suppliers=[]; }
   try { taskCats  = JSON.parse(localStorage.getItem('_cache_setting_task_cats')) ||JSON.parse(localStorage.getItem(TASK_CATS_KEY)) ||[]; } catch { taskCats=[]; }
+  try { budget = Number(JSON.parse(localStorage.getItem('_cache_setting_budget'))) || 0; } catch { budget = 0; }
 
   // Also read old-format localStorage as fallback for first launch
   if (!docs.length)     { try { docs      = JSON.parse(localStorage.getItem(DOCS_KEY))      ||[]; } catch {} }
@@ -2049,6 +2065,7 @@ function syncToSupabase() {
           {key:'suppliers', value:suppliers},
           {key:'task_cats', value:taskCats},
         {key:'systems',   value:systems},
+        {key:'budget',    value:budget},
         ], {onConflict:'key'}),
       ]);
       // Prune deleted rows — delete any Supabase rows not in current arrays
@@ -2352,6 +2369,7 @@ function renderDashboard() {
   renderTimelineStrip();
   renderTaskStrip();
   renderStats();
+  renderPrincipalItems();
   renderRecent();
   renderUpcoming();
   renderDashboardOpenTasks();
@@ -2485,6 +2503,17 @@ function renderTaskStrip() {
   }).join('');
 }
 
+function setBudget() {
+  const val = prompt('Enter total project budget (excl. GST):', budget || '');
+  if (val === null) return;
+  const n = parseFloat(String(val).replace(/[^0-9.]/g, ''));
+  if (isNaN(n)) { alert('Invalid number'); return; }
+  budget = n;
+  sbSaveSetting('budget', budget);
+  localStorage.setItem('_cache_setting_budget', JSON.stringify(budget));
+  renderStats();
+}
+
 function renderStats() {
   const accepted = docs.filter(d=>d.status==='accepted');
   const totalCommitted = accepted.reduce((s,d)=>s+Number(d.amount),0);
@@ -2501,19 +2530,87 @@ function renderStats() {
     return s + paidTotal(d);
   }, 0);
   const totalOutstanding = Math.max(0, totalInvoiced - totalInvoicePaid);
-  const openTasks = tasks.filter(t=>!t.done).length;
-  const overdueTasks = tasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
   const pendingQuotes = docs.filter(d=>d.type==='quote' && d.status==='pending');
   const totalPendingQuotes = pendingQuotes.reduce((s,d)=>s+Number(d.amount),0);
+  const budgetRemaining = budget > 0 ? budget - totalCommitted : null;
+  const budgetColor = budgetRemaining === null ? 'var(--accent)' : budgetRemaining < 0 ? 'var(--red)' : 'var(--accent)';
   document.getElementById('stats-row').innerHTML = `
-    <div class="stat-card gold"><div class="stat-label">Committed (Accepted)</div><div class="stat-value gold">${fmt(totalCommitted)}</div><div class="stat-sub">${accepted.length} accepted quotes</div></div>
-    <div class="stat-card green"><div class="stat-label">Total Paid</div><div class="stat-value green">${fmt(totalPaid)}</div><div class="stat-sub">all documents</div></div>
-    <div class="stat-card orange"><div class="stat-label">Outstanding (Invoices)</div><div class="stat-value orange">${fmt(totalOutstanding)}</div><div class="stat-sub">${fmt(totalInvoiced)} invoiced − ${fmt(totalInvoicePaid)} paid</div></div>
+    <div class="stat-card gold" style="cursor:pointer;" onclick="setBudget()" title="Click to set budget">
+      <div class="stat-label">Budget <span style="font-size:9px;opacity:0.6;">✎</span></div>
+      <div class="stat-value" style="color:${budgetColor};">${budget > 0 ? fmt(budget) : '— Set —'}</div>
+      <div class="stat-sub">${budgetRemaining !== null ? (budgetRemaining >= 0 ? fmt(budgetRemaining)+' remaining' : fmt(Math.abs(budgetRemaining))+' over budget') : 'click to set'}</div>
+    </div>
+    <div class="stat-card gold"><div class="stat-label">Committed (Accepted)</div><div class="stat-value gold">${fmt(totalCommitted)}</div><div class="stat-sub">${accepted.length} accepted quote${accepted.length===1?'':'s'}</div></div>
     <div class="stat-card" style="border-top-color:var(--yellow);"><div class="stat-label">Pending Review</div><div class="stat-value" style="color:var(--yellow);">${fmt(totalPendingQuotes)}</div><div class="stat-sub">${pendingQuotes.length} quote${pendingQuotes.length===1?'':'s'} awaiting decision</div></div>
-    <div class="stat-card purple"><div class="stat-label">Open Tasks</div><div class="stat-value purple">${openTasks}</div><div class="stat-sub">${overdueTasks} overdue</div></div>
-    <div class="stat-card blue"><div class="stat-label">Documents</div><div class="stat-value blue">${docs.length}</div><div class="stat-sub">${docs.filter(d=>d.type==='quote').length} quotes · ${docs.filter(d=>d.type==='invoice').length} inv</div></div>
-    ${fixturesTotal>0?`<div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} items · ${fmt(fixturesOrdered)} ordered</div></div>`:''}
+    <div class="stat-card green"><div class="stat-label">Invoiced (Total Paid)</div><div class="stat-value green">${fmt(totalInvoiced)}</div><div class="stat-sub">${fmt(totalInvoicePaid)} paid</div></div>
+    <div class="stat-card orange"><div class="stat-label">Outstanding (Invoices)</div><div class="stat-value orange">${fmt(totalOutstanding)}</div><div class="stat-sub">${invoiceDocs.length} invoice${invoiceDocs.length===1?'':'s'}</div></div>
+    <div class="stat-card" style="border-top-color:var(--purple);"><div class="stat-label">Fixtures Est.</div><div class="stat-value" style="color:var(--purple);">${fmt(fixturesTotal)}</div><div class="stat-sub">${fixtures.length} item${fixtures.length===1?'':'s'} · ${fmt(fixturesOrdered)} ordered</div></div>
   `;
+}
+
+function renderPrincipalItems() {
+  const el = document.getElementById('principal-items-list');
+  if (!el) return;
+  const countEl = document.getElementById('pi-count');
+  if (!systems.length) {
+    el.innerHTML = '<div class="empty-state">No principal items defined — click ⚙ Manage to add building systems.</div>';
+    if (countEl) countEl.textContent = '';
+    return;
+  }
+  let nComplete=0, nInvoiced=0, nQuoted=0, nPending=0;
+  const rows = systems.map(sys => {
+    const sysDocs     = docs.filter(d => d.systemGroup === sys);
+    const sysQuotes   = sysDocs.filter(d => d.type === 'quote'   && d.status !== 'rejected');
+    const sysInvoices = sysDocs.filter(d => d.type === 'invoice');
+    // Derive status
+    let statusLabel, statusColor;
+    if (sysInvoices.length > 0) {
+      const allPaid = sysInvoices.every(d => d.status === 'paid' || paidTotal(d) >= (Number(d.amount) + Number(d.gst||0)));
+      if (allPaid) { statusLabel='COMPLETE'; statusColor='var(--green)'; nComplete++; }
+      else          { statusLabel='INVOICED'; statusColor='var(--orange)'; nInvoiced++; }
+    } else if (sysQuotes.length > 0) {
+      statusLabel='QUOTED'; statusColor='var(--blue)'; nQuoted++;
+    } else {
+      statusLabel='PENDING'; statusColor='var(--text-dim)'; nPending++;
+    }
+    // Quote line
+    let quoteLine = `<span style="color:var(--text-dim);">—</span>`;
+    if (sysQuotes.length) {
+      const q = sysQuotes[0];
+      const qAmt = Number(q.amount) + Number(q.gst||0);
+      const more = sysQuotes.length > 1 ? ` <span style="color:var(--text-muted);font-size:9px;">+${sysQuotes.length-1}</span>` : '';
+      quoteLine = `<span onclick="navigateToDoc('${q.id}')" style="cursor:pointer;color:var(--blue);font-family:var(--mono);" title="${q.supplier||''}">${fmt(qAmt)}${more}</span>`;
+    }
+    // Invoice line
+    let invoiceLine = `<span style="color:var(--text-dim);">—</span>`;
+    if (sysInvoices.length) {
+      const inv = sysInvoices[0];
+      const invAmt = Number(inv.amount) + Number(inv.gst||0);
+      const paid = paidTotal(inv);
+      const more = sysInvoices.length > 1 ? ` <span style="color:var(--text-muted);font-size:9px;">+${sysInvoices.length-1}</span>` : '';
+      const paidStr = paid > 0 ? ` <span style="color:${paid>=invAmt?'var(--green)':'var(--yellow)'};">· ${fmt(paid)} paid</span>` : '';
+      invoiceLine = `<span onclick="navigateToDoc('${inv.id}')" style="cursor:pointer;color:var(--orange);font-family:var(--mono);" title="${inv.supplier||''}">${fmt(invAmt)}${paidStr}${more}</span>`;
+    }
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 16px;border-bottom:1px solid var(--border);transition:background 0.1s;gap:8px;" onmouseenter="this.style.background='rgba(255,255,255,0.025)'" onmouseleave="this.style.background=''">
+      <div style="min-width:0;">
+        <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sys}</div>
+        <div style="margin-top:3px;"><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:${statusColor};border:1px solid ${statusColor}55;padding:1px 5px;">${statusLabel}</span></div>
+      </div>
+      <div style="text-align:right;white-space:nowrap;flex-shrink:0;">
+        <div style="font-size:11px;margin-bottom:2px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">Q </span>${quoteLine}</div>
+        <div style="font-size:11px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">I </span>${invoiceLine}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = rows.join('');
+  if (countEl) {
+    const parts = [];
+    if (nComplete)  parts.push(`${nComplete} complete`);
+    if (nInvoiced)  parts.push(`${nInvoiced} invoiced`);
+    if (nQuoted)    parts.push(`${nQuoted} quoted`);
+    if (nPending)   parts.push(`${nPending} pending`);
+    countEl.textContent = parts.join(' · ');
+  }
 }
 
 function renderRecent() {
@@ -5214,6 +5311,7 @@ function addSystem() {
   renderSystemsEdit();
   refreshSystemGroupSelect('e-system-group', '');
   refreshSystemGroupSelect('f-system-group', '');
+  renderPrincipalItems();
 }
 
 function deleteSystem(name) {
@@ -5226,6 +5324,7 @@ function deleteSystem(name) {
   refreshSystemGroupSelect('e-system-group', '');
   refreshSystemGroupSelect('f-system-group', '');
   if (currentQuoteView==='system') renderSystemView();
+  renderPrincipalItems();
 }
 
 function renameSystem(oldName, newName) {
@@ -5240,6 +5339,7 @@ function renameSystem(oldName, newName) {
   refreshSystemGroupSelect('e-system-group', '');
   refreshSystemGroupSelect('f-system-group', '');
   if (currentQuoteView==='system') renderSystemView();
+  renderPrincipalItems();
 }
 
 function renderSystemsEdit() {
