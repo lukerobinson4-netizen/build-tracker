@@ -2560,9 +2560,9 @@ function renderPrincipalItems() {
   let nComplete=0, nInvoiced=0, nQuoted=0, nPending=0;
   const rows = systems.map(sys => {
     const sysDocs     = docs.filter(d => d.systemGroup === sys);
-    const sysQuotes   = sysDocs.filter(d => d.type === 'quote'   && d.status !== 'rejected');
+    const sysQuotes   = sysDocs.filter(d => d.type === 'quote'   && d.status === 'accepted');
     const sysInvoices = sysDocs.filter(d => d.type === 'invoice');
-    // Derive status
+    // Derive status — quote must be accepted; invoice supersedes quote
     let statusLabel, statusColor;
     if (sysInvoices.length > 0) {
       const allPaid = sysInvoices.every(d => d.status === 'paid' || paidTotal(d) >= (Number(d.amount) + Number(d.gst||0)));
@@ -2573,23 +2573,22 @@ function renderPrincipalItems() {
     } else {
       statusLabel='PENDING'; statusColor='var(--text-dim)'; nPending++;
     }
-    // Quote line
-    let quoteLine = `<span style="color:var(--text-dim);">—</span>`;
-    if (sysQuotes.length) {
-      const q = sysQuotes[0];
-      const qAmt = Number(q.amount) + Number(q.gst||0);
-      const more = sysQuotes.length > 1 ? ` <span style="color:var(--text-muted);font-size:9px;">+${sysQuotes.length-1}</span>` : '';
-      quoteLine = `<span onclick="navigateToDoc('${q.id}')" style="cursor:pointer;color:var(--blue);font-family:var(--mono);" title="${q.supplier||''}">${fmt(qAmt)}${more}</span>`;
-    }
-    // Invoice line
-    let invoiceLine = `<span style="color:var(--text-dim);">—</span>`;
+    // Amount display: invoice takes precedence — only show quote when no invoice exists
+    let amountHtml;
     if (sysInvoices.length) {
       const inv = sysInvoices[0];
       const invAmt = Number(inv.amount) + Number(inv.gst||0);
       const paid = paidTotal(inv);
       const more = sysInvoices.length > 1 ? ` <span style="color:var(--text-muted);font-size:9px;">+${sysInvoices.length-1}</span>` : '';
       const paidStr = paid > 0 ? ` <span style="color:${paid>=invAmt?'var(--green)':'var(--yellow)'};">· ${fmt(paid)} paid</span>` : '';
-      invoiceLine = `<span onclick="navigateToDoc('${inv.id}')" style="cursor:pointer;color:var(--orange);font-family:var(--mono);" title="${inv.supplier||''}">${fmt(invAmt)}${paidStr}${more}</span>`;
+      amountHtml = `<div style="font-size:11px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">INV </span><span onclick="navigateToDoc('${inv.id}')" style="cursor:pointer;color:var(--orange);font-family:var(--mono);" title="${inv.supplier||''}">${fmt(invAmt)}${paidStr}${more}</span></div>`;
+    } else if (sysQuotes.length) {
+      const q = sysQuotes[0];
+      const qAmt = Number(q.amount) + Number(q.gst||0);
+      const more = sysQuotes.length > 1 ? ` <span style="color:var(--text-muted);font-size:9px;">+${sysQuotes.length-1}</span>` : '';
+      amountHtml = `<div style="font-size:11px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">Q </span><span onclick="navigateToDoc('${q.id}')" style="cursor:pointer;color:var(--blue);font-family:var(--mono);" title="${q.supplier||''}">${fmt(qAmt)}${more}</span></div>`;
+    } else {
+      amountHtml = `<div style="font-size:11px;color:var(--text-dim);font-family:var(--mono);">—</div>`;
     }
     return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 16px;border-bottom:1px solid var(--border);transition:background 0.1s;gap:8px;" onmouseenter="this.style.background='rgba(255,255,255,0.025)'" onmouseleave="this.style.background=''">
       <div style="min-width:0;">
@@ -2597,8 +2596,7 @@ function renderPrincipalItems() {
         <div style="margin-top:3px;"><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.8px;color:${statusColor};border:1px solid ${statusColor}55;padding:1px 5px;">${statusLabel}</span></div>
       </div>
       <div style="text-align:right;white-space:nowrap;flex-shrink:0;">
-        <div style="font-size:11px;margin-bottom:2px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">Q </span>${quoteLine}</div>
-        <div style="font-size:11px;"><span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">I </span>${invoiceLine}</div>
+        ${amountHtml}
       </div>
     </div>`;
   });
