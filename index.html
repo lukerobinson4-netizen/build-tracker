@@ -75,7 +75,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .timeline-strip-scroll::-webkit-scrollbar { height: 4px; }
 .timeline-strip-scroll::-webkit-scrollbar-track { background: var(--bg); }
 .timeline-strip-scroll::-webkit-scrollbar-thumb { background: var(--border-light); }
-.tl-item { min-width: 160px; padding: 12px 14px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; cursor: default; transition: background 0.1s; }
+.tl-item { min-width: 160px; padding: 12px 14px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; cursor: default; transition: background 0.1s; position: relative; }
 .tl-item:hover { background: var(--surface2); }
 .tl-item.overdue { border-top: 2px solid var(--red); }
 .tl-item.today { border-top: 2px solid var(--orange); }
@@ -1005,7 +1005,7 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
 <div class="modal-overlay" id="date-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <div class="modal-title">Add Date / Milestone</div>
+      <div class="modal-title" id="dm-modal-title">Add Date / Milestone</div>
       <button class="modal-close" onclick="closeModal('date-modal')">×</button>
     </div>
     <div class="modal-body">
@@ -1063,18 +1063,26 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           </select>
           <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:4px;">Hold Ctrl/Cmd to select multiple. Dependency arrows will show on the Gantt.</span>
         </div>
-        <div class="form-group full">
+        <div class="form-group full" id="dm-done-row" style="display:none;">
+          <label class="form-label">Status</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="dm-done" style="accent-color:var(--green);">
+            <span style="font-size:12px;color:var(--text-muted);">Mark as complete / done</span>
+          </label>
+        </div>
+        <div class="form-group full" id="dm-create-task-row">
           <label class="form-label">Also create as Task?</label>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="dm-create-task" style="accent-color:var(--accent);" checked> 
+            <input type="checkbox" id="dm-create-task" style="accent-color:var(--accent);" checked>
             <span style="font-size:12px;color:var(--text-muted);">Add this to the task list as well</span>
           </label>
         </div>
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-ghost" id="dm-delete-btn" style="display:none;margin-right:auto;color:var(--red);" onclick="deleteDateItem()">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('date-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveDateItem()">Add to Timeline</button>
+      <button class="btn btn-primary" id="dm-save-btn" onclick="saveDateItem()">Add to Timeline</button>
     </div>
   </div>
 </div>
@@ -2473,6 +2481,8 @@ function renderTimelineStrip() {
     const navAction = d.sourceDoc ? `navigateToDoc('${d.sourceDoc}')` : `navigateToDate('${d.id}')`;
     return `<div class="tl-item ${cls}" onclick="${navAction}" style="cursor:pointer;" title="${(d.notes||d.title).replace(/'/g,'&#39;')}">
       <button class="tl-done-btn ${d.done?'done':''}" onclick="markDateDone('${d.id}',event)" title="${d.done?'Unmark':'Mark as actioned'}">${d.done?'✓ Done':'Mark Done'}</button>
+      ${d.source!=='doc'?`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditDateModal('${d.id}')" title="Edit" style="position:absolute;top:4px;right:4px;padding:1px 5px;font-size:10px;opacity:0;transition:opacity 0.15s;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0'">✎</button>`:''}
+
       <div class="tl-date" style="color:${dateCol}">${fmtD(d.date)} ${dueText}</div>
       <div class="tl-title">${d.title}</div>
       <div class="tl-source">${d.source==='doc'&&d.sourceDoc?(docs.find(x=>x.id===d.sourceDoc)||{}).supplier||d.trade:d.trade||''}</div>
@@ -3026,12 +3036,13 @@ function renderGantt() {
       const doneFade = item.done ? 'opacity:0.45;' : '';
       const depCount = (item.deps||[]).length;
 
-      html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(32,34,36,0.98)'" onmouseleave="this.style.background='transparent';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
+      html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(32,34,36,0.98)';var eb=this.querySelector('.gantt-edit-btn');if(eb)eb.style.opacity='1';" onmouseleave="this.style.background='transparent';this.querySelector('.gantt-sticky-label').style.background='var(--surface)';var eb=this.querySelector('.gantt-edit-btn');if(eb)eb.style.opacity='0';">
         <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
           <div style="display:flex;align-items:center;gap:5px;">
             ${item.done?`<span style="color:var(--green);font-size:10px;">✓</span>`:''}
             ${depCount>0?`<span title="${depCount} dependenc${depCount===1?'y':'ies'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;">⬡${depCount}</span>`:''}
             <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${item.title}</span>
+            ${item.source!=='doc'?`<button onclick="openEditDateModal('${item.id}')" title="Edit" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;padding:0 2px;opacity:0;transition:opacity 0.15s;" class="gantt-edit-btn">✎</button>`:''}
           </div>
           <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
             <span style="font-family:var(--mono);font-size:9px;color:${col};">${item.type}</span>
@@ -3107,14 +3118,10 @@ function renderGantt() {
 
 // Quick actions popup from Gantt bar click
 function openGanttItemMenu(itemId) {
+  // Only edit items that exist in the dates array (not virtual payment items)
   const item = dates.find(d=>d.id===itemId);
   if (!item) return;
-  // Toggle done state on click for quick marking
-  // Could open a modal — for now just toggle done and re-render
-  item.done = !item.done;
-  saveAll();
-  renderGantt();
-  renderDashboard();
+  openEditDateModal(itemId);
 }
 
 // ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
@@ -3391,6 +3398,9 @@ function importExtracted() {
 
 // ═══ SAVE DATE/MILESTONE ══════════════════════════════════════════════════════
 function openDateModal() {
+  editingDateId = null;
+  document.getElementById('dm-modal-title').textContent = 'Add Date / Milestone';
+  document.getElementById('dm-save-btn').textContent = 'Add to Timeline';
   document.getElementById('dm-date').value = today();
   document.getElementById('dm-end-date').value = '';
   document.getElementById('dm-title').value = '';
@@ -3399,9 +3409,35 @@ function openDateModal() {
   document.getElementById('dm-trade').value = '';
   document.getElementById('dm-priority').value = 'med';
   document.getElementById('dm-create-task').checked = true;
+  document.getElementById('dm-create-task-row').style.display = '';
+  document.getElementById('dm-done-row').style.display = 'none';
+  document.getElementById('dm-delete-btn').style.display = 'none';
   // Populate depends-on list
   const depSel = document.getElementById('dm-depends');
   depSel.innerHTML = dates.map(d=>`<option value="${d.id}">${d.title} (${fmtD(d.date)})</option>`).join('');
+  openModal('date-modal');
+}
+
+function openEditDateModal(id) {
+  const item = dates.find(d=>d.id===id);
+  if (!item) return;
+  editingDateId = id;
+  document.getElementById('dm-modal-title').textContent = 'Edit Milestone / Date';
+  document.getElementById('dm-save-btn').textContent = 'Save Changes';
+  document.getElementById('dm-title').value = item.title || '';
+  document.getElementById('dm-date').value = item.date || '';
+  document.getElementById('dm-end-date').value = item.endDate || '';
+  document.getElementById('dm-type').value = item.type || 'milestone';
+  document.getElementById('dm-trade').value = item.trade || '';
+  document.getElementById('dm-priority').value = item.priority || 'med';
+  document.getElementById('dm-notes').value = item.notes || '';
+  document.getElementById('dm-done').checked = !!item.done;
+  document.getElementById('dm-done-row').style.display = '';
+  document.getElementById('dm-create-task-row').style.display = 'none';
+  document.getElementById('dm-delete-btn').style.display = '';
+  // Populate depends-on list, pre-select deps
+  const depSel = document.getElementById('dm-depends');
+  depSel.innerHTML = dates.filter(d=>d.id!==id).map(d=>`<option value="${d.id}"${(item.deps||[]).includes(d.id)?' selected':''}>${d.title} (${fmtD(d.date)})</option>`).join('');
   openModal('date-modal');
 }
 
@@ -3411,24 +3447,53 @@ function saveDateItem() {
   if (!title || !date) { alert('Title and date required.'); return; }
   const depSel = document.getElementById('dm-depends');
   const deps = depSel ? Array.from(depSel.selectedOptions).map(o=>o.value) : [];
-  const item = {
-    id: uid(), title, date,
-    endDate: document.getElementById('dm-end-date').value,
-    type: document.getElementById('dm-type').value,
-    trade: document.getElementById('dm-trade').value,
-    priority: document.getElementById('dm-priority').value,
-    notes: document.getElementById('dm-notes').value.trim(),
-    source: 'manual', sourceDoc: '', done: false, deps
-  };
-  dates.push(item);
-  if (document.getElementById('dm-create-task').checked) {
-    tasks.push({ id:uid(), title, desc:item.notes, cat:item.type==='payment'?'payment':item.type==='inspection'?'inspection':item.type==='permit'?'admin':'other', priority:item.priority, due:date, assign:'Luke', linkedDoc:'', done:false, created:today() });
+  if (editingDateId) {
+    // Edit existing
+    const item = dates.find(d=>d.id===editingDateId);
+    if (item) {
+      item.title    = title;
+      item.date     = date;
+      item.endDate  = document.getElementById('dm-end-date').value;
+      item.type     = document.getElementById('dm-type').value;
+      item.trade    = document.getElementById('dm-trade').value;
+      item.priority = document.getElementById('dm-priority').value;
+      item.notes    = document.getElementById('dm-notes').value.trim();
+      item.done     = document.getElementById('dm-done').checked;
+      item.deps     = deps;
+    }
+  } else {
+    // Create new
+    const item = {
+      id: uid(), title, date,
+      endDate: document.getElementById('dm-end-date').value,
+      type: document.getElementById('dm-type').value,
+      trade: document.getElementById('dm-trade').value,
+      priority: document.getElementById('dm-priority').value,
+      notes: document.getElementById('dm-notes').value.trim(),
+      source: 'manual', sourceDoc: '', done: false, deps
+    };
+    dates.push(item);
+    if (document.getElementById('dm-create-task').checked) {
+      tasks.push({ id:uid(), title, desc:item.notes, cat:item.type==='payment'?'payment':item.type==='inspection'?'inspection':item.type==='permit'?'admin':'other', priority:item.priority, due:date, assign:'Luke', linkedDoc:'', done:false, created:today() });
+    }
   }
   saveAll();
   closeModal('date-modal');
   renderDashboard();
   renderGantt();
   renderTasks();
+}
+
+function deleteDateItem() {
+  if (!editingDateId) return;
+  const item = dates.find(d=>d.id===editingDateId);
+  if (!item) return;
+  if (!confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+  dates.splice(dates.indexOf(item), 1);
+  saveAll();
+  closeModal('date-modal');
+  renderDashboard();
+  renderGantt();
 }
 
 // ═══ SAVE TASK ════════════════════════════════════════════════════════════════
@@ -4034,6 +4099,7 @@ function parsePaste(){const text=document.getElementById('paste-content').value;
 
 // ═══ EDIT DOCUMENT ════════════════════════════════════════════════════════════
 let editingDocId = null;
+let editingDateId = null;
 let editDateRowCount = 0;
 let editingPaymentDocId = null;
 let editingPaymentId = null;
