@@ -6,6 +6,7 @@
 <title>Build Agent — 128 Dairy Creek Rd</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root {
     --bg: #0e0f0e;
@@ -631,6 +632,18 @@ INSTRUCTIONS:
 9. If you are ever unsure whether Luke has confirmed, do NOT save — ask again.`;
 }
 
+// Compact system prompt used when a PDF is attached to keep total tokens down
+function buildCompactSystem() {
+  return `You are a build project management agent for Luke Robinson's home construction at 128 Dairy Creek Rd, Goulburn NSW Australia.
+You have direct access to his Supabase build tracking database via the provided tools.
+TODAY: ${new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
+INSTRUCTIONS:
+1. Call get_build_data before answering questions about existing records.
+2. Extract ALL relevant fields from the document (supplier, trade, amounts, dates, doc number) and tell Luke what you found before saving anything.
+3. NEVER call create_* or update_* in the same turn you propose saving. End with "Shall I save this?" and only write after Luke confirms.
+4. Format currency as AUD with $ and two decimals. Be concise.`;
+}
+
 // ─── Conversation state ───────────────────────────────────────────────────────
 let conversation = [];
 let isLoading = false;
@@ -720,7 +733,10 @@ async function runTool(name, input) {
 }
 
 // ─── Agent loop ───────────────────────────────────────────────────────────────
-async function runAgentLoop() {
+// systemPrompt: string to use as system prompt
+// historyStartIdx: index into conversation[] to slice from (omits prior history).
+//   Pass conversation.length - 1 when a PDF is attached to send only the current turn.
+async function runAgentLoop(systemPrompt, historyStartIdx = 0) {
   // Tool name labels
   const toolLabels = {
     get_build_data: { label: '🔍 Reading build data', write: false },
@@ -735,15 +751,18 @@ async function runAgentLoop() {
   };
 
   while (true) {
+    // Slice from historyStartIdx so prior conversation is omitted when processing a PDF
+    const msgsToSend = historyStartIdx > 0 ? conversation.slice(historyStartIdx) : conversation;
+
     const res = await fetch(AGENT_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4096,
-        system: buildSystem(ctx),
+        system: systemPrompt,
         tools: TOOLS,
-        messages: conversation
+        messages: msgsToSend
       })
     });
 
@@ -794,33 +813,58 @@ async function runAgentLoop() {
   }
 }
 
-// ─── Send ─────────────────────────────────────────────────────────────────────
 // ─── PDF state ────────────────────────────────────────────────────────────────
-let attachedPdf = null; // { name, base64 }
+let attachedPdf = null; // { name, text, truncated }
 
-function handleFileSelect(input) {
+const PDF_WORD_LIMIT = 4000;
+
+// Set PDF.js worker (must match CDN version)
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+async function extractPdfText(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    fullText += content.items.map(item => item.str).join(' ') + '\n';
+  }
+  const words = fullText.trim().split(/\s+/);
+  const truncated = words.length > PDF_WORD_LIMIT;
+  const text = truncated ? words.slice(0, PDF_WORD_LIMIT).join(' ') : fullText.trim();
+  return { text, truncated };
+}
+
+async function handleFileSelect(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
     alert('Please select a PDF file.');
     return;
   }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const base64 = e.target.result.split(',')[1];
-    attachedPdf = { name: file.name, base64 };
-    showFilePill(file.name);
-  };
-  reader.readAsDataURL(file);
+  showFilePill(file.name, true);
+  try {
+    const { text, truncated } = await extractPdfText(file);
+    attachedPdf = { name: file.name, text, truncated };
+    showFilePill(file.name, false, truncated);
+  } catch (e) {
+    alert('Failed to read PDF: ' + e.message);
+    removeAttachment();
+  }
   input.value = '';
 }
 
-function showFilePill(name) {
+function showFilePill(name, loading = false, truncated = false) {
   const wrap = document.getElementById('filePillWrap');
+  const note = loading ? ' — reading…' : truncated ? ' — truncated to 4k words' : '';
   wrap.innerHTML = `
     <div class="file-pill">
-      📄 ${escHtml(name)}
-      <button class="file-pill-remove" onclick="removeAttachment()" title="Remove">×</button>
+      📄 ${escHtml(name)}${escHtml(note)}
+      ${loading ? '' : `<button class="file-pill-remove" onclick="removeAttachment()" title="Remove">×</button>`}
     </div>`;
 }
 
@@ -832,18 +876,20 @@ function removeAttachment() {
 // Drag and drop
 document.addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag-over'); });
 document.addEventListener('dragleave', e => { if (e.relatedTarget === null) document.body.classList.remove('drag-over'); });
-document.addEventListener('drop', e => {
+document.addEventListener('drop', async e => {
   e.preventDefault();
   document.body.classList.remove('drag-over');
   const file = e.dataTransfer.files[0];
   if (file && (file.type === 'application/pdf' || file.name.endsWith('.pdf'))) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const base64 = ev.target.result.split(',')[1];
-      attachedPdf = { name: file.name, base64 };
-      showFilePill(file.name);
-    };
-    reader.readAsDataURL(file);
+    showFilePill(file.name, true);
+    try {
+      const { text, truncated } = await extractPdfText(file);
+      attachedPdf = { name: file.name, text, truncated };
+      showFilePill(file.name, false, truncated);
+    } catch (err) {
+      alert('Failed to read PDF: ' + err.message);
+      removeAttachment();
+    }
   }
 });
 
@@ -861,19 +907,22 @@ async function sendMessage() {
   // Build user message content
   let userContent;
   const displayText = text || `Please read and extract data from this PDF: ${attachedPdf.name}`;
+  let pdfForThisTurn = null;
 
   if (hasPdf) {
+    pdfForThisTurn = attachedPdf;
     // Show PDF badge + text in UI
-    const pdfHtml = `<div class="pdf-msg-badge">📄 ${escHtml(attachedPdf.name)}</div><br>${escHtml(displayText)}`;
+    const truncNote = pdfForThisTurn.truncated
+      ? `<br><span style="font-size:11px;opacity:0.7;font-family:var(--mono)">⚠️ Note: document was truncated to fit API limits (${PDF_WORD_LIMIT} words)</span>`
+      : '';
+    const pdfHtml = `<div class="pdf-msg-badge">📄 ${escHtml(pdfForThisTurn.name)}</div>${truncNote}<br>${escHtml(displayText)}`;
     addUserMessage(pdfHtml);
 
-    // Build multipart content for API
+    // Send extracted text instead of raw base64 to stay within token limits
+    const pdfBlock = `[PDF: ${pdfForThisTurn.name}]\n\n${pdfForThisTurn.text}${pdfForThisTurn.truncated ? '\n\n[Document truncated to 4,000 words to fit API limits]' : ''}`;
     userContent = [
-      {
-        type: 'document',
-        source: { type: 'base64', media_type: 'application/pdf', data: attachedPdf.base64 }
-      },
-      { type: 'text', text: text || `Please read this PDF (${attachedPdf.name}) and extract all relevant build data from it — supplier, trade, amounts, dates, document number, and any other details. Then tell me what you found before saving anything.` }
+      { type: 'text', text: pdfBlock },
+      { type: 'text', text: text || `Please read this PDF (${pdfForThisTurn.name}) and extract all relevant build data — supplier, trade, amounts, dates, document number, and any other details. Tell me what you found before saving anything.` }
     ];
     removeAttachment();
   } else {
@@ -886,7 +935,13 @@ async function sendMessage() {
 
   try {
     if (!ctx) ctx = await loadContext();
-    await runAgentLoop();
+    // When a PDF is attached: use compact system prompt and send only the current turn
+    // to avoid blowing the input token rate limit
+    if (pdfForThisTurn) {
+      await runAgentLoop(buildCompactSystem(), conversation.length - 1);
+    } else {
+      await runAgentLoop(buildSystem(ctx));
+    }
   } catch (err) {
     removeThinking();
     addAgentMessage(`⚠️ Error: ${escHtml(err.message)}`);
