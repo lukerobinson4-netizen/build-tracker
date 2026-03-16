@@ -119,6 +119,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .badge-rejected { border-color: var(--red); color: var(--red); }
 .badge-invoice { border-color: var(--orange); color: var(--orange); }
 .badge-paid { border-color: var(--green); color: var(--green); background: rgba(76,175,125,0.1); }
+.badge-partial { border-color: var(--yellow); color: var(--yellow); background: rgba(212,184,74,0.1); }
 .badge-expired { border-color: var(--text-dim); color: var(--text-dim); }
 
 /* TASK PRIORITY */
@@ -898,8 +899,13 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
             <input class="form-control" type="date" id="f-date" />
           </div>
           <div class="form-group">
-            <label class="form-label">Total Amount (excl GST) *</label>
-            <input class="form-control" type="number" id="f-amount" placeholder="0.00" step="0.01" />
+            <label class="form-label" id="f-amount-label">Total Amount (excl GST) *</label>
+            <input class="form-control" type="number" id="f-amount" placeholder="0.00" step="0.01" oninput="onFAmountInput()" />
+            <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--text-muted);cursor:pointer;">
+              <input type="checkbox" id="f-gst-incl" onchange="onFGstInclChange()" style="accent-color:var(--accent);width:14px;height:14px;">
+              Amount already includes GST
+            </label>
+            <span id="f-gst-preview" style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:3px;display:block;"></span>
           </div>
           <div class="form-group" id="expiry-group">
             <label class="form-label">Quote Valid Until</label>
@@ -2318,8 +2324,8 @@ function removeSupplier(name) {
 
 function typeBadge(d) { return d.type==='invoice'?`<span class="badge badge-invoice">Invoice</span>`:`<span class="badge badge-quote">Quote</span>`; }
 function statusBadge(d) {
-  const m={quote:'badge-quote',accepted:'badge-accepted',rejected:'badge-rejected',invoice:'badge-invoice',paid:'badge-paid',expired:'badge-expired',pending:'badge-quote'};
-  const l={quote:'Quote',accepted:'Accepted',rejected:'Rejected',invoice:'Invoice',paid:'Paid',expired:'Expired',pending:'Pending'};
+  const m={quote:'badge-quote',accepted:'badge-accepted',rejected:'badge-rejected',invoice:'badge-invoice',paid:'badge-paid',partial:'badge-partial',expired:'badge-expired',pending:'badge-quote'};
+  const l={quote:'Quote',accepted:'Accepted',rejected:'Rejected',invoice:'Invoice',paid:'Paid',partial:'Partial',expired:'Expired',pending:'Pending'};
   return `<span class="badge ${m[d.status]||'badge-quote'}">${l[d.status]||d.status}</span>`;
 }
 
@@ -2658,7 +2664,7 @@ function pendingPaymentRows(doc) {
   const docPaid   = paidTotal(doc);
 
   const isInvoice  = doc.type === 'invoice';
-  const isAccepted = ['accepted', 'invoice', 'paid'].includes(doc.status);
+  const isAccepted = ['accepted', 'invoice', 'paid', 'partial'].includes(doc.status);
   const hasPaymentRows = (doc.payments || []).length > 0;
 
   // Skip pure unaccepted quotes with no payment schedule
@@ -3731,6 +3737,9 @@ function openAddModal() {
   document.getElementById('f-status').value='pending';
   document.getElementById('f-date').value=today();
   document.getElementById('f-amount').value='';
+  const fGstIncl=document.getElementById('f-gst-incl'); if(fGstIncl) fGstIncl.checked=false;
+  const fAmtLabel=document.getElementById('f-amount-label'); if(fAmtLabel) fAmtLabel.textContent='Total Amount (excl GST) *';
+  const fGstPrev=document.getElementById('f-gst-preview'); if(fGstPrev) fGstPrev.textContent='';
   // Populate all trade selects dynamically
   refreshAllTradeSelects();
   // Populate supplier datalist
@@ -3757,7 +3766,7 @@ function onTypeChange() {
   document.getElementById('expiry-group').style.display=t==='quote'?'flex':'none';
   document.getElementById('linked-quote-group').style.display=t==='invoice'?'flex':'none';
   document.getElementById('f-status').innerHTML=t==='invoice'
-    ?'<option value="pending">Unpaid</option><option value="paid">Paid</option>'
+    ?'<option value="pending">Unpaid</option><option value="partial">Partially Paid</option><option value="paid">Paid</option>'
     :'<option value="pending">Pending Review</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="expired">Expired</option>';
 }
 function onTypeChangeU(){const t=document.getElementById('u-type').value;document.getElementById('u-expiry-group').style.display=t==='quote'?'flex':'none';document.getElementById('u-linked-group').style.display=t==='invoice'?'flex':'none';}
@@ -3798,6 +3807,28 @@ function onGstInclChange() {
   onAmountInput();
 }
 
+function onFAmountInput() {
+  const raw = parseFloat(document.getElementById('f-amount').value||0);
+  const inclGST = document.getElementById('f-gst-incl').checked;
+  const preview = document.getElementById('f-gst-preview');
+  if (inclGST) {
+    const excl = Math.round(raw / 1.1 * 100) / 100;
+    const gst  = Math.round((raw - excl) * 100) / 100;
+    preview.textContent = `Excl GST: $${excl.toFixed(2)} · GST: $${gst.toFixed(2)}`;
+    preview.style.color = 'var(--yellow)';
+  } else {
+    const gst = Math.round(raw * 0.1 * 100) / 100;
+    preview.textContent = raw ? `GST: $${gst.toFixed(2)} · Total incl: $${(raw + gst).toFixed(2)}` : '';
+    preview.style.color = 'var(--text-dim)';
+  }
+}
+function onFGstInclChange() {
+  const inclGST = document.getElementById('f-gst-incl').checked;
+  const label = document.getElementById('f-amount-label');
+  if (label) label.textContent = inclGST ? 'Amount (incl GST) *' : 'Total Amount (excl GST) *';
+  onFAmountInput();
+}
+
 function saveDocument() {
   let type,status,supplier,trade,desc,docnum,date,expiry,amount,notes,linkedQuote,attachmentName='',systemGroup='';
   let bankDetails = {};
@@ -3806,7 +3837,9 @@ function saveDocument() {
     supplier=document.getElementById('f-supplier').value.trim(); trade=document.getElementById('f-trade').value;
     desc=document.getElementById('f-desc').value.trim(); docnum=document.getElementById('f-docnum').value.trim();
     date=document.getElementById('f-date').value; expiry=document.getElementById('f-expiry').value;
-    amount=parseFloat(document.getElementById('f-amount').value)||0; notes=document.getElementById('f-notes').value.trim();
+    amount=parseFloat(document.getElementById('f-amount').value)||0;
+    if(document.getElementById('f-gst-incl')?.checked) amount=Math.round(amount/1.1*100)/100;
+    notes=document.getElementById('f-notes').value.trim();
     systemGroup=document.getElementById('f-system-group')?.value||'';
     linkedQuote=document.getElementById('f-linked-quote').value;
     bankDetails = { bank:document.getElementById('f-bank').value.trim(), bsb:document.getElementById('f-bsb').value.trim(), acc:document.getElementById('f-acc-num').value.trim(), accName:document.getElementById('f-acc-name').value.trim() };
@@ -4079,7 +4112,7 @@ function openEditModal(docId) {
   // Status options depend on type
   const statusEl = document.getElementById('e-status');
   if (d.type==='invoice') {
-    statusEl.innerHTML = '<option value="pending">Unpaid</option><option value="paid">Paid</option>';
+    statusEl.innerHTML = '<option value="pending">Unpaid</option><option value="partial">Partially Paid</option><option value="paid">Paid</option>';
   } else {
     statusEl.innerHTML = '<option value="pending">Pending Review</option><option value="accepted">Accepted</option><option value="rejected">Rejected</option><option value="expired">Expired</option>';
   }
