@@ -6,6 +6,7 @@
   var openPanels = new Set();
   var fixtureDataCache = new Map();
   var batchSearchActive = false;
+  var batchCancelled = false;
 
   function fmt(n) {
     if (n == null || isNaN(n)) return '--';
@@ -267,7 +268,10 @@
   }
 
   async function searchAllPrices() {
-    if (batchSearchActive) return;
+    if (batchSearchActive) {
+      batchCancelled = true;
+      return;
+    }
     var fixtures = [];
     fixtureDataCache.forEach(function(f) {
       if (f.brand || f.model || f.product_name) fixtures.push(f);
@@ -275,17 +279,19 @@
     if (!fixtures.length) { showToast('No fixtures with brand/model to search', 'warning'); return; }
 
     batchSearchActive = true;
+    batchCancelled = false;
     var btn = document.getElementById('btn-search-all-prices');
-    if (btn) btn.disabled = true;
+    if (btn) { btn.innerHTML = '✕ Cancel'; btn.disabled = false; }
 
     var done = 0;
     for (var i = 0; i < fixtures.length; i++) {
+      if (batchCancelled) break;
       var fixture = fixtures[i];
       var brand = fixture.brand || '';
       var model = fixture.model || fixture.product_name || '';
       if (!brand && !model) { done++; continue; }
       try {
-        if (btn) btn.innerHTML = '<span class="price-search-spinner"></span> ' + done + ' / ' + fixtures.length + '...';
+        if (btn) btn.innerHTML = '✕ Cancel (' + done + ' / ' + fixtures.length + ')';
         var response = await fetch(PRICE_SEARCH_API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -302,9 +308,11 @@
       await new Promise(function(r) { setTimeout(r, 1500); });
     }
 
+    var wasCancelled = batchCancelled;
     batchSearchActive = false;
+    batchCancelled = false;
     if (btn) { btn.disabled = false; btn.innerHTML = 'Search All Prices'; }
-    showToast('Searched ' + done + ' fixtures', 'success');
+    showToast(wasCancelled ? 'Search cancelled after ' + done + ' fixtures' : 'Searched ' + done + ' fixtures', wasCancelled ? 'warning' : 'success');
   }
 
   function injectSearchButtons() {

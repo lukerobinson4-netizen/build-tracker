@@ -309,6 +309,7 @@
     </div>
   </div>
   <div class="header-right">
+    <button class="back-link" onclick="clearConversation()" style="background:none;cursor:pointer;" title="Clear conversation history">✕ New chat</button>
     <a href="/" class="back-link">← Back to tracker</a>
     <div class="header-status">
       <div class="status-dot"></div>
@@ -376,9 +377,11 @@
 
 <script>
 // ─── Config ───────────────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://nqoylzfsdxnjdwrbghsn.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xb3lsemZzZHhuamR3cmJnaHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3ODU3NTIsImV4cCI6MjA4NzM2MTc1Mn0.SVoZxD2NEQKLECyAgCmK3NRVHCttGpPBU9C6IZwr9bM';
+// Supabase credentials read from localStorage (same keys used by index.html)
+const SUPABASE_URL = localStorage.getItem('_sb_url') || '';
+const SUPABASE_KEY = localStorage.getItem('_sb_key') || '';
 const AGENT_API = '/api/agent';
+const MODEL = 'claude-sonnet-4-20250514';
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.getElementById('init-time').textContent = fmtTime();
@@ -420,13 +423,19 @@ async function sbUpdate(table, id, data) {
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
+// ★ ADDING A NEW TABLE? Update all 4 marked sections in this file:
+//   1. loadContext()   — add a sbQuery() call and include it in the return object
+//   2. TOOLS array     — add get_build_data enum value + any create_*/update_* tools
+//   3. buildSystem()   — add a count/summary line to the DATABASE SNAPSHOT
+//   4. runTool()       — add case handlers for any new create_*/update_* tools
 async function loadContext() {
-  const [docs, tasks, dates, contacts, questions, settings] = await Promise.all([
+  const [docs, tasks, dates, contacts, questions, fixtures, settings] = await Promise.all([
     sbQuery('docs', 'select=id,type,status,supplier,trade,amount,gst,description,doc_date,expiry,docnum,notes,system_group,balance_due,payments'),
     sbQuery('tasks', 'select=id,title,status,cat,priority,due,assign,done,notes,linked_doc'),
     sbQuery('dates', 'select=id,title,date,end_date,type,trade,priority,done,notes,source_doc'),
     sbQuery('contacts', 'select=id,name,company,supplier,role,trade,mobile,email,notes'),
     sbQuery('questions', 'select=id,question_text,for_name,asked,answer,answered,priority,linked_doc,linked_contact'),
+    sbQuery('fixtures', 'select=id,name,room,category,status,brand,model,product_code,finish,qty,unit_price,supplier,notes'),
     fetch(`${SUPABASE_URL}/rest/v1/settings?select=key,value`, {
       headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
     }).then(r => r.json())
@@ -441,6 +450,7 @@ async function loadContext() {
     dates: Array.isArray(dates) ? dates : [],
     contacts: Array.isArray(contacts) ? contacts : [],
     questions: Array.isArray(questions) ? questions : [],
+    fixtures: Array.isArray(fixtures) ? fixtures : [],
     trades: s.trades || [],
     suppliers: s.suppliers || [],
     task_cats: s.task_cats || [],
@@ -449,16 +459,17 @@ async function loadContext() {
 }
 
 // ─── Tools ────────────────────────────────────────────────────────────────────
+// ★ ADDING A NEW TABLE? Add its name to get_build_data enum, then add tool definitions below.
 const TOOLS = [
   {
     name: 'get_build_data',
-    description: 'Fetch current build data. ALWAYS call this first before answering questions about docs, tasks, dates, contacts or questions.',
+    description: 'Fetch current build data. ALWAYS call this first before answering questions about docs, tasks, dates, contacts, questions or fixtures.',
     input_schema: {
       type: 'object',
       properties: {
         tables: {
           type: 'array',
-          items: { type: 'string', enum: ['docs','tasks','dates','contacts','questions','all'] },
+          items: { type: 'string', enum: ['docs','tasks','dates','contacts','questions','fixtures','all'] },
           description: 'Which tables to retrieve. Use ["all"] for status summaries.'
         }
       },
@@ -595,12 +606,15 @@ const TOOLS = [
 ];
 
 // ─── System prompt ────────────────────────────────────────────────────────────
+// ★ ADDING A NEW TABLE? Add a count/summary line to the DATABASE SNAPSHOT section below.
 function buildSystem(ctx) {
   const totalQuotes = ctx.docs.filter(d => d.type === 'quote').length;
   const totalInvoices = ctx.docs.filter(d => d.type === 'invoice').length;
   const openTasks = ctx.tasks.filter(t => !t.done).length;
   const unanswered = ctx.questions.filter(q => !q.answered).length;
   const upcomingDates = ctx.dates.filter(d => !d.done).length;
+  const fixturesNeeded = ctx.fixtures.filter(f => f.status === 'needed').length;
+  const fixturesOrdered = ctx.fixtures.filter(f => f.status === 'ordered').length;
 
   return `You are a build project management agent for Luke Robinson's home construction at 128 Dairy Creek Rd, Goulburn NSW Australia.
 
@@ -614,6 +628,7 @@ DATABASE SNAPSHOT:
 - Dates: ${ctx.dates.length} total, ${upcomingDates} upcoming
 - Contacts: ${ctx.contacts.length}
 - Questions: ${ctx.questions.length} total, ${unanswered} unanswered
+- Fixtures: ${ctx.fixtures.length} total (${fixturesNeeded} still needed, ${fixturesOrdered} ordered)
 
 KNOWN TRADES: ${ctx.trades.join(', ')}
 KNOWN SUPPLIERS: ${ctx.suppliers.join(', ')}
@@ -645,11 +660,55 @@ INSTRUCTIONS:
 }
 
 // ─── Conversation state ───────────────────────────────────────────────────────
-let conversation = [];
+const CONV_KEY = 'agent_conversation';
+
+function saveConversation() {
+  // Strip base64 PDF document blocks before saving — too large for localStorage
+  const stripped = conversation.map(msg => {
+    if (!Array.isArray(msg.content)) return msg;
+    const content = msg.content.map(block => {
+      if (block.type === 'document' && block.source?.type === 'base64') {
+        return { type: 'text', text: '[PDF attachment — not stored]' };
+      }
+      return block;
+    });
+    return { ...msg, content };
+  });
+  try {
+    localStorage.setItem(CONV_KEY, JSON.stringify(stripped));
+  } catch (e) {
+    // Storage full — clear and try again
+    localStorage.removeItem(CONV_KEY);
+  }
+}
+
+function loadConversation() {
+  try {
+    const stored = localStorage.getItem(CONV_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function clearConversation() {
+  conversation = [];
+  localStorage.removeItem(CONV_KEY);
+  document.getElementById('messages').innerHTML = '';
+}
+
+let conversation = loadConversation();
 let isLoading = false;
 let ctx = null;
+let systemPrompt = null;
+
+async function refreshCtx() {
+  await refreshCtx();
+  systemPrompt = buildSystem(ctx);
+}
 
 // ─── Tool execution ───────────────────────────────────────────────────────────
+// ★ ADDING A NEW TABLE? Add case handlers below for any new create_*/update_* tools.
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
@@ -658,7 +717,7 @@ async function runTool(name, input) {
   switch (name) {
     case 'get_build_data': {
       const tables = input.tables.includes('all')
-        ? ['docs','tasks','dates','contacts','questions']
+        ? ['docs','tasks','dates','contacts','questions','fixtures']
         : input.tables;
       const result = {};
       tables.forEach(t => result[t] = ctx[t]);
@@ -668,12 +727,12 @@ async function runTool(name, input) {
       const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       if (!row.status) row.status = 'pending';
       await sbInsert('docs', row);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true, id: row.id, message: 'Doc saved to database.' });
     }
     case 'update_doc': {
       await sbUpdate('docs', input.id, { ...input.updates, updated_at: new Date().toISOString() });
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true });
     }
     case 'create_task': {
@@ -685,12 +744,12 @@ async function runTool(name, input) {
       };
       if (!row.priority) row.priority = 'med';
       await sbInsert('tasks', row);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true, id: row.id });
     }
     case 'update_task': {
       await sbUpdate('tasks', input.id, { ...input.updates, updated_at: new Date().toISOString() });
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true });
     }
     case 'create_date': {
@@ -701,20 +760,20 @@ async function runTool(name, input) {
       };
       if (!row.priority) row.priority = 'med';
       await sbInsert('dates', row);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true, id: row.id });
     }
     case 'create_contact': {
       const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       await sbInsert('contacts', row);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true, id: row.id });
     }
     case 'create_question': {
       const row = { id: uid(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       if (!row.priority) row.priority = 'med';
       await sbInsert('questions', row);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true, id: row.id });
     }
     case 'answer_question': {
@@ -724,7 +783,7 @@ async function runTool(name, input) {
         updated_at: new Date().toISOString()
       };
       await sbUpdate('questions', input.id, updates);
-      ctx = await loadContext();
+      await refreshCtx();
       return JSON.stringify({ success: true });
     }
     default:
@@ -758,7 +817,7 @@ async function runAgentLoop(systemPrompt, historyStartIdx = 0) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: MODEL,
         max_tokens: 4096,
         system: systemPrompt,
         tools: TOOLS,
@@ -934,19 +993,20 @@ async function sendMessage() {
   addThinking();
 
   try {
-    if (!ctx) ctx = await loadContext();
+    if (!ctx) await refreshCtx();
     // When a PDF is attached: use compact system prompt and send only the current turn
     // to avoid blowing the input token rate limit
     if (pdfForThisTurn) {
       await runAgentLoop(buildCompactSystem(), conversation.length - 1);
     } else {
-      await runAgentLoop(buildSystem(ctx));
+      await runAgentLoop(systemPrompt);
     }
   } catch (err) {
     removeThinking();
     addAgentMessage(`⚠️ Error: ${escHtml(err.message)}`);
   }
 
+  saveConversation();
   isLoading = false;
   document.getElementById('sendBtn').disabled = false;
   document.getElementById('input').focus();
