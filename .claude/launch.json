@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "collection-tracker (netlify dev)",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd /d C:\\Claude\\github\\collection-tracker && netlify dev --port 8888"],
+      "port": 8888
+    }
+  ]
+}
