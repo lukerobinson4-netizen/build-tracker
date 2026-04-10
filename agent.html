@@ -703,7 +703,7 @@ let ctx = null;
 let systemPrompt = null;
 
 async function refreshCtx() {
-  await refreshCtx();
+  ctx = await loadContext();
   systemPrompt = buildSystem(ctx);
 }
 
