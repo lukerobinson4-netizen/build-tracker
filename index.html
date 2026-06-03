@@ -3003,9 +3003,20 @@ function setGanttFilter(f,el) {
 function renderGantt() {
   const container = document.getElementById('gantt-container');
   const todayStr = today();
-  const startDate = new Date(todayStr);
-  startDate.setDate(1);
-  const endDate = new Date(startDate);
+
+  // ── DATE RANGE: start from earliest item (or 1 month back), end = today + ganttMonths forward ──
+  let baseItems = dates.filter(d => {
+    if (ganttFilter === 'all') return true;
+    return d.type === ganttFilter;
+  });
+
+  const allDates = baseItems.map(d => d.date).filter(Boolean);
+  const earliestItemDate = allDates.length ? allDates.reduce((a,b) => a < b ? a : b) : todayStr;
+  const startDate = new Date(earliestItemDate + 'T00:00:00');
+  startDate.setDate(1); // snap to month start
+
+  const endDate = new Date(todayStr);
+  endDate.setDate(1);
   endDate.setMonth(endDate.getMonth() + ganttMonths);
 
   const days = [];
@@ -3019,21 +3030,6 @@ function renderGantt() {
   const totalW = LABEL_W + days.length * DAY_W;
   const showDeps = document.getElementById('gantt-show-deps')?.checked !== false;
   const searchLower = (ganttSearch||'').toLowerCase().trim();
-
-  // ── COLLECT ITEMS ──
-  let baseItems = dates.filter(d => {
-    if (ganttFilter === 'all') return true;
-    return d.type === ganttFilter;
-  });
-  if (ganttFilter === 'all' || ganttFilter === 'payment') {
-    docs.forEach(d => {
-      (d.payments||[]).filter(p => !p.paid && p.due).forEach(p => {
-        if (!dates.find(dt => dt.sourceDoc===d.id && dt.type==='payment' && dt.date===p.due)) {
-          baseItems.push({ id:'pay_'+p.id, title:`${d.supplier} — ${p.desc}`, date:p.due, endDate:'', type:'payment', trade:d.trade, priority:'med', notes:fmt(p.amount)+' due', source:'doc', sourceDoc:d.id, done:false, deps:[], progress:0 });
-        }
-      });
-    });
-  }
 
   const startStr = startDate.toISOString().split('T')[0];
   const endStr   = endDate.toISOString().split('T')[0];
