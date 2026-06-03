@@ -175,6 +175,23 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .gantt-milestone:hover { filter: brightness(1.3); }
 .gantt-today-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--orange); opacity: 0.6; z-index: 4; pointer-events: none; }
 
+/* GANTT ENHANCED */
+.gantt-group-header-row { display:flex; border-bottom:1px solid var(--border); min-height:32px; background:rgba(200,169,110,0.06); }
+.gantt-group-label { display:flex; align-items:center; gap:8px; padding:6px 12px; border-right:1px solid var(--border); position:sticky; left:0; z-index:10; background:rgba(28,30,32,0.97); cursor:pointer; user-select:none; }
+.gantt-group-label:hover { background:rgba(200,169,110,0.1); }
+.gantt-group-fill { flex:1; }
+.gantt-edit-btn { opacity:0; background:none; border:1px solid var(--border); color:var(--text-dim); border-radius:3px; cursor:pointer; padding:1px 5px; font-size:10px; flex-shrink:0; transition:opacity 0.15s; }
+.gantt-sticky-label:hover .gantt-edit-btn { opacity:1 !important; }
+.gantt-bar:hover { filter:brightness(1.15); }
+.gantt-search-input { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:4px; font-family:var(--mono); font-size:11px; width:150px; height:28px; }
+.gantt-search-input:focus { outline:none; border-color:var(--accent); }
+.gantt-dep-list { max-height:160px; overflow-y:auto; border:1px solid var(--border); border-radius:4px; padding:6px; display:flex; flex-direction:column; gap:2px; background:var(--bg); }
+.gantt-dep-list label { display:flex; align-items:center; gap:8px; cursor:pointer; padding:3px 6px; font-size:11px; color:var(--text-muted); border-radius:3px; }
+.gantt-dep-list label:hover { background:rgba(255,255,255,0.04); color:var(--text); }
+.gantt-progress-dark { position:absolute; top:0; right:0; bottom:0; background:rgba(0,0,0,0.3); pointer-events:none; border-radius:0 2px 2px 0; }
+.gantt-critical { box-shadow:0 0 0 2px #e05555, 0 0 10px rgba(224,85,85,0.35) !important; }
+.gantt-search-match { background:rgba(200,169,110,0.08) !important; }
+
 /* QUOTE ROW */
 .quote-item { border-bottom: 1px solid var(--border); }
 .quote-item:last-child { border-bottom: none; }
@@ -717,31 +734,51 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
       <div class="section-title">Gantt / Timeline</div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-blue btn-sm" onclick="openExtractModal()">↓ Extract from Docs</button>
-        <button class="btn btn-ghost btn-sm" onclick="openDateModal()">+ Add Manually</button>
+        <button class="btn btn-ghost btn-sm" onclick="openDateModal()">+ Add Item</button>
       </div>
     </div>
+
+    <!-- Row 1: View range + Zoom + Group -->
     <div class="gantt-controls">
-      <div class="gantt-zoom text-muted">View:</div>
-      <button class="btn btn-ghost btn-sm" onclick="setGanttRange(3)">3 months</button>
-      <button class="btn btn-ghost btn-sm active-btn" onclick="setGanttRange(6)" id="gantt-active-range">6 months</button>
-      <button class="btn btn-ghost btn-sm" onclick="setGanttRange(12)">12 months</button>
-      <div class="gantt-zoom text-muted" style="margin-left:16px;">Filter:</div>
+      <div class="gantt-zoom text-muted">Range:</div>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttRange(3)" id="gantt-range-3">3 mo</button>
+      <button class="btn btn-ghost btn-sm active-btn" onclick="setGanttRange(6)" id="gantt-range-6">6 mo</button>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttRange(12)" id="gantt-range-12">12 mo</button>
+      <div class="gantt-zoom text-muted" style="margin-left:12px;">Zoom:</div>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttZoom(16)" id="gantt-zoom-16">Narrow</button>
+      <button class="btn btn-ghost btn-sm active-btn" onclick="setGanttZoom(28)" id="gantt-zoom-28">Normal</button>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttZoom(40)" id="gantt-zoom-40">Wide</button>
+      <div class="gantt-zoom text-muted" style="margin-left:12px;">Group:</div>
+      <button class="btn btn-ghost btn-sm active-btn" onclick="setGanttGroup('none')" id="gantt-grp-none">None</button>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttGroup('trade')" id="gantt-grp-trade">Trade</button>
+      <button class="btn btn-ghost btn-sm" onclick="setGanttGroup('type')" id="gantt-grp-type">Type</button>
+    </div>
+
+    <!-- Row 2: Filter + Search + Toggles -->
+    <div class="gantt-controls" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border);">
+      <div class="gantt-zoom text-muted">Filter:</div>
       <div class="task-filter active" onclick="setGanttFilter('all',this)" style="font-size:9px;padding:3px 8px;">All</div>
       <div class="task-filter" onclick="setGanttFilter('payment',this)" style="font-size:9px;padding:3px 8px;">Payments</div>
       <div class="task-filter" onclick="setGanttFilter('inspection',this)" style="font-size:9px;padding:3px 8px;">Inspections</div>
       <div class="task-filter" onclick="setGanttFilter('milestone',this)" style="font-size:9px;padding:3px 8px;">Milestones</div>
-      <div class="task-filter" onclick="setGanttFilter('quote',this)" style="font-size:9px;padding:3px 8px;">Quote Dates</div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div class="task-filter" onclick="setGanttFilter('task',this)" style="font-size:9px;padding:3px 8px;">Tasks</div>
+      <div class="task-filter" onclick="setGanttFilter('permit',this)" style="font-size:9px;padding:3px 8px;">Permits</div>
+      <div class="task-filter" onclick="setGanttFilter('delivery',this)" style="font-size:9px;padding:3px 8px;">Deliveries</div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <input class="gantt-search-input" id="gantt-search-box" placeholder="Search items…" oninput="ganttSearch=this.value;renderGantt()" title="Filter visible items by text" />
         <button class="btn btn-ghost btn-sm" onclick="ganttScrollToToday()" title="Scroll to today">⊙ Today</button>
-        <select id="gantt-jump-select" class="form-control" style="width:180px;font-size:11px;padding:4px 8px;height:28px;" onchange="ganttJumpToSelected()" title="Jump to item">
-          <option value="">Jump to item...</option>
+        <select id="gantt-jump-select" class="form-control" style="width:170px;font-size:11px;padding:4px 8px;height:28px;" onchange="ganttJumpToSelected()" title="Jump to item">
+          <option value="">Jump to item…</option>
         </select>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-muted);">
-          <input type="checkbox" id="gantt-show-deps" checked onchange="renderGantt()" style="accent-color:var(--accent);">
-          Dependencies
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--text-muted);" title="Show dependency arrows">
+          <input type="checkbox" id="gantt-show-deps" checked onchange="renderGantt()" style="accent-color:var(--accent);">Deps
+        </label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-family:var(--mono);font-size:10px;color:#e05555;" title="Highlight critical path">
+          <input type="checkbox" id="gantt-show-critical" onchange="ganttShowCritical=this.checked;renderGantt()" style="accent-color:#e05555;">Critical
         </label>
       </div>
     </div>
+
     <div class="gantt-wrap" id="gantt-wrap">
       <div id="gantt-container"></div>
     </div>
@@ -1007,35 +1044,35 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
-<!-- ═══ ADD DATE / MILESTONE MODAL ═══ -->
+<!-- ═══ ADD / EDIT DATE / MILESTONE MODAL ═══ -->
 <div class="modal-overlay" id="date-modal">
   <div class="modal modal-sm">
     <div class="modal-header">
-      <div class="modal-title">Add Date / Milestone</div>
+      <div class="modal-title" id="date-modal-title">Add Date / Milestone</div>
       <button class="modal-close" onclick="closeModal('date-modal')">×</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group full">
           <label class="form-label">Title *</label>
-          <input class="form-control" id="dm-title" placeholder="e.g. Geotech results expected, Frame inspection, Payment due" />
+          <input class="form-control" id="dm-title" placeholder="e.g. Frame inspection, Payment due, Geotech results" />
         </div>
         <div class="form-group">
-          <label class="form-label">Date *</label>
+          <label class="form-label">Start Date *</label>
           <input class="form-control" type="date" id="dm-date" />
         </div>
         <div class="form-group">
-          <label class="form-label">End Date (for ranges)</label>
+          <label class="form-label">End Date <span style="color:var(--text-dim);font-weight:400;">(for range bars)</span></label>
           <input class="form-control" type="date" id="dm-end-date" />
         </div>
         <div class="form-group">
           <label class="form-label">Type</label>
           <select class="form-control" id="dm-type">
             <option value="milestone">Milestone</option>
+            <option value="task">Task / Action</option>
             <option value="payment">Payment Due</option>
             <option value="inspection">Inspection</option>
             <option value="delivery">Delivery</option>
-            <option value="task">Task / Action</option>
             <option value="permit">Permit / Approval</option>
             <option value="design">Design / Engineering</option>
             <option value="other">Other</option>
@@ -1043,13 +1080,8 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
         </div>
         <div class="form-group">
           <label class="form-label">Trade / Category</label>
-          <select class="form-control" id="dm-trade">
-            <option value="">— General —</option>
-            <option>Roofing & Cladding</option><option>Electrical</option><option>Plumbing</option>
-            <option>Solar & Battery</option><option>Hydronic Heating</option><option>Concrete & Floors</option>
-            <option>Pool</option><option>Earthworks</option><option>Structural</option>
-            <option>Precast</option><option>Windows & Doors</option><option>Geotech</option><option>Admin</option>
-          </select>
+          <input class="form-control" id="dm-trade" list="dm-trade-list" placeholder="— General —" autocomplete="off" />
+          <datalist id="dm-trade-list"></datalist>
         </div>
         <div class="form-group">
           <label class="form-label">Priority</label>
@@ -1059,28 +1091,54 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
             <option value="low">Low</option>
           </select>
         </div>
+        <div class="form-group">
+          <label class="form-label">Assigned To</label>
+          <input class="form-control" id="dm-assign" placeholder="e.g. Luke, Builder, Architect" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;justify-content:space-between;">
+            <span>Progress</span>
+            <span id="dm-progress-val" style="color:var(--accent);font-family:var(--mono);">0%</span>
+          </label>
+          <input type="range" id="dm-progress" min="0" max="100" step="5" value="0"
+            style="width:100%;accent-color:var(--accent);"
+            oninput="document.getElementById('dm-progress-val').textContent=this.value+'%'" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bar Colour Override</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="color" id="dm-color" value="#c8a96e"
+              style="width:40px;height:32px;border:1px solid var(--border);background:var(--bg);cursor:pointer;border-radius:4px;padding:2px;" />
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('dm-color').value='#c8a96e';document.getElementById('dm-color-clear').style.display='none';" id="dm-color-reset" style="font-size:10px;">Reset to type default</button>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;margin-top:5px;cursor:pointer;">
+            <input type="checkbox" id="dm-color-custom" style="accent-color:var(--accent);" onchange="document.getElementById('dm-color').disabled=!this.checked">
+            <span style="font-size:11px;color:var(--text-dim);">Use custom colour</span>
+          </label>
+        </div>
         <div class="form-group full">
           <label class="form-label">Notes</label>
-          <textarea class="form-control" id="dm-notes" rows="3" placeholder="Any additional context..."></textarea>
+          <textarea class="form-control" id="dm-notes" rows="2" placeholder="Any additional context…"></textarea>
         </div>
         <div class="form-group full">
-          <label class="form-label">Depends On (must be complete first)</label>
-          <select class="form-control" id="dm-depends" multiple style="min-height:72px;">
-          </select>
-          <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:4px;">Hold Ctrl/Cmd to select multiple. Dependency arrows will show on the Gantt.</span>
+          <label class="form-label" style="margin-bottom:6px;">Depends On <span style="color:var(--text-dim);font-weight:400;">(these must finish first)</span></label>
+          <div class="gantt-dep-list" id="dm-depends-list">
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">No other items yet.</span>
+          </div>
         </div>
-        <div class="form-group full">
+        <div class="form-group full" id="dm-create-task-row">
           <label class="form-label">Also create as Task?</label>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="dm-create-task" style="accent-color:var(--accent);" checked> 
+            <input type="checkbox" id="dm-create-task" style="accent-color:var(--accent);" checked>
             <span style="font-size:12px;color:var(--text-muted);">Add this to the task list as well</span>
           </label>
         </div>
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="dm-delete-btn" onclick="deleteDateItem()" style="display:none;margin-right:auto;">Delete</button>
       <button class="btn btn-ghost" onclick="closeModal('date-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveDateItem()">Add to Timeline</button>
+      <button class="btn btn-primary" id="dm-save-btn" onclick="saveDateItem()">Add to Timeline</button>
     </div>
   </div>
 </div>
@@ -1656,6 +1714,15 @@ let currentTaskFilter = 'all';
 let currentImportTab  = 'form';
 let ganttMonths    = 6;
 let ganttFilter    = 'all';
+let ganttDayWidth  = 28;
+let ganttGroupBy   = 'none';
+let ganttSearch    = '';
+let ganttShowCritical = false;
+let ganttCollapsed = {};
+let ganttDrag      = null;
+let ganttDragRAF   = null;
+let ganttWasDragging = false;
+let editingDateId  = null;
 let paymentTarget  = null;
 let deleteTarget   = null;
 let deleteType     = 'doc';
@@ -2926,7 +2993,6 @@ function renderTaskUrgent() {
 }
 
 // ═══ GANTT ════════════════════════════════════════════════════════════════════
-function setGanttRange(n) { ganttMonths=n; renderGantt(); }
 function setGanttFilter(f,el) {
   ganttFilter=f;
   document.querySelectorAll('.gantt-controls .task-filter').forEach(x=>x.classList.remove('active'));
@@ -2946,63 +3012,87 @@ function renderGantt() {
   const cur = new Date(startDate);
   while (cur < endDate) { days.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
 
-  const DAY_W = 28;
+  const DAY_W = ganttDayWidth;
   const LABEL_W = 240;
   const ROW_H = 44;
+  const HEADER_H = 56; // month row (28) + day row (28)
   const totalW = LABEL_W + days.length * DAY_W;
   const showDeps = document.getElementById('gantt-show-deps')?.checked !== false;
+  const searchLower = (ganttSearch||'').toLowerCase().trim();
 
-  // Filter items
-  let items = dates.filter(d=>{
-    if (ganttFilter==='all') return true;
-    return d.type===ganttFilter || (ganttFilter==='quote' && d.source==='doc');
+  // ── COLLECT ITEMS ──
+  let baseItems = dates.filter(d => {
+    if (ganttFilter === 'all') return true;
+    return d.type === ganttFilter;
   });
-  if (ganttFilter==='all'||ganttFilter==='payment') {
-    docs.forEach(d=>{
-      (d.payments||[]).filter(p=>!p.paid&&p.due).forEach(p=>{
-        // Only add if not already in dates
-        if (!dates.find(dt=>dt.sourceDoc===d.id && dt.type==='payment' && dt.date===p.due && dt.title.includes(p.desc))) {
-          items.push({ id:'pay_'+p.id, title:`${d.supplier} — ${p.desc}`, date:p.due, endDate:'', type:'payment', trade:d.trade, priority:'med', notes:fmt(p.amount)+' due', source:'doc', sourceDoc:d.id, done:false, deps:[] });
+  if (ganttFilter === 'all' || ganttFilter === 'payment') {
+    docs.forEach(d => {
+      (d.payments||[]).filter(p => !p.paid && p.due).forEach(p => {
+        if (!dates.find(dt => dt.sourceDoc===d.id && dt.type==='payment' && dt.date===p.due)) {
+          baseItems.push({ id:'pay_'+p.id, title:`${d.supplier} — ${p.desc}`, date:p.due, endDate:'', type:'payment', trade:d.trade, priority:'med', notes:fmt(p.amount)+' due', source:'doc', sourceDoc:d.id, done:false, deps:[], progress:0 });
         }
       });
     });
   }
 
   const startStr = startDate.toISOString().split('T')[0];
-  const endStr = endDate.toISOString().split('T')[0];
-  const allItems = items.filter(d=> d.date <= endStr && (d.endDate||d.date) >= startStr);
-  allItems.sort((a,b)=>a.date.localeCompare(b.date));
+  const endStr   = endDate.toISOString().split('T')[0];
+  let allItems = baseItems.filter(d => d.date <= endStr && (d.endDate||d.date) >= startStr);
+  allItems.sort((a,b) => a.date.localeCompare(b.date));
 
-  // Build month header spans
+  // ── CRITICAL PATH ──
+  const criticalIds = ganttShowCritical ? computeCriticalIds(allItems) : new Set();
+
+  // ── GROUPING ──
+  let groups = [];
+  if (ganttGroupBy === 'none') {
+    groups = [{ key:'__all', label:null, items:allItems }];
+  } else {
+    const map = {};
+    allItems.forEach(item => {
+      const k = ganttGroupBy === 'trade' ? (item.trade||'— General') : (item.type||'other');
+      if (!map[k]) map[k] = [];
+      map[k].push(item);
+    });
+    groups = Object.entries(map).sort((a,b) => a[0].localeCompare(b[0])).map(([k,v]) => ({ key:k, label:k, items:v }));
+  }
+
+  // ── ROW INDEX (for SVG arrows) ──
+  const rowIndex = {};
+  let rowCursor = 0;
+  groups.forEach(g => {
+    if (g.label !== null) rowCursor++;
+    if (!ganttCollapsed[g.key]) g.items.forEach(item => { rowIndex[item.id] = rowCursor++; });
+  });
+  const totalRows = rowCursor;
+
+  // ── MONTH SPANS ──
   const months = {};
-  days.forEach((d,i)=>{
+  days.forEach(d => {
     const k = d.getFullYear()+'-'+(d.getMonth()+1);
-    if (!months[k]) months[k]={label:d.toLocaleDateString('en-AU',{month:'short',year:'numeric'}),count:0};
+    if (!months[k]) months[k] = { label:d.toLocaleDateString('en-AU',{month:'short',year:'numeric'}), count:0 };
     months[k].count++;
   });
 
-  const todayIdx = days.findIndex(d=>d.toISOString().split('T')[0]===todayStr);
+  const todayIdx = days.findIndex(d => d.toISOString().split('T')[0] === todayStr);
 
-  // Map item id → row index for dependency arrows
-  const rowIndex = {};
-  allItems.forEach((item,i) => { rowIndex[item.id] = i; });
-
-  let html = `<div style="width:${totalW}px;position:relative;">`;
+  let html = `<div style="width:${totalW}px;position:relative;min-height:${HEADER_H + totalRows*ROW_H + 40}px;">`;
 
   // ── MONTH HEADER ──
   html += `<div style="display:flex;position:sticky;top:0;z-index:20;background:var(--surface);">
     <div style="min-width:${LABEL_W}px;padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--text-dim);border-right:1px solid var(--border);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:25;background:var(--surface);">ITEM</div>
     <div style="display:flex;flex:1;">
-      ${Object.values(months).map(m=>`<div style="min-width:${m.count*DAY_W}px;text-align:center;padding:6px 4px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border);text-transform:uppercase;">${m.label}</div>`).join('')}
+      ${Object.values(months).map(m => `<div style="min-width:${m.count*DAY_W}px;text-align:center;padding:6px 4px;font-family:var(--mono);font-size:10px;color:var(--text-muted);border-right:1px solid var(--border);border-bottom:1px solid var(--border);text-transform:uppercase;">${m.label}</div>`).join('')}
     </div>
   </div>`;
 
   // ── DAY NUMBERS ──
   html += `<div style="display:flex;position:sticky;top:28px;z-index:20;background:var(--surface);border-bottom:2px solid var(--border);">
     <div style="min-width:${LABEL_W}px;border-right:1px solid var(--border);position:sticky;left:0;z-index:25;background:var(--surface);"></div>
-    ${days.map((d,i)=>{
-      const isT=i===todayIdx, isW=d.getDay()===0||d.getDay()===6;
-      return `<div style="min-width:${DAY_W}px;text-align:center;font-family:var(--mono);font-size:9px;color:${isT?'var(--orange)':isW?'var(--text-dim)':'var(--border-light)'};padding:3px 0;border-right:1px solid var(--border);background:${isT?'rgba(224,127,58,0.1)':isW?'rgba(255,255,255,0.01)':'transparent'};">${d.getDate()}</div>`;
+    ${days.map((d,i) => {
+      const isT = i===todayIdx, isW = d.getDay()===0||d.getDay()===6;
+      const label = DAY_W >= 20 ? d.getDate() : (d.getDate()%7===0 ? d.getDate() : '');
+      return `<div style="min-width:${DAY_W}px;text-align:center;font-family:var(--mono);font-size:9px;color:${isT?'var(--orange)':isW?'var(--text-dim)':'var(--border-light)'};padding:3px 0;border-right:1px solid var(--border);background:${isT?'rgba(224,127,58,0.1)':isW?'rgba(255,255,255,0.01)':'transparent'};">${label}</div>`;
     }).join('')}
   </div>`;
 
@@ -3010,119 +3100,317 @@ function renderGantt() {
   if (!allItems.length) {
     html += `<div style="padding:40px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text-dim);">No items in this date range. Add milestones or extract dates from documents.</div>`;
   } else {
-    // Collect bar positions for SVG arrow rendering
-    const barPositions = {}; // id → {x, y, w, isMilestone}
-    const HEADER_H = 28 + 28; // month + day rows
+    const barPositions = {};
 
-    allItems.forEach((item, rowIdx) => {
-      const col = TYPE_COLORS[item.type]||'#7a7875';
-      const startIdx = days.findIndex(d=>d.toISOString().split('T')[0]===item.date);
-      const endIdx = item.endDate ? days.findIndex(d=>d.toISOString().split('T')[0]===item.endDate) : -1;
-      const hasRange = endIdx > startIdx && endIdx >= 0;
-      const isMilestone = !hasRange;
-      const rowY = HEADER_H + rowIdx * ROW_H;
-
-      // Store position for arrows
-      if (startIdx >= 0) {
-        const barX = isMilestone
-          ? startIdx * DAY_W + DAY_W/2
-          : startIdx * DAY_W + 2;
-        const barW = isMilestone ? 0 : (endIdx >= 0 ? (endIdx - startIdx + 1) * DAY_W - 4 : DAY_W - 4);
-        barPositions[item.id] = { x: barX, y: rowY + ROW_H/2, w: barW, isMilestone, rightX: barX + barW };
+    groups.forEach(group => {
+      // Group header row
+      if (group.label !== null) {
+        const collapsed = !!ganttCollapsed[group.key];
+        html += `<div class="gantt-group-header-row">
+          <div class="gantt-group-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;" onclick="ganttToggleGroup('${group.key}')">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--accent);">${collapsed?'▶':'▼'}</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">${group.label}</span>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">(${group.items.length})</span>
+          </div>
+          <div class="gantt-group-fill"></div>
+        </div>`;
       }
 
-      const doneFade = item.done ? 'opacity:0.45;' : '';
-      const depCount = (item.deps||[]).length;
+      if (ganttCollapsed[group.key]) return;
 
-      html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(32,34,36,0.98)'" onmouseleave="this.style.background='transparent';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
-        <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
-          <div style="display:flex;align-items:center;gap:5px;">
-            ${item.done?`<span style="color:var(--green);font-size:10px;">✓</span>`:''}
-            ${depCount>0?`<span title="${depCount} dependenc${depCount===1?'y':'ies'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;">⬡${depCount}</span>`:''}
-            <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${item.title}</span>
+      group.items.forEach(item => {
+        const col = (item.color && document.getElementById('dm-color-custom')?.checked ? item.color : null) || item.color || TYPE_COLORS[item.type] || '#7a7875';
+        const startIdx = days.findIndex(d => d.toISOString().split('T')[0] === item.date);
+        const endIdx   = item.endDate ? days.findIndex(d => d.toISOString().split('T')[0] === item.endDate) : -1;
+        const hasRange = endIdx > startIdx && endIdx >= 0;
+        const isMilestone = !hasRange;
+        const absRowIdx = rowIndex[item.id] ?? 0;
+        const rowY = HEADER_H + absRowIdx * ROW_H;
+        const progress = Math.max(0, Math.min(100, item.progress||0));
+        const isCritical = criticalIds.has(item.id);
+        const isMatch = searchLower && (
+          item.title.toLowerCase().includes(searchLower) ||
+          (item.trade||'').toLowerCase().includes(searchLower) ||
+          (item.notes||'').toLowerCase().includes(searchLower) ||
+          (item.assign||'').toLowerCase().includes(searchLower)
+        );
+        const isDimmed = searchLower && !isMatch;
+
+        if (startIdx >= 0) {
+          const barX = isMilestone ? startIdx*DAY_W + DAY_W/2 : startIdx*DAY_W + 2;
+          const barW = isMilestone ? 0 : (endIdx>=0 ? (endIdx-startIdx+1)*DAY_W-4 : DAY_W-4);
+          barPositions[item.id] = { x:barX, y:rowY+ROW_H/2, w:barW, isMilestone, rightX:barX+barW };
+        }
+
+        const depCount = (item.deps||[]).length;
+        const doneFade = item.done ? 'opacity:0.4;' : '';
+        const dimFade  = isDimmed ? 'opacity:0.15;' : '';
+        const searchBg = isMatch ? 'background:rgba(200,169,110,0.08);' : '';
+
+        html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}${dimFade}${searchBg}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(28,30,32,0.98)'" onmouseleave="this.style.background='${isMatch?'rgba(200,169,110,0.08)':'transparent'}';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
+          <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
+            <div style="display:flex;align-items:center;gap:5px;">
+              ${item.done ? `<span style="color:var(--green);font-size:10px;flex-shrink:0;">✓</span>` : ''}
+              ${isCritical ? `<span title="On critical path" style="font-family:var(--mono);font-size:8px;color:#e05555;border:1px solid #e05555;padding:0 3px;flex-shrink:0;">CP</span>` : ''}
+              ${depCount>0 ? `<span title="${depCount} dep${depCount===1?'':'s'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;flex-shrink:0;">⬡${depCount}</span>` : ''}
+              ${progress>0&&progress<100 ? `<span style="font-family:var(--mono);font-size:8px;color:var(--text-dim);flex-shrink:0;">${progress}%</span>` : ''}
+              ${progress===100 ? `<span style="font-family:var(--mono);font-size:8px;color:var(--green);flex-shrink:0;">100%</span>` : ''}
+              <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${item.title}</span>
+              <button class="gantt-edit-btn" onclick="editGanttItem('${item.id}')" title="Edit item">✎</button>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">
+              <span style="font-family:var(--mono);font-size:9px;color:${col};">${item.type}</span>
+              ${item.trade ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.trade}</span>` : ''}
+              ${item.assign ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.assign}</span>` : ''}
+            </div>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
-            <span style="font-family:var(--mono);font-size:9px;color:${col};">${item.type}</span>
-            ${item.trade?`<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.trade}</span>`:''}
+          <div style="flex:1;position:relative;">
+            ${days.map((d,i) => {
+              const isT=i===todayIdx, isW=d.getDay()===0||d.getDay()===6;
+              return `<div style="position:absolute;left:${i*DAY_W}px;top:0;width:${DAY_W}px;height:100%;border-right:1px solid rgba(42,44,46,0.4);background:${isT?'rgba(224,127,58,0.06)':isW?'rgba(255,255,255,0.01)':'transparent'};pointer-events:none;"></div>`;
+            }).join('')}
+            ${startIdx>=0 ? (isMilestone
+              ? `<div title="${item.title}${item.notes?': '+item.notes:''}" style="position:absolute;left:${startIdx*DAY_W+DAY_W/2-7}px;top:50%;transform:translateY(-50%) rotate(45deg);width:14px;height:14px;background:${col};cursor:pointer;z-index:3;box-shadow:${isCritical?'0 0 0 2px #e05555,0 0 8px rgba(224,85,85,0.4)':'0 0 0 2px var(--bg)'};" onclick="editGanttItem('${item.id}')"></div>`
+              : `<div title="${item.title} — drag to reschedule" style="position:absolute;left:${startIdx*DAY_W+2}px;width:${(endIdx-startIdx+1)*DAY_W-4}px;height:22px;top:50%;transform:translateY(-50%);background:${col};opacity:0.88;border-radius:2px;display:flex;align-items:center;padding:0 14px 0 7px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.95);overflow:hidden;white-space:nowrap;z-index:2;cursor:grab;${isCritical?'box-shadow:0 0 0 2px #e05555,0 0 10px rgba(224,85,85,0.35);':''}" onmousedown="ganttBarMousedown(event,'${item.id}','move')" ondblclick="editGanttItem('${item.id}')">
+                  ${progress>0&&progress<100 ? `<div class="gantt-progress-dark" style="width:${100-progress}%;"></div>` : ''}
+                  ${progress===100 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.15) 4px,rgba(0,0,0,0.15) 8px);border-radius:2px;pointer-events:none;"></div>` : ''}
+                  <span style="position:relative;z-index:1;overflow:hidden;text-overflow:ellipsis;">${item.title}</span>
+                  <div style="position:absolute;top:0;bottom:0;left:0;width:7px;cursor:ew-resize;z-index:4;" onmousedown="ganttBarMousedown(event,'${item.id}','resize-left')"></div>
+                  <div style="position:absolute;top:0;bottom:0;right:0;width:7px;cursor:ew-resize;z-index:4;" onmousedown="ganttBarMousedown(event,'${item.id}','resize-right')"></div>
+                </div>`
+            ) : ''}
+            ${todayIdx>=0 ? `<div style="position:absolute;left:${todayIdx*DAY_W+DAY_W/2}px;top:0;bottom:0;width:2px;background:var(--orange);opacity:0.6;z-index:4;pointer-events:none;"></div>` : ''}
           </div>
-        </div>
-        <div style="flex:1;position:relative;">
-          ${days.map((d,i)=>{
-            const isT=i===todayIdx, isW=d.getDay()===0||d.getDay()===6;
-            return `<div style="position:absolute;left:${i*DAY_W}px;top:0;width:${DAY_W}px;height:100%;border-right:1px solid rgba(42,44,46,0.4);background:${isT?'rgba(224,127,58,0.06)':isW?'rgba(255,255,255,0.01)':'transparent'};pointer-events:none;"></div>`;
-          }).join('')}
-          ${startIdx>=0 ? (
-            isMilestone
-              ? `<div title="${item.title}${item.notes?': '+item.notes:''}" style="position:absolute;left:${startIdx*DAY_W+DAY_W/2-7}px;top:50%;transform:translateY(-50%) rotate(45deg);width:14px;height:14px;background:${col};cursor:pointer;z-index:3;box-shadow:0 0 0 2px var(--bg);" onclick="openGanttItemMenu('${item.id}')"></div>`
-              : (endIdx>=0 ? `<div title="${item.title}" style="position:absolute;left:${startIdx*DAY_W+2}px;width:${(endIdx-startIdx+1)*DAY_W-4}px;height:22px;top:50%;transform:translateY(-50%);background:${col};opacity:0.85;border-radius:2px;display:flex;align-items:center;padding:0 7px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.95);overflow:hidden;white-space:nowrap;z-index:2;cursor:pointer;" onclick="openGanttItemMenu('${item.id}')">${item.title}</div>` : '')
-          ) : ''}
-          ${todayIdx>=0?`<div style="position:absolute;left:${todayIdx*DAY_W+DAY_W/2}px;top:0;bottom:0;width:2px;background:var(--orange);opacity:0.5;z-index:4;pointer-events:none;"></div>`:''}
-        </div>
-      </div>`;
+        </div>`;
+      });
     });
 
     // ── SVG DEPENDENCY ARROWS ──
     if (showDeps) {
-      const svgH = allItems.length * ROW_H + HEADER_H + 20;
+      const svgH = totalRows * ROW_H + HEADER_H + 20;
       let svgLines = '';
       allItems.forEach(item => {
-        const deps = item.deps || [];
-        deps.forEach(depId => {
+        (item.deps||[]).forEach(depId => {
           const from = barPositions[depId];
           const to   = barPositions[item.id];
           if (!from || !to) return;
-          // Arrow: from right edge of dependency → left edge of dependent
           const x1 = LABEL_W + from.rightX;
           const y1 = from.y;
           const x2 = LABEL_W + to.x - (to.isMilestone ? 8 : 4);
           const y2 = to.y;
           const mx = (x1 + x2) / 2;
-          // Elbow path
-          const path = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
-          svgLines += `
-            <path d="${path}" fill="none" stroke="#9b7fd4" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7" marker-end="url(#dep-arrow)"/>`;
+          svgLines += `<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none" stroke="#9b7fd4" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.7" marker-end="url(#dep-arrow)"/>`;
         });
       });
-
       if (svgLines) {
         html += `<svg style="position:absolute;top:0;left:0;width:${totalW}px;height:${svgH}px;pointer-events:none;z-index:5;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <marker id="dep-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#9b7fd4" opacity="0.8"/>
-            </marker>
-          </defs>
-          ${svgLines}
-        </svg>`;
+          <defs><marker id="dep-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9b7fd4" opacity="0.8"/></marker></defs>
+          ${svgLines}</svg>`;
       }
     }
   }
 
   html += '</div>';
   container.innerHTML = html;
-  // Populate jump-to-item select
+
+  // Populate jump-to select
   const jumpSel = document.getElementById('gantt-jump-select');
   if (jumpSel) {
-    const sortedItems = [...items].sort((a,b)=>a.date.localeCompare(b.date));
-    jumpSel.innerHTML = '<option value="">Jump to item...</option>' +
-      sortedItems.filter(i=>i.date).map(i=>`<option value="${i.date}">${i.title.slice(0,40)} (${fmtD(i.date)})</option>`).join('');
+    jumpSel.innerHTML = '<option value="">Jump to item…</option>' +
+      [...allItems].sort((a,b) => a.date.localeCompare(b.date))
+        .map(i => `<option value="${i.date}">${i.title.slice(0,40)} (${fmtD(i.date)})</option>`).join('');
   }
-  // Auto-scroll to today on first render
   if (!container._scrolledToday) {
     container._scrolledToday = true;
-    setTimeout(()=>ganttScrollToToday(), 50);
+    setTimeout(() => ganttScrollToToday(), 50);
   }
 }
 
-// Quick actions popup from Gantt bar click
-function openGanttItemMenu(itemId) {
-  const item = dates.find(d=>d.id===itemId);
+// ═══ GANTT HELPERS ════════════════════════════════════════════════════════════
+
+function openGanttItemMenu(itemId) { editGanttItem(itemId); }
+
+// ── Zoom / Group / Range controls ──
+function setGanttZoom(w) {
+  ganttDayWidth = w;
+  document.querySelectorAll('[id^="gantt-zoom-"]').forEach(b => b.classList.remove('active-btn'));
+  const btn = document.getElementById('gantt-zoom-'+w);
+  if (btn) btn.classList.add('active-btn');
+  renderGantt();
+}
+
+function setGanttGroup(g) {
+  ganttGroupBy = g;
+  ganttCollapsed = {};
+  document.querySelectorAll('[id^="gantt-grp-"]').forEach(b => b.classList.remove('active-btn'));
+  const btn = document.getElementById('gantt-grp-'+g);
+  if (btn) btn.classList.add('active-btn');
+  renderGantt();
+}
+
+function ganttToggleGroup(key) {
+  ganttCollapsed[key] = !ganttCollapsed[key];
+  renderGantt();
+}
+
+function setGanttRange(m) {
+  ganttMonths = m;
+  document.querySelectorAll('[id^="gantt-range-"]').forEach(b => b.classList.remove('active-btn'));
+  const btn = document.getElementById('gantt-range-'+m);
+  if (btn) btn.classList.add('active-btn');
+  renderGantt();
+}
+
+// ── Drag to move / resize bars ──
+function ganttAddDays(dateStr, days) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function ganttBarMousedown(e, itemId, type) {
+  e.stopPropagation();
+  e.preventDefault();
+  const item = dates.find(d => d.id === itemId);
   if (!item) return;
-  // Toggle done state on click for quick marking
-  // Could open a modal — for now just toggle done and re-render
-  item.done = !item.done;
+  ganttDrag = { itemId, type, startX: e.clientX, origDate: item.date, origEndDate: item.endDate || item.date, dragging: false };
+  document.addEventListener('mousemove', ganttDragMove);
+  document.addEventListener('mouseup', ganttDragEnd);
+}
+
+function ganttDragMove(e) {
+  if (!ganttDrag) return;
+  const dx = e.clientX - ganttDrag.startX;
+  if (Math.abs(dx) < 4 && !ganttDrag.dragging) return;
+  ganttDrag.dragging = true;
+  const daysDelta = Math.round(dx / ganttDayWidth);
+  const item = dates.find(d => d.id === ganttDrag.itemId);
+  if (!item) return;
+  if (ganttDrag.type === 'move') {
+    item.date    = ganttAddDays(ganttDrag.origDate,    daysDelta);
+    item.endDate = ganttAddDays(ganttDrag.origEndDate, daysDelta);
+  } else if (ganttDrag.type === 'resize-right') {
+    const newEnd = ganttAddDays(ganttDrag.origEndDate, daysDelta);
+    if (newEnd >= item.date) item.endDate = newEnd;
+  } else if (ganttDrag.type === 'resize-left') {
+    const newStart = ganttAddDays(ganttDrag.origDate, daysDelta);
+    if (newStart <= (item.endDate || item.date)) item.date = newStart;
+  }
+  if (ganttDragRAF) cancelAnimationFrame(ganttDragRAF);
+  ganttDragRAF = requestAnimationFrame(() => renderGantt());
+}
+
+function ganttDragEnd(e) {
+  document.removeEventListener('mousemove', ganttDragMove);
+  document.removeEventListener('mouseup', ganttDragEnd);
+  if (!ganttDrag) return;
+  const wasDragging = ganttDrag.dragging;
+  ganttDrag = null;
+  if (wasDragging) {
+    ganttWasDragging = true;
+    setTimeout(() => { ganttWasDragging = false; }, 100);
+    saveAll();
+    renderGantt();
+    renderDashboard();
+  }
+}
+
+// ── Critical path (longest chain) ──
+function computeCriticalIds(items) {
+  const itemMap = {};
+  items.forEach(i => { itemMap[i.id] = i; });
+  const early = {};
+
+  function epochDays(s) { return Math.floor(new Date(s + 'T00:00:00').getTime() / 86400000); }
+
+  function earlyFinish(id) {
+    if (early[id] !== undefined) return early[id];
+    const item = itemMap[id];
+    if (!item) { early[id] = 0; return 0; }
+    const dur = item.endDate ? Math.max(0, epochDays(item.endDate) - epochDays(item.date)) : 0;
+    let latestDepEnd = 0;
+    (item.deps||[]).forEach(d => { const de = earlyFinish(d); if (de > latestDepEnd) latestDepEnd = de; });
+    const start = Math.max(epochDays(item.date), latestDepEnd);
+    early[id] = start + dur;
+    return early[id];
+  }
+
+  items.forEach(i => earlyFinish(i.id));
+  const vals = Object.values(early);
+  if (!vals.length) return new Set();
+  const projectEnd = Math.max(...vals);
+
+  const critical = new Set();
+  function traceCritical(id) {
+    if (critical.has(id)) return;
+    critical.add(id);
+    const item = itemMap[id];
+    if (item) (item.deps||[]).forEach(d => traceCritical(d));
+  }
+  items.filter(i => early[i.id] === projectEnd).forEach(i => traceCritical(i.id));
+  return critical;
+}
+
+// ── Edit/delete gantt item ──
+function editGanttItem(itemId) {
+  if (ganttWasDragging) return;
+  const item = dates.find(d => d.id === itemId);
+  if (!item) return;
+
+  editingDateId = itemId;
+  document.getElementById('date-modal-title').textContent = 'Edit Timeline Item';
+  document.getElementById('dm-save-btn').textContent = 'Save Changes';
+  document.getElementById('dm-delete-btn').style.display = 'inline-flex';
+  document.getElementById('dm-create-task-row').style.display = 'none';
+
+  document.getElementById('dm-title').value    = item.title;
+  document.getElementById('dm-date').value     = item.date;
+  document.getElementById('dm-end-date').value = item.endDate || '';
+  document.getElementById('dm-type').value     = item.type || 'milestone';
+  document.getElementById('dm-trade').value    = item.trade || '';
+  document.getElementById('dm-priority').value = item.priority || 'med';
+  document.getElementById('dm-notes').value    = item.notes || '';
+  document.getElementById('dm-assign').value   = item.assign || '';
+  const prog = item.progress || 0;
+  document.getElementById('dm-progress').value = prog;
+  document.getElementById('dm-progress-val').textContent = prog + '%';
+  const hasColor = !!item.color;
+  document.getElementById('dm-color-custom').checked = hasColor;
+  document.getElementById('dm-color').value    = item.color || '#c8a96e';
+  document.getElementById('dm-color').disabled = !hasColor;
+
+  ganttRenderDepCheckboxes(itemId, item.deps || []);
+  openModal('date-modal');
+}
+
+function deleteDateItem() {
+  if (!editingDateId) return;
+  const item = dates.find(d => d.id === editingDateId);
+  if (!item) return;
+  if (!confirm(`Delete "${item.title}"?\nThis will also remove it from any dependency lists.`)) return;
+  dates = dates.filter(d => d.id !== editingDateId);
+  dates.forEach(d => { d.deps = (d.deps||[]).filter(id => id !== editingDateId); });
+  editingDateId = null;
   saveAll();
+  closeModal('date-modal');
   renderGantt();
   renderDashboard();
+}
+
+function ganttRenderDepCheckboxes(excludeId, selectedIds) {
+  const list = document.getElementById('dm-depends-list');
+  if (!list) return;
+  const others = dates.filter(d => d.id !== excludeId).sort((a,b) => a.date.localeCompare(b.date));
+  if (!others.length) {
+    list.innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:4px;">No other items yet.</span>';
+    return;
+  }
+  list.innerHTML = others.map(d =>
+    `<label>
+      <input type="checkbox" value="${d.id}" ${(selectedIds||[]).includes(d.id)?'checked':''} style="accent-color:var(--accent);">
+      <span>${d.title} <span style="color:var(--text-dim);font-family:var(--mono);font-size:10px;">(${fmtD(d.date)}${d.type?', '+d.type:''})</span></span>
+    </label>`
+  ).join('');
 }
 
 // ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
@@ -3399,17 +3687,32 @@ function importExtracted() {
 
 // ═══ SAVE DATE/MILESTONE ══════════════════════════════════════════════════════
 function openDateModal() {
-  document.getElementById('dm-date').value = today();
+  editingDateId = null;
+  document.getElementById('date-modal-title').textContent = 'Add Date / Milestone';
+  document.getElementById('dm-save-btn').textContent = 'Add to Timeline';
+  document.getElementById('dm-delete-btn').style.display = 'none';
+  document.getElementById('dm-create-task-row').style.display = '';
+
+  document.getElementById('dm-title').value    = '';
+  document.getElementById('dm-date').value     = today();
   document.getElementById('dm-end-date').value = '';
-  document.getElementById('dm-title').value = '';
-  document.getElementById('dm-notes').value = '';
-  document.getElementById('dm-type').value = 'milestone';
-  document.getElementById('dm-trade').value = '';
+  document.getElementById('dm-type').value     = 'milestone';
+  document.getElementById('dm-trade').value    = '';
   document.getElementById('dm-priority').value = 'med';
+  document.getElementById('dm-notes').value    = '';
+  document.getElementById('dm-assign').value   = '';
+  document.getElementById('dm-progress').value = 0;
+  document.getElementById('dm-progress-val').textContent = '0%';
+  document.getElementById('dm-color-custom').checked = false;
+  document.getElementById('dm-color').value    = '#c8a96e';
+  document.getElementById('dm-color').disabled = true;
   document.getElementById('dm-create-task').checked = true;
-  // Populate depends-on list
-  const depSel = document.getElementById('dm-depends');
-  depSel.innerHTML = dates.map(d=>`<option value="${d.id}">${d.title} (${fmtD(d.date)})</option>`).join('');
+
+  // Populate trade datalist
+  const dl = document.getElementById('dm-trade-list');
+  if (dl) dl.innerHTML = trades.map(t => `<option value="${t}">`).join('');
+
+  ganttRenderDepCheckboxes(null, []);
   openModal('date-modal');
 }
 
@@ -3417,21 +3720,36 @@ function saveDateItem() {
   const title = document.getElementById('dm-title').value.trim();
   const date  = document.getElementById('dm-date').value;
   if (!title || !date) { alert('Title and date required.'); return; }
-  const depSel = document.getElementById('dm-depends');
-  const deps = depSel ? Array.from(depSel.selectedOptions).map(o=>o.value) : [];
-  const item = {
-    id: uid(), title, date,
-    endDate: document.getElementById('dm-end-date').value,
-    type: document.getElementById('dm-type').value,
-    trade: document.getElementById('dm-trade').value,
-    priority: document.getElementById('dm-priority').value,
-    notes: document.getElementById('dm-notes').value.trim(),
-    source: 'manual', sourceDoc: '', done: false, deps
+
+  const deps = Array.from(document.querySelectorAll('#dm-depends-list input[type=checkbox]:checked')).map(cb => cb.value);
+  const useCustomColor = document.getElementById('dm-color-custom').checked;
+
+  const data = {
+    title, date,
+    endDate:   document.getElementById('dm-end-date').value,
+    type:      document.getElementById('dm-type').value,
+    trade:     document.getElementById('dm-trade').value.trim(),
+    priority:  document.getElementById('dm-priority').value,
+    notes:     document.getElementById('dm-notes').value.trim(),
+    assign:    document.getElementById('dm-assign').value.trim(),
+    progress:  parseInt(document.getElementById('dm-progress').value) || 0,
+    color:     useCustomColor ? document.getElementById('dm-color').value : '',
+    deps
   };
-  dates.push(item);
-  if (document.getElementById('dm-create-task').checked) {
-    tasks.push({ id:uid(), title, desc:item.notes, cat:item.type==='payment'?'payment':item.type==='inspection'?'inspection':item.type==='permit'?'admin':'other', priority:item.priority, due:date, assign:'Luke', linkedDoc:'', done:false, created:today() });
+
+  if (editingDateId) {
+    const idx = dates.findIndex(d => d.id === editingDateId);
+    if (idx >= 0) dates[idx] = { ...dates[idx], ...data };
+    editingDateId = null;
+  } else {
+    const item = { id:uid(), ...data, source:'manual', sourceDoc:'', done:false };
+    dates.push(item);
+    if (document.getElementById('dm-create-task').checked) {
+      const catMap = { payment:'payment', inspection:'inspection', permit:'admin' };
+      tasks.push({ id:uid(), title, desc:data.notes, cat:catMap[data.type]||'other', priority:data.priority, due:date, assign:data.assign||'Luke', linkedDoc:'', done:false, created:today() });
+    }
   }
+
   saveAll();
   closeModal('date-modal');
   renderDashboard();
