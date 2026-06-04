@@ -2301,7 +2301,7 @@ function seedTasks() {
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 function fmt(n) { if (n==null) return '—'; return '$'+Number(n).toLocaleString('en-AU',{minimumFractionDigits:0,maximumFractionDigits:0}); }
 function fmtD(d) { if (!d) return '—'; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function today() { return new Date().toISOString().split('T')[0]; }
+function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function daysUntil(d) { if (!d) return null; return Math.round((new Date(d)-new Date(today()))/86400000); }
 function uid() { return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 // A payment is considered paid if it has a paid date OR status==='paid'/'partial'
