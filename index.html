@@ -3274,10 +3274,7 @@ function renderGantt() {
       [...allItems].sort((a,b) => a.date.localeCompare(b.date))
         .map(i => `<option value="${i.date}">${i.title.slice(0,40)} (${fmtD(i.date)})</option>`).join('');
   }
-  if (!container._scrolledToday) {
-    container._scrolledToday = true;
-    setTimeout(() => ganttScrollToToday(), 50);
-  }
+  setTimeout(() => ganttScrollToToday(), 50);
 }
 
 // ═══ GANTT HELPERS ════════════════════════════════════════════════════════════
@@ -5455,15 +5452,18 @@ function removeFileFromDoc(docId, fileId) {
 // ═══ GANTT ALIGN / FREEZE ════════════════════════════════════════════════════
 function ganttScrollToDate(dateStr) {
   if (!dateStr) return;
-  const ganttWrap = document.getElementById('gantt-wrap') || document.querySelector('.gantt-wrap');
+  const ganttWrap = document.getElementById('gantt-wrap');
   if (!ganttWrap) return;
-  const DAY_W = 28;
+  const DAY_W = ganttDayWidth;
   const LABEL_W = 240;
-  const startDate = new Date(today());
+  // Match the same startDate logic as renderGantt(): earliest item, snapped to month start
+  const allDates = dates.map(d => d.date).filter(Boolean);
+  const earliest = allDates.length ? allDates.reduce((a,b) => a < b ? a : b) : today();
+  const startDate = new Date(earliest + 'T00:00:00');
   startDate.setDate(1);
-  const targetDate = new Date(dateStr);
+  const targetDate = new Date(dateStr + 'T00:00:00');
   const dayDiff = Math.round((targetDate - startDate) / 86400000);
-  const scrollX = LABEL_W + dayDiff * DAY_W - ganttWrap.clientWidth/2 + DAY_W;
+  const scrollX = LABEL_W + dayDiff * DAY_W - ganttWrap.clientWidth / 2 + DAY_W;
   ganttWrap.scrollTo({ left: Math.max(0, scrollX), behavior: 'smooth' });
 }
 
