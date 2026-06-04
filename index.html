@@ -191,6 +191,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .gantt-progress-dark { position:absolute; top:0; right:0; bottom:0; background:rgba(0,0,0,0.3); pointer-events:none; border-radius:0 2px 2px 0; }
 .gantt-critical { box-shadow:0 0 0 2px #e05555, 0 0 10px rgba(224,85,85,0.35) !important; }
 .gantt-search-match { background:rgba(200,169,110,0.08) !important; }
+.gantt-row-handle { cursor:grab; color:var(--border-light); font-size:13px; padding:0 3px 0 0; opacity:0; transition:opacity 0.15s; flex-shrink:0; user-select:none; line-height:1; }
+.gantt-row-handle:active { cursor:grabbing; }
+.gantt-sticky-label:hover .gantt-row-handle { opacity:1; }
+.gantt-row-drag-over-top { border-top:2px solid var(--accent) !important; }
+.gantt-dep-badge { cursor:pointer; font-family:var(--mono); font-size:8px; color:var(--purple); border:1px solid var(--purple); padding:0 3px; flex-shrink:0; border-radius:2px; }
+.gantt-dep-badge:hover { background:rgba(155,127,212,0.15); }
+.gantt-dep-add { cursor:pointer; font-family:var(--mono); font-size:8px; color:var(--border-light); border:1px dashed var(--border-light); padding:0 3px; flex-shrink:0; border-radius:2px; opacity:0; transition:opacity 0.15s; }
+.gantt-sticky-label:hover .gantt-dep-add { opacity:1; }
+.gantt-dep-add:hover { color:var(--purple); border-color:var(--purple); }
+.gantt-dep-popover { display:none; position:fixed; z-index:9999; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px; min-width:270px; max-width:340px; box-shadow:0 8px 32px rgba(0,0,0,0.6); }
 
 /* QUOTE ROW */
 .quote-item { border-bottom: 1px solid var(--border); }
@@ -1044,6 +1054,16 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
+<!-- ═══ GANTT DEPENDENCY POPOVER ═══ -->
+<div class="gantt-dep-popover" id="gantt-dep-popover">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <div id="gdp-title" style="font-family:var(--mono);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;">Prerequisites</div>
+    <button onclick="closeDepPopover()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:18px;line-height:1;padding:0 2px;">&times;</button>
+  </div>
+  <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-bottom:8px;">Tick items that must finish before this one starts.</div>
+  <div id="gantt-dep-popover-list" class="gantt-dep-list" style="max-height:260px;overflow-y:auto;"></div>
+</div>
+
 <!-- ═══ ADD / EDIT DATE / MILESTONE MODAL ═══ -->
 <div class="modal-overlay" id="date-modal">
   <div class="modal modal-sm">
@@ -1719,9 +1739,12 @@ let ganttGroupBy   = 'none';
 let ganttSearch    = '';
 let ganttShowCritical = false;
 let ganttCollapsed = {};
+let ganttOrder     = [];
 let ganttDrag      = null;
 let ganttDragRAF   = null;
 let ganttWasDragging = false;
+let ganttRowDrag   = null;
+let ganttDepPopoverItemId = null;
 let editingDateId  = null;
 let paymentTarget  = null;
 let deleteTarget   = null;
@@ -3034,7 +3057,19 @@ function renderGantt() {
   const startStr = startDate.toISOString().split('T')[0];
   const endStr   = endDate.toISOString().split('T')[0];
   let allItems = baseItems.filter(d => d.date <= endStr && (d.endDate||d.date) >= startStr);
-  allItems.sort((a,b) => a.date.localeCompare(b.date));
+
+  // ── SORT: manual order first, then by date for unranked items ──
+  if (ganttGroupBy === 'none' && ganttOrder.length) {
+    allItems.sort((a, b) => {
+      const ia = ganttOrder.indexOf(a.id), ib = ganttOrder.indexOf(b.id);
+      if (ia === -1 && ib === -1) return a.date.localeCompare(b.date);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+  } else {
+    allItems.sort((a,b) => a.date.localeCompare(b.date));
+  }
 
   // ── CRITICAL PATH ──
   const criticalIds = ganttShowCritical ? computeCriticalIds(allItems) : new Set();
@@ -3143,18 +3178,21 @@ function renderGantt() {
         const dimFade  = isDimmed ? 'opacity:0.15;' : '';
         const searchBg = isMatch ? 'background:rgba(200,169,110,0.08);' : '';
 
-        html += `<div style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}${dimFade}${searchBg}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(28,30,32,0.98)'" onmouseleave="this.style.background='${isMatch?'rgba(200,169,110,0.08)':'transparent'}';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
-          <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 12px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
-            <div style="display:flex;align-items:center;gap:5px;">
+        html += `<div data-item-id="${item.id}" style="display:flex;min-height:${ROW_H}px;border-bottom:1px solid var(--border);position:relative;${doneFade}${dimFade}${searchBg}" onmouseenter="this.style.background='rgba(255,255,255,0.025)';this.querySelector('.gantt-sticky-label').style.background='rgba(28,30,32,0.98)'" onmouseleave="this.style.background='${isMatch?'rgba(200,169,110,0.08)':'transparent'}';this.querySelector('.gantt-sticky-label').style.background='var(--surface)'">
+          <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 8px 6px 4px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span class="gantt-row-handle" onmousedown="ganttRowHandleMousedown(event,'${item.id}')" title="Drag to reorder">⠿</span>
               ${item.done ? `<span style="color:var(--green);font-size:10px;flex-shrink:0;">✓</span>` : ''}
-              ${isCritical ? `<span title="On critical path" style="font-family:var(--mono);font-size:8px;color:#e05555;border:1px solid #e05555;padding:0 3px;flex-shrink:0;">CP</span>` : ''}
-              ${depCount>0 ? `<span title="${depCount} dep${depCount===1?'':'s'}" style="font-family:var(--mono);font-size:8px;color:var(--purple);border:1px solid var(--purple);padding:0 3px;flex-shrink:0;">⬡${depCount}</span>` : ''}
+              ${isCritical ? `<span title="On critical path" style="font-family:var(--mono);font-size:8px;color:#e05555;border:1px solid #e05555;padding:0 3px;flex-shrink:0;border-radius:2px;">CP</span>` : ''}
+              ${depCount>0
+                ? `<span class="gantt-dep-badge" title="Click to edit prerequisites" onclick="openDepPopover('${item.id}',event)">⬡${depCount}</span>`
+                : `<span class="gantt-dep-add" title="Add prerequisites" onclick="openDepPopover('${item.id}',event)">+dep</span>`}
               ${progress>0&&progress<100 ? `<span style="font-family:var(--mono);font-size:8px;color:var(--text-dim);flex-shrink:0;">${progress}%</span>` : ''}
-              ${progress===100 ? `<span style="font-family:var(--mono);font-size:8px;color:var(--green);flex-shrink:0;">100%</span>` : ''}
+              ${progress===100 ? `<span style="font-family:var(--mono);font-size:8px;color:var(--green);flex-shrink:0;">✓100%</span>` : ''}
               <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${item.title}</span>
               <button class="gantt-edit-btn" onclick="editGanttItem('${item.id}')" title="Edit item">✎</button>
             </div>
-            <div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;">
+            <div style="display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap;padding-left:18px;">
               <span style="font-family:var(--mono);font-size:9px;color:${col};">${item.type}</span>
               ${item.trade ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.trade}</span>` : ''}
               ${item.assign ? `<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim);">· ${item.assign}</span>` : ''}
@@ -3407,6 +3445,119 @@ function ganttRenderDepCheckboxes(excludeId, selectedIds) {
       <span>${d.title} <span style="color:var(--text-dim);font-family:var(--mono);font-size:10px;">(${fmtD(d.date)}${d.type?', '+d.type:''})</span></span>
     </label>`
   ).join('');
+}
+
+// ── Row reorder drag ──────────────────────────────────────────────────────────
+function saveGanttOrder() {
+  try { localStorage.setItem('_cache_gantt_order', JSON.stringify(ganttOrder)); } catch(e) {}
+}
+function loadGanttOrder() {
+  try { ganttOrder = JSON.parse(localStorage.getItem('_cache_gantt_order') || '[]'); } catch(e) { ganttOrder = []; }
+}
+
+function ganttRowHandleMousedown(e, itemId) {
+  e.preventDefault();
+  e.stopPropagation();
+  closeDepPopover();
+  ganttRowDrag = { itemId, overItemId: null };
+  document.body.style.cursor = 'grabbing';
+  document.addEventListener('mousemove', ganttRowDragMove);
+  document.addEventListener('mouseup', ganttRowDragEnd);
+}
+
+function ganttRowDragMove(e) {
+  if (!ganttRowDrag) return;
+  // Clear previous highlight
+  document.querySelectorAll('.gantt-row-drag-over-top').forEach(r => r.classList.remove('gantt-row-drag-over-top'));
+  // Find row under cursor
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const rowEl = el ? el.closest('[data-item-id]') : null;
+  const overId = rowEl ? rowEl.dataset.itemId : null;
+  if (overId && overId !== ganttRowDrag.itemId) {
+    ganttRowDrag.overItemId = overId;
+    rowEl.classList.add('gantt-row-drag-over-top');
+  } else {
+    ganttRowDrag.overItemId = null;
+  }
+}
+
+function ganttRowDragEnd(e) {
+  document.removeEventListener('mousemove', ganttRowDragMove);
+  document.removeEventListener('mouseup', ganttRowDragEnd);
+  document.body.style.cursor = '';
+  document.querySelectorAll('.gantt-row-drag-over-top').forEach(r => r.classList.remove('gantt-row-drag-over-top'));
+  if (!ganttRowDrag) return;
+  const { itemId, overItemId } = ganttRowDrag;
+  ganttRowDrag = null;
+  if (!overItemId || overItemId === itemId) return;
+  // Build order from current rendered rows
+  const allIds = [...document.querySelectorAll('[data-item-id]')].map(el => el.dataset.itemId);
+  const filtered = allIds.filter(id => id !== itemId);
+  const overIdx = filtered.indexOf(overItemId);
+  if (overIdx >= 0) filtered.splice(overIdx, 0, itemId);
+  else filtered.push(itemId);
+  ganttOrder = filtered;
+  saveGanttOrder();
+  renderGantt();
+}
+
+// ── Inline dependency popover ─────────────────────────────────────────────────
+function openDepPopover(itemId, event) {
+  event.stopPropagation();
+  const item = dates.find(d => d.id === itemId);
+  if (!item) return;
+  ganttDepPopoverItemId = itemId;
+  const list = document.getElementById('gantt-dep-popover-list');
+  document.getElementById('gdp-title').textContent = item.title.length > 28 ? item.title.slice(0,28)+'…' : item.title;
+  const others = dates.filter(d => d.id !== itemId).sort((a,b) => a.date.localeCompare(b.date));
+  if (!others.length) {
+    list.innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:4px 0;">No other items to depend on yet.</span>';
+  } else {
+    list.innerHTML = others.map(d =>
+      `<label>
+        <input type="checkbox" value="${d.id}" ${(item.deps||[]).includes(d.id)?'checked':''} style="accent-color:var(--accent);" onchange="ganttDepToggle('${itemId}','${d.id}',this.checked)">
+        <span>${d.title} <span style="color:var(--text-dim);font-family:var(--mono);font-size:9px;">(${fmtD(d.date)})</span></span>
+      </label>`
+    ).join('');
+  }
+  // Position popover near click
+  const popover = document.getElementById('gantt-dep-popover');
+  popover.style.display = 'block';
+  const rect = event.target.getBoundingClientRect();
+  const pw = 300, ph = 360;
+  let left = rect.right + 10;
+  let top  = rect.top - 4;
+  if (left + pw > window.innerWidth - 8)  left = rect.left - pw - 10;
+  if (top  + ph > window.innerHeight - 8) top  = window.innerHeight - ph - 8;
+  popover.style.left = Math.max(8, left) + 'px';
+  popover.style.top  = Math.max(8, top)  + 'px';
+  // Close on outside click
+  setTimeout(() => document.addEventListener('click', depPopoverOutsideClick), 0);
+}
+
+function depPopoverOutsideClick(e) {
+  const pop = document.getElementById('gantt-dep-popover');
+  if (pop && !pop.contains(e.target)) {
+    closeDepPopover();
+    document.removeEventListener('click', depPopoverOutsideClick);
+  }
+}
+
+function closeDepPopover() {
+  const pop = document.getElementById('gantt-dep-popover');
+  if (pop) pop.style.display = 'none';
+  ganttDepPopoverItemId = null;
+  document.removeEventListener('click', depPopoverOutsideClick);
+}
+
+function ganttDepToggle(itemId, depId, checked) {
+  const item = dates.find(d => d.id === itemId);
+  if (!item) return;
+  item.deps = item.deps || [];
+  if (checked) { if (!item.deps.includes(depId)) item.deps.push(depId); }
+  else { item.deps = item.deps.filter(id => id !== depId); }
+  saveAll();
+  renderGantt(); // redraws chart + dep arrows; popover is fixed-position so it stays open
 }
 
 // ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
@@ -5800,6 +5951,7 @@ function renderSystemDocRow(d) {
 // ── App startup ──────────────────────────────────────────────────────────────
 loadQueue();
 loadAll(); // instant load from cache
+loadGanttOrder();
 
 refreshAllTradeSelects();
 refreshSupplierDatalist();
