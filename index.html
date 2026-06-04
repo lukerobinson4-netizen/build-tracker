@@ -201,6 +201,13 @@ body { background: var(--bg); color: var(--text); font-family: var(--sans); font
 .gantt-sticky-label:hover .gantt-dep-add { opacity:1; }
 .gantt-dep-add:hover { color:var(--purple); border-color:var(--purple); }
 .gantt-dep-popover { display:none; position:fixed; z-index:9999; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:12px; min-width:270px; max-width:340px; box-shadow:0 8px 32px rgba(0,0,0,0.6); }
+.gantt-crit-flag { cursor:pointer; font-size:11px; flex-shrink:0; opacity:0.25; transition:opacity 0.15s, filter 0.15s; line-height:1; padding:0 1px; }
+.gantt-crit-flag.is-crit { opacity:1; filter:drop-shadow(0 0 4px rgba(224,85,85,0.7)); }
+.gantt-sticky-label:hover .gantt-crit-flag { opacity:0.6; }
+.gantt-sticky-label:hover .gantt-crit-flag.is-crit { opacity:1; }
+.gantt-toast { position:fixed; bottom:24px; right:24px; z-index:10000; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:10px 16px; font-family:var(--mono); font-size:11px; color:var(--text); max-width:400px; box-shadow:0 4px 20px rgba(0,0,0,0.5); opacity:0; transform:translateY(8px); transition:opacity 0.2s, transform 0.2s; pointer-events:none; }
+.gantt-toast.show { opacity:1; transform:translateY(0); pointer-events:auto; }
+.gantt-toast.warn { border-color:var(--orange); color:var(--orange); }
 
 /* QUOTE ROW */
 .quote-item { border-bottom: 1px solid var(--border); }
@@ -1054,6 +1061,9 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
   </div>
 </div>
 
+<!-- ═══ GANTT TOAST ═══ -->
+<div class="gantt-toast" id="gantt-toast"></div>
+
 <!-- ═══ GANTT DEPENDENCY POPOVER ═══ -->
 <div class="gantt-dep-popover" id="gantt-dep-popover">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -1145,6 +1155,13 @@ input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www
           <div class="gantt-dep-list" id="dm-depends-list">
             <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);">No other items yet.</span>
           </div>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Mark as Critical?</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="dm-critical" style="accent-color:#e05555;">
+            <span style="font-size:12px;color:var(--text-muted);">Always highlight this item in red — regardless of critical path calculation</span>
+          </label>
         </div>
         <div class="form-group full" id="dm-create-task-row">
           <label class="form-label">Also create as Task?</label>
@@ -3174,6 +3191,8 @@ function renderGantt() {
         }
 
         const depCount = (item.deps||[]).length;
+        const isManualCrit = !!item.critical;
+        const showCritStyle = isManualCrit || isCritical;
         const doneFade = item.done ? 'opacity:0.4;' : '';
         const dimFade  = isDimmed ? 'opacity:0.15;' : '';
         const searchBg = isMatch ? 'background:rgba(200,169,110,0.08);' : '';
@@ -3182,8 +3201,9 @@ function renderGantt() {
           <div class="gantt-sticky-label" style="min-width:${LABEL_W}px;max-width:${LABEL_W}px;padding:6px 8px 6px 4px;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--surface);">
             <div style="display:flex;align-items:center;gap:4px;">
               <span class="gantt-row-handle" onmousedown="ganttRowHandleMousedown(event,'${item.id}')" title="Drag to reorder">⠿</span>
+              <span class="gantt-crit-flag${isManualCrit?' is-crit':''}" onclick="ganttToggleCritical('${item.id}')" title="${isManualCrit?'Remove critical flag':'Mark as critical'}">🚩</span>
               ${item.done ? `<span style="color:var(--green);font-size:10px;flex-shrink:0;">✓</span>` : ''}
-              ${isCritical ? `<span title="On critical path" style="font-family:var(--mono);font-size:8px;color:#e05555;border:1px solid #e05555;padding:0 3px;flex-shrink:0;border-radius:2px;">CP</span>` : ''}
+              ${isCritical && !isManualCrit ? `<span title="On critical path" style="font-family:var(--mono);font-size:8px;color:#e05555;border:1px solid #e05555;padding:0 3px;flex-shrink:0;border-radius:2px;">CP</span>` : ''}
               ${depCount>0
                 ? `<span class="gantt-dep-badge" title="Click to edit prerequisites" onclick="openDepPopover('${item.id}',event)">⬡${depCount}</span>`
                 : `<span class="gantt-dep-add" title="Add prerequisites" onclick="openDepPopover('${item.id}',event)">+dep</span>`}
@@ -3204,8 +3224,8 @@ function renderGantt() {
               return `<div style="position:absolute;left:${i*DAY_W}px;top:0;width:${DAY_W}px;height:100%;border-right:1px solid rgba(42,44,46,0.4);background:${isT?'rgba(224,127,58,0.06)':isW?'rgba(255,255,255,0.01)':'transparent'};pointer-events:none;"></div>`;
             }).join('')}
             ${startIdx>=0 ? (isMilestone
-              ? `<div title="${item.title}${item.notes?': '+item.notes:''}" style="position:absolute;left:${startIdx*DAY_W+DAY_W/2-7}px;top:50%;transform:translateY(-50%) rotate(45deg);width:14px;height:14px;background:${col};cursor:pointer;z-index:3;box-shadow:${isCritical?'0 0 0 2px #e05555,0 0 8px rgba(224,85,85,0.4)':'0 0 0 2px var(--bg)'};" onclick="editGanttItem('${item.id}')"></div>`
-              : `<div title="${item.title} — drag to reschedule" style="position:absolute;left:${startIdx*DAY_W+2}px;width:${(endIdx-startIdx+1)*DAY_W-4}px;height:22px;top:50%;transform:translateY(-50%);background:${col};opacity:0.88;border-radius:2px;display:flex;align-items:center;padding:0 14px 0 7px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.95);overflow:hidden;white-space:nowrap;z-index:2;cursor:grab;${isCritical?'box-shadow:0 0 0 2px #e05555,0 0 10px rgba(224,85,85,0.35);':''}" onmousedown="ganttBarMousedown(event,'${item.id}','move')" ondblclick="editGanttItem('${item.id}')">
+              ? `<div title="${item.title}${item.notes?': '+item.notes:''}" style="position:absolute;left:${startIdx*DAY_W+DAY_W/2-7}px;top:50%;transform:translateY(-50%) rotate(45deg);width:14px;height:14px;background:${col};cursor:pointer;z-index:3;box-shadow:${showCritStyle?'0 0 0 2px #e05555,0 0 8px rgba(224,85,85,0.5)':'0 0 0 2px var(--bg)'};" onclick="editGanttItem('${item.id}')"></div>`
+              : `<div title="${item.title} — drag to reschedule" style="position:absolute;left:${startIdx*DAY_W+2}px;width:${(endIdx-startIdx+1)*DAY_W-4}px;height:22px;top:50%;transform:translateY(-50%);background:${col};opacity:0.88;border-radius:2px;display:flex;align-items:center;padding:0 14px 0 7px;font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.95);overflow:hidden;white-space:nowrap;z-index:2;cursor:grab;${showCritStyle?'box-shadow:0 0 0 2px #e05555,0 0 10px rgba(224,85,85,0.4);':''}" onmousedown="ganttBarMousedown(event,'${item.id}','move')" ondblclick="editGanttItem('${item.id}')">
                   ${progress>0&&progress<100 ? `<div class="gantt-progress-dark" style="width:${100-progress}%;"></div>` : ''}
                   ${progress===100 ? `<div style="position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.15) 4px,rgba(0,0,0,0.15) 8px);border-radius:2px;pointer-events:none;"></div>` : ''}
                   <span style="position:relative;z-index:1;overflow:hidden;text-overflow:ellipsis;">${item.title}</span>
@@ -3339,6 +3359,7 @@ function ganttDragEnd(e) {
   document.removeEventListener('mouseup', ganttDragEnd);
   if (!ganttDrag) return;
   const wasDragging = ganttDrag.dragging;
+  const movedItemId = ganttDrag.itemId;
   ganttDrag = null;
   if (wasDragging) {
     ganttWasDragging = true;
@@ -3346,6 +3367,8 @@ function ganttDragEnd(e) {
     saveAll();
     renderGantt();
     renderDashboard();
+    const movedItem = dates.find(d => d.id === movedItemId);
+    if (movedItem) ganttWarnWeekends(movedItem);
   }
 }
 
@@ -3413,6 +3436,7 @@ function editGanttItem(itemId) {
   document.getElementById('dm-color').value    = item.color || '#c8a96e';
   document.getElementById('dm-color').disabled = !hasColor;
 
+  document.getElementById('dm-critical').checked = !!item.critical;
   ganttRenderDepCheckboxes(itemId, item.deps || []);
   openModal('date-modal');
 }
@@ -3558,6 +3582,42 @@ function ganttDepToggle(itemId, depId, checked) {
   else { item.deps = item.deps.filter(id => id !== depId); }
   saveAll();
   renderGantt(); // redraws chart + dep arrows; popover is fixed-position so it stays open
+}
+
+// ── Manual critical flag toggle ───────────────────────────────────────────────
+function ganttToggleCritical(itemId) {
+  const item = dates.find(d => d.id === itemId);
+  if (!item) return;
+  item.critical = !item.critical;
+  saveAll();
+  renderGantt();
+}
+
+// ── Weekend warning ───────────────────────────────────────────────────────────
+function ganttIsWeekend(dateStr) {
+  if (!dateStr) return false;
+  const day = new Date(dateStr + 'T00:00:00').getDay();
+  return day === 0 || day === 6;
+}
+
+function ganttWarnWeekends(item) {
+  const dayName = s => new Date(s + 'T00:00:00').toLocaleDateString('en-AU', { weekday:'long' });
+  const parts = [];
+  if (ganttIsWeekend(item.date))    parts.push(`starts ${dayName(item.date)} ${fmtD(item.date)}`);
+  if (item.endDate && ganttIsWeekend(item.endDate)) parts.push(`ends ${dayName(item.endDate)} ${fmtD(item.endDate)}`);
+  if (parts.length) showGanttToast(`⚠ Weekend: "${item.title.slice(0,28)}" ${parts.join(' · ')}`, 'warn');
+}
+
+function showGanttToast(msg, type = '') {
+  const el = document.getElementById('gantt-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'gantt-toast' + (type ? ' ' + type : '');
+  // Force reflow so transition fires even if already showing
+  void el.offsetWidth;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 5000);
 }
 
 // ═══ DOCUMENTS ════════════════════════════════════════════════════════════════
@@ -3853,6 +3913,7 @@ function openDateModal() {
   document.getElementById('dm-color-custom').checked = false;
   document.getElementById('dm-color').value    = '#c8a96e';
   document.getElementById('dm-color').disabled = true;
+  document.getElementById('dm-critical').checked = false;
   document.getElementById('dm-create-task').checked = true;
 
   // Populate trade datalist
@@ -3881,8 +3942,11 @@ function saveDateItem() {
     assign:    document.getElementById('dm-assign').value.trim(),
     progress:  parseInt(document.getElementById('dm-progress').value) || 0,
     color:     useCustomColor ? document.getElementById('dm-color').value : '',
+    critical:  document.getElementById('dm-critical').checked,
     deps
   };
+  // Weekend warning after save
+  ganttWarnWeekends(data);
 
   if (editingDateId) {
     const idx = dates.findIndex(d => d.id === editingDateId);
