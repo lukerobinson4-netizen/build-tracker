@@ -3363,6 +3363,8 @@ function ganttDragEnd(e) {
   if (wasDragging) {
     ganttWasDragging = true;
     setTimeout(() => { ganttWasDragging = false; }, 100);
+    const cascaded = cascadeDependencies([movedItemId]);
+    if (cascaded.size > 0) showGanttToast(`↓ ${cascaded.size} dependent item${cascaded.size > 1 ? 's' : ''} moved forward`);
     saveAll();
     renderGantt();
     renderDashboard();
@@ -3581,6 +3583,57 @@ function ganttDepToggle(itemId, depId, checked) {
   else { item.deps = item.deps.filter(id => id !== depId); }
   saveAll();
   renderGantt(); // redraws chart + dep arrows; popover is fixed-position so it stays open
+}
+
+// ── Dependency cascade: push dependents forward when a task moves ─────────────
+function cascadeDependencies(seedIds) {
+  // Build reverse map: for each item, which items list it as a dep
+  const dependents = {};
+  dates.forEach(item => {
+    (item.deps || []).forEach(depId => {
+      if (!dependents[depId]) dependents[depId] = [];
+      if (!dependents[depId].includes(item.id)) dependents[depId].push(item.id);
+    });
+  });
+
+  const queue = [...new Set(seedIds)];
+  const processed = new Set();
+  const movedIds = new Set();
+
+  while (queue.length > 0) {
+    const srcId = queue.shift();
+    if (processed.has(srcId)) continue;
+    processed.add(srcId);
+    const src = dates.find(d => d.id === srcId);
+    if (!src) continue;
+
+    (dependents[srcId] || []).forEach(dstId => {
+      if (processed.has(dstId)) return;
+      const dst = dates.find(d => d.id === dstId);
+      if (!dst) return;
+
+      // Earliest allowed start = latest finish date among all this item's deps
+      const earliestStart = (dst.deps || []).reduce((best, depId) => {
+        const dep = dates.find(d => d.id === depId);
+        if (!dep) return best;
+        const finish = dep.endDate || dep.date;
+        return finish > best ? finish : best;
+      }, '');
+
+      if (!earliestStart || dst.date >= earliestStart) return;
+
+      // Push forward, preserving duration
+      const dur = dst.endDate
+        ? Math.round((new Date(dst.endDate + 'T00:00:00') - new Date(dst.date + 'T00:00:00')) / 86400000)
+        : 0;
+      dst.date = earliestStart;
+      if (dst.endDate) dst.endDate = ganttAddDays(earliestStart, dur);
+      movedIds.add(dstId);
+      queue.push(dstId); // cascade further
+    });
+  }
+
+  return movedIds;
 }
 
 // ── Manual critical flag toggle ───────────────────────────────────────────────
@@ -3947,17 +4000,25 @@ function saveDateItem() {
   // Weekend warning after save
   ganttWarnWeekends(data);
 
+  let savedId = null;
   if (editingDateId) {
+    savedId = editingDateId;
     const idx = dates.findIndex(d => d.id === editingDateId);
     if (idx >= 0) dates[idx] = { ...dates[idx], ...data };
     editingDateId = null;
   } else {
     const item = { id:uid(), ...data, source:'manual', sourceDoc:'', done:false };
+    savedId = item.id;
     dates.push(item);
     if (document.getElementById('dm-create-task').checked) {
       const catMap = { payment:'payment', inspection:'inspection', permit:'admin' };
       tasks.push({ id:uid(), title, desc:data.notes, cat:catMap[data.type]||'other', priority:data.priority, due:date, assign:data.assign||'Luke', linkedDoc:'', done:false, created:today() });
     }
+  }
+
+  if (savedId) {
+    const cascaded = cascadeDependencies([savedId]);
+    if (cascaded.size > 0) showGanttToast(`↓ ${cascaded.size} dependent item${cascaded.size > 1 ? 's' : ''} moved forward`);
   }
 
   saveAll();
