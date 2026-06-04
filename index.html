@@ -2302,6 +2302,8 @@ function seedTasks() {
 function fmt(n) { if (n==null) return '—'; return '$'+Number(n).toLocaleString('en-AU',{minimumFractionDigits:0,maximumFractionDigits:0}); }
 function fmtD(d) { if (!d) return '—'; const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+// Local-time date string from a Date object (avoids UTC offset shifting the day)
+function dStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function daysUntil(d) { if (!d) return null; return Math.round((new Date(d)-new Date(today()))/86400000); }
 function uid() { return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,6); }
 // A payment is considered paid if it has a paid date OR status==='paid'/'partial'
@@ -3071,8 +3073,8 @@ function renderGantt() {
   const showDeps = document.getElementById('gantt-show-deps')?.checked !== false;
   const searchLower = (ganttSearch||'').toLowerCase().trim();
 
-  const startStr = startDate.toISOString().split('T')[0];
-  const endStr   = endDate.toISOString().split('T')[0];
+  const startStr = dStr(startDate);
+  const endStr   = dStr(endDate);
   let allItems = baseItems.filter(d => d.date <= endStr && (d.endDate||d.date) >= startStr);
 
   // ── SORT: manual order first, then by date for unranked items ──
@@ -3122,7 +3124,7 @@ function renderGantt() {
     months[k].count++;
   });
 
-  const todayIdx = days.findIndex(d => d.toISOString().split('T')[0] === todayStr);
+  const todayIdx = days.findIndex(d => dStr(d) === todayStr);
 
   let html = `<div style="width:${totalW}px;position:relative;min-height:${HEADER_H + totalRows*ROW_H + 40}px;">`;
 
@@ -3168,8 +3170,8 @@ function renderGantt() {
 
       group.items.forEach(item => {
         const col = (item.color && document.getElementById('dm-color-custom')?.checked ? item.color : null) || item.color || TYPE_COLORS[item.type] || '#7a7875';
-        const startIdx = days.findIndex(d => d.toISOString().split('T')[0] === item.date);
-        const endIdx   = item.endDate ? days.findIndex(d => d.toISOString().split('T')[0] === item.endDate) : -1;
+        const startIdx = days.findIndex(d => dStr(d) === item.date);
+        const endIdx   = item.endDate ? days.findIndex(d => dStr(d) === item.endDate) : -1;
         const hasRange = endIdx > startIdx && endIdx >= 0;
         const isMilestone = !hasRange;
         const absRowIdx = rowIndex[item.id] ?? 0;
@@ -3316,7 +3318,7 @@ function setGanttRange(m) {
 function ganttAddDays(dateStr, days) {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
+  return dStr(d);
 }
 
 function ganttBarMousedown(e, itemId, type) {
