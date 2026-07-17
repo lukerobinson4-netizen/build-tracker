@@ -3326,7 +3326,9 @@ function ganttBarMousedown(e, itemId, type) {
   e.preventDefault();
   const item = dates.find(d => d.id === itemId);
   if (!item) return;
-  ganttDrag = { itemId, type, startX: e.clientX, origDate: item.date, origEndDate: item.endDate || item.date, dragging: false };
+  const hasEndDate = !!item.endDate && item.endDate !== item.date;
+  const workingDuration = hasEndDate ? countWorkingDays(item.date, item.endDate) : 1;
+  ganttDrag = { itemId, type, startX: e.clientX, origDate: item.date, origEndDate: item.endDate || item.date, dragging: false, workingDuration, hasEndDate };
   document.addEventListener('mousemove', ganttDragMove);
   document.addEventListener('mouseup', ganttDragEnd);
 }
@@ -3340,8 +3342,12 @@ function ganttDragMove(e) {
   const item = dates.find(d => d.id === ganttDrag.itemId);
   if (!item) return;
   if (ganttDrag.type === 'move') {
-    item.date    = ganttAddDays(ganttDrag.origDate,    daysDelta);
-    item.endDate = ganttAddDays(ganttDrag.origEndDate, daysDelta);
+    item.date = ganttAddDays(ganttDrag.origDate, daysDelta);
+    if (ganttDrag.hasEndDate && ganttDrag.workingDuration > 1) {
+      item.endDate = addWorkingDays(item.date, ganttDrag.workingDuration - 1);
+    } else {
+      item.endDate = ganttAddDays(ganttDrag.origEndDate, daysDelta);
+    }
   } else if (ganttDrag.type === 'resize-right') {
     const newEnd = ganttAddDays(ganttDrag.origEndDate, daysDelta);
     if (newEnd >= item.date) item.endDate = newEnd;
@@ -3620,14 +3626,13 @@ function cascadeDependencies(seedIds) {
         return finish > best ? finish : best;
       }, '');
 
-      if (!earliestStart || dst.date >= earliestStart) return;
+      const newStart = snapToWorkingDay(earliestStart);
+      if (!newStart || dst.date >= newStart) return;
 
-      // Push forward, preserving duration
-      const dur = dst.endDate
-        ? Math.round((new Date(dst.endDate + 'T00:00:00') - new Date(dst.date + 'T00:00:00')) / 86400000)
-        : 0;
-      dst.date = earliestStart;
-      if (dst.endDate) dst.endDate = ganttAddDays(earliestStart, dur);
+      // Push forward, preserving working-day duration
+      const wDur = dst.endDate ? countWorkingDays(dst.date, dst.endDate) : 0;
+      dst.date = newStart;
+      if (dst.endDate) dst.endDate = addWorkingDays(newStart, wDur - 1);
       movedIds.add(dstId);
       queue.push(dstId); // cascade further
     });
@@ -3643,6 +3648,39 @@ function ganttToggleCritical(itemId) {
   item.critical = !item.critical;
   saveAll();
   renderGantt();
+}
+
+// ── Working-day helpers ───────────────────────────────────────────────────────
+function countWorkingDays(startStr, endStr) {
+  if (!endStr || endStr <= startStr) return 1;
+  let count = 0;
+  const d = new Date(startStr + 'T00:00:00');
+  const end = new Date(endStr + 'T00:00:00');
+  while (d <= end) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return Math.max(1, count);
+}
+
+function addWorkingDays(startStr, n) {
+  // Returns the date that is n additional working days after startStr
+  // addWorkingDays('Fri', 2) → Tue (Fri=0, Mon=1, Tue=2)
+  if (!n || n <= 0) return startStr;
+  const d = new Date(startStr + 'T00:00:00');
+  let rem = n;
+  while (rem > 0) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() !== 0 && d.getDay() !== 6) rem--;
+  }
+  return dStr(d);
+}
+
+function snapToWorkingDay(dateStr) {
+  // If dateStr falls on a weekend, advance to Monday
+  let d = new Date(dateStr + 'T00:00:00');
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  return dStr(d);
 }
 
 // ── Weekend warning ───────────────────────────────────────────────────────────
