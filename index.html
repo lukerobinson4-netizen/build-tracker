@@ -4321,12 +4321,21 @@ function savePayment() {
     document.getElementById('pm-ref').focus();
     return;
   }
+  let partialAmount = '';
+  if (status === 'partial') {
+    partialAmount = parseFloat(document.getElementById('pm-paid-amount').value);
+    if (!partialAmount || partialAmount <= 0 || partialAmount >= amount) {
+      alert('Enter the amount actually paid so far (more than $0 and less than the full amount). If the full amount has been paid, use "Paid" status instead.');
+      document.getElementById('pm-paid-amount').focus();
+      return;
+    }
+  }
   const p = {
     id:uid(), desc, amount,
     gst: Math.round(amount*0.1*100)/100,
     due,
     paid: (status==='paid'||status==='partial') ? (document.getElementById('pm-paid-date').value||today()) : '',
-    paidAmount: status==='partial' ? parseFloat(document.getElementById('pm-paid-amount').value)||amount : '',
+    paidAmount: status==='partial' ? partialAmount : '',
     status,
     ref:   document.getElementById('pm-ref').value.trim(),
     method:document.getElementById('pm-method').value,
